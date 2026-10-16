@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one phone-sized column. Status bar on top, one screen in the middle, five tabs at the bottom.
-   Every screen leads with one clear action; details live one tap deeper. */
+/* Layout: one phone-sized column. Status bar on top, one screen in the middle, four tabs at the bottom.
+   Every screen leads with one clear action; the upgrade tree is a pannable star map. */
 :root {
   --night: #0c0f22;      /* deep lunar night, page ground */
   --deck: #171b37;       /* raised panels */
@@ -24,7 +24,7 @@
   --shield: #6ecbff;
   --good: #7bd88f;
   --xp: #9a88ff;
-  --t-a: #ff7a59; --t-d: #59b8ff; --t-k: #f2c14e;
+  --t-a: #ff7a59; --t-d: #59b8ff; --t-c: #c48bff; --t-k: #f2c14e;
   --r-c: #9aa3b8; --r-r: #4fb3ff; --r-e: #b77bff; --r-l: #ffb347;
   --f-display: "Chakra Petch", "Trebuchet MS", system-ui, sans-serif;
   --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -54,10 +54,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible, [data-act]:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; letter-spacing: .02em; }
 p { margin: 0; }
-.num { font-variant-numeric: tabular-nums; }
 .muted { color: var(--dim); }
 
-#app { position: relative; z-index: 1; max-width: 520px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; }
+#app { position: relative; z-index: 1; max-width: 560px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; }
 
 /* ---------- Statusleiste ---------- */
 #top { display: flex; align-items: center; gap: 12px; padding-block: 12px 10px; border-bottom: 1px solid var(--line); }
@@ -67,21 +66,24 @@ p { margin: 0; }
 .bar i { display: block; height: 100%; background: var(--xp); border-radius: 4px; transition: width .5s ease; }
 .bar.gold i { background: var(--gold); }
 .xptext { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.coins { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 16px; white-space: nowrap; }
+.wallet { display: flex; gap: 10px; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px; white-space: nowrap; }
 .coin::before { content: ""; display: inline-block; width: .8em; height: .8em; border-radius: 50%; background: var(--gold); box-shadow: inset -2px -2px 0 rgba(0,0,0,.25); margin-right: 5px; vertical-align: -1px; }
+.sp { color: var(--good); }
+.sp::before { content: "★"; margin-right: 3px; }
 
-#main { flex: 1; overflow-y: auto; overflow-x: hidden; padding-block: 14px 24px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 14px; }
+#main { flex: 1; overflow-y: auto; overflow-x: hidden; padding-block: 14px 24px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 #main > * { flex-shrink: 0; }
+#main.fill { overflow: hidden; padding-bottom: 8px; }
 .screen-title h2 { font-size: 24px; }
 .screen-title p { color: var(--dim); font-size: 14px; margin-top: 2px; }
 .label { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .12em; font-size: 12px; color: var(--dim); margin-top: 6px; }
 
-#nav { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); padding-block: 6px 8px; }
+#nav { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); padding-block: 6px 8px; }
 #nav button { background: none; border: 0; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--dim); font-size: 12px; font-weight: 600; }
 #nav button svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #nav button.on { color: var(--gold); }
 #nav .badge { position: relative; }
-#nav .badge b { position: absolute; top: -4px; right: -10px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--good); color: var(--night); font-size: 11px; line-height: 17px; }
+#nav .badge b { position: absolute; top: -4px; right: -12px; min-width: 18px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--good); color: var(--night); font-size: 11px; line-height: 17px; }
 
 .btn { border: 0; border-radius: 12px; padding: 13px 18px; font-weight: 700; font-size: 16px; background: var(--gold); color: var(--gold-ink); font-family: var(--f-display); letter-spacing: .03em; transition: transform .12s ease, opacity .2s; }
 .btn:active { transform: scale(.97); }
@@ -96,7 +98,6 @@ p { margin: 0; }
 .r-c { --rc: var(--r-c); } .r-r { --rc: var(--r-r); } .r-e { --rc: var(--r-e); } .r-l { --rc: var(--r-l); }
 .rar { color: var(--rc); font-weight: 700; }
 
-/* Siegchance: Farbe + Wort + Zahl */
 .chance { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 14px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .chance.easy { background: color-mix(in srgb, var(--good) 20%, transparent); color: var(--good); }
 .chance.even { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold); }
@@ -109,7 +110,7 @@ p { margin: 0; }
 .herobar .hb { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .herobar .ht { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--hc); font-weight: 700; }
 .herobar .hn { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
-.herobar .chev { color: var(--dim); font-size: 22px; }
+.chev { color: var(--dim); font-size: 22px; }
 .nextfight { position: relative; overflow: hidden; border-radius: 20px; padding: 18px; border: 2px solid var(--gold); background: var(--deck); display: flex; flex-direction: column; gap: 12px; }
 .nextfight::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .55; pointer-events: none; }
 .nextfight > * { position: relative; }
@@ -130,14 +131,13 @@ p { margin: 0; }
 .todo .tt { flex: 1; min-width: 0; }
 .todo .tt b { display: block; }
 .todo .tt span { font-size: 13px; color: var(--dim); }
-.todo .chev { color: var(--dim); font-size: 20px; }
 .todo.hot { border-color: var(--good); }
 .todo.hot .ti { background: color-mix(in srgb, var(--good) 22%, var(--deck-2)); }
-.goal { font-size: 14px; color: var(--dim); line-height: 1.45; }
+.goal { font-size: 14px; color: var(--dim); line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
 .goal b { color: var(--moon); }
 
 /* ---------- Etappen ---------- */
-.zonetabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-inline: -2px; padding: 2px; }
+.zonetabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
 .zonetabs::-webkit-scrollbar { display: none; }
 .ztab { flex: none; background: var(--deck-2); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; text-align: left; color: var(--dim); }
 .ztab b { display: block; font-size: 14px; color: var(--moon); }
@@ -162,13 +162,13 @@ p { margin: 0; }
 .stage.next { border: 2px solid var(--gold); }
 
 /* ---------- Team ---------- */
-.slots { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.slot { min-height: 118px; border-radius: 14px; border: 1px dashed var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; padding: 8px 4px; font-size: 13px; color: var(--dim); background: none; min-width: 0; }
+.lineup { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+.slot { min-height: 116px; border-radius: 14px; border: 1px dashed var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; padding: 8px 3px; font-size: 12px; color: var(--dim); background: none; min-width: 0; }
 .slot.full { border: 2px solid var(--rc); background: var(--deck); color: var(--moon); }
-.slot .se { font-size: 34px; line-height: 1.15; }
-.slot .sn { font-weight: 700; font-size: 13px; line-height: 1.15; max-width: 100%; overflow-wrap: anywhere; }
-.slot .sl { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.slot .sa { font-size: 11px; color: var(--rc); font-weight: 700; }
+.slot.hero { border: 2px solid var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--deck)); color: var(--moon); }
+.slot .se { font-size: 32px; line-height: 1.15; }
+.slot .sn { font-weight: 700; font-size: 12px; line-height: 1.15; max-width: 100%; overflow-wrap: anywhere; }
+.slot .sl { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
 .slot.empty { border-color: var(--good); color: var(--good); }
 .slot.locked { opacity: .5; }
 .clist { display: flex; flex-direction: column; gap: 8px; }
@@ -178,6 +178,8 @@ p { margin: 0; }
 .crow .cn { font-weight: 700; font-size: 16px; }
 .crow .cm { font-size: 13px; color: var(--dim); }
 .crow .clv { font-family: var(--f-display); font-weight: 700; font-size: 16px; text-align: right; white-space: nowrap; }
+.crow.future { opacity: .55; border-style: dashed; border-left-style: solid; }
+.crow.future .ce { filter: grayscale(1) brightness(.6); }
 .flag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--gold); color: var(--gold-ink); margin-top: 3px; }
 
 /* ---------- Modal ---------- */
@@ -190,9 +192,8 @@ p { margin: 0; }
 .modal .row .btn { flex: 1; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 .mhead { display: flex; gap: 14px; align-items: center; }
-.mhead .me { font-size: 56px; line-height: 1; width: 72px; height: 72px; border-radius: 18px; display: grid; place-items: center; background: var(--deck-2); border: 2px solid var(--rc); flex: none; }
+.mhead .me { font-size: 50px; line-height: 1; width: 72px; height: 72px; border-radius: 18px; display: grid; place-items: center; background: var(--deck-2); border: 2px solid var(--rc); flex: none; }
 .mhead .mt { min-width: 0; }
-.mhead .mt h2 { font-size: 22px; }
 .mhead .mt p { font-size: 14px; }
 .box { background: var(--deck-2); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .box .bt { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); font-weight: 700; }
@@ -210,7 +211,7 @@ p { margin: 0; }
 .evorow .el { font-size: 11px; color: var(--dim); }
 .ablist { display: flex; flex-direction: column; gap: 8px; }
 .abrow { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; background: var(--deck-2); border-radius: 12px; }
-.abrow .lvtag { font-family: var(--f-display); font-weight: 700; font-size: 12px; min-width: 48px; text-align: center; padding: 3px 0; border-radius: 6px; background: var(--gold); color: var(--gold-ink); flex: none; }
+.abrow .lvtag { font-family: var(--f-display); font-weight: 700; font-size: 12px; min-width: 50px; text-align: center; padding: 3px 0; border-radius: 6px; background: var(--gold); color: var(--gold-ink); flex: none; }
 .abrow.locked { opacity: .5; }
 .abrow.locked .lvtag { background: var(--line); color: var(--dim); }
 .abrow .an { font-weight: 700; }
@@ -221,35 +222,39 @@ p { margin: 0; }
 .steps p { color: var(--moon); }
 .steps span { color: var(--dim); font-size: 14px; display: block; }
 
-/* ---------- Talente ---------- */
-.btabs { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
-.btab { background: var(--deck-2); border: 2px solid transparent; border-radius: 12px; padding: 8px 4px; text-align: center; color: var(--dim); }
-.btab b { display: block; font-size: 15px; color: var(--bc); }
-.btab span { font-size: 12px; }
-.btab.on { border-color: var(--bc); background: color-mix(in srgb, var(--bc) 12%, var(--deck)); }
-.tier { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); font-weight: 700; margin-top: 4px; }
-.trow { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--deck); border: 1px solid var(--line); border-radius: 14px; }
-.trow .tinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.trow .tname { font-weight: 700; }
-.trow .tdesc { font-size: 14px; color: var(--dim); line-height: 1.35; }
-.trow .tdesc em { font-style: normal; color: var(--good); }
-.pips { display: flex; gap: 4px; margin-top: 2px; }
-.pips i { width: 16px; height: 6px; border-radius: 3px; background: var(--deck-2); }
-.pips i.on { background: var(--bc); }
-.plus { width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--good); color: var(--night); font-size: 26px; font-weight: 700; line-height: 1; flex: none; }
-.plus[disabled] { background: var(--deck-2); color: var(--dim); opacity: .6; }
-.trow.locked { opacity: .45; }
-.trow.maxed { border-color: var(--bc); }
-
-/* ---------- Shop ---------- */
-.offer { display: flex; align-items: center; gap: 14px; }
-.offer + .offer { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
-.packart { width: 62px; height: 84px; border-radius: 12px; flex: none; display: grid; place-items: center; font-size: 22px; color: var(--moon); border: 2px solid var(--moon); background: linear-gradient(150deg, var(--r-e), var(--r-r) 60%, var(--night)); }
-.packart.big { background: linear-gradient(150deg, var(--r-l), var(--r-e) 55%, var(--night)); }
-.offer .oi { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-.offer h3 { font-size: 17px; }
-.offer p { color: var(--dim); font-size: 14px; line-height: 1.35; }
-.oddsline { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 14px; }
+/* ---------- Upgrade-Baum ---------- */
+.treebar { display: flex; gap: 6px; align-items: center; }
+.treebar .bjump { flex: 1; min-width: 0; border: 0; border-radius: 10px; padding: 8px 2px; background: var(--deck-2); color: var(--bc); font-weight: 700; font-size: 13px; }
+.treebar .zoom { flex: none; border: 1px solid var(--line); background: var(--deck); border-radius: 10px; padding: 8px 10px; font-size: 13px; font-weight: 700; color: var(--moon); }
+#main > .treewrap { flex: 1 1 0; min-height: 0; flex-shrink: 1; }
+.treewrap { position: relative; overflow: auto; border: 1px solid var(--line); border-radius: 16px; background:
+  radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--xp) 14%, transparent), transparent 60%), var(--night); -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
+.treesize { position: relative; }
+.tree { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.tree svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.tree svg line { stroke: var(--line); stroke-width: 3; stroke-linecap: round; }
+.tree svg line.own { stroke: var(--bc); stroke-width: 4; }
+.tree svg line.next { stroke: color-mix(in srgb, var(--good) 55%, var(--line)); stroke-dasharray: 6 6; }
+.tnode { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; border: 2px solid var(--line); background: var(--deck);
+  display: grid; place-items: center; font-size: 24px; padding: 0; transition: transform .15s; }
+.tnode:active { transform: scale(.94); }
+.tnode .tl { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: 80px; font-size: 10.5px; font-weight: 600; line-height: 1.15; color: var(--dim); text-align: center; pointer-events: none; }
+.tnode .tc { position: absolute; top: -6px; right: -8px; min-width: 22px; height: 20px; border-radius: 10px; font-size: 11px; font-weight: 700; line-height: 18px; padding: 0 5px; background: var(--deck-2); border: 1px solid var(--line); color: var(--dim); font-family: var(--f-body); }
+.tnode.locked { opacity: .45; filter: grayscale(.7); }
+.tnode.open { border-color: var(--good); border-style: dashed; }
+.tnode.open .tl { color: var(--moon); }
+.tnode.buy { border: 3px solid var(--good); box-shadow: 0 0 0 4px color-mix(in srgb, var(--good) 22%, transparent); animation: glow 1.8s ease-in-out infinite; }
+.tnode.buy .tc { background: var(--good); color: var(--night); border-color: var(--good); }
+.tnode.own { background: color-mix(in srgb, var(--bc) 30%, var(--deck)); border: 3px solid var(--bc); }
+.tnode.own .tl { color: var(--moon); }
+.tnode.own .tc { display: none; }
+.tnode.flagship { width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 18px; font-size: 28px; }
+.tnode.flagship .tl { top: 68px; }
+.tnode.root { width: 76px; height: 76px; margin: -38px 0 0 -38px; font-size: 40px; border: 3px solid var(--gold); background: radial-gradient(circle at 35% 30%, var(--moon), #b9b39e 55%, #6f6a5b); cursor: default; }
+.bhead { position: absolute; transform: translate(-50%, -50%); padding: 5px 14px; border-radius: 999px; font-family: var(--f-display); font-weight: 700; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: var(--night); background: var(--bc); white-space: nowrap; }
+@keyframes glow { 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--good) 10%, transparent); } }
+.legendrow { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--dim); }
+.legendrow span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; border: 2px solid var(--c); background: var(--f, transparent); }
 
 /* ---------- Kampf ---------- */
 #battle { position: fixed; inset: 0; z-index: 20; background: var(--night); display: flex; justify-content: center;
@@ -268,32 +273,39 @@ p { margin: 0; }
 .side { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .b-enemies { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
 .b-log { text-align: center; font-size: 15px; font-weight: 600; min-height: 46px; padding: 8px 12px; background: color-mix(in srgb, var(--deck) 85%, transparent); border: 1px solid var(--line); border-radius: 12px; display: grid; place-items: center; }
-.b-team { padding-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
-.b-team .side { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); }
-.unit { position: relative; border-radius: 12px; background: var(--deck); border: 1px solid var(--line); padding: 6px 5px 7px; text-align: center; display: flex; flex-direction: column; gap: 3px; transition: transform .15s ease, opacity .3s, filter .3s; min-width: 0; }
+.b-team { padding-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
+.b-team .side { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
+.unit { position: relative; border-radius: 12px; background: var(--deck); border: 1px solid var(--line); padding: 5px 4px 6px; text-align: center; display: flex; flex-direction: column; gap: 2px; transition: transform .15s ease, opacity .3s, filter .3s; min-width: 0; }
 .b-enemies .unit { width: 104px; padding: 8px 6px; border-color: color-mix(in srgb, var(--hp) 40%, var(--line)); }
-.unit .ue { font-size: 30px; line-height: 1.15; }
+.unit .ue { font-size: 26px; line-height: 1.15; }
 .b-enemies .unit .ue { font-size: 46px; }
 .b-enemies .unit.boss { width: 136px; border-color: var(--r-l); }
 .b-enemies .unit.boss .ue { font-size: 64px; }
 .unit.hero { border: 2px solid var(--gold); }
-.unit .un { font-size: 11px; font-weight: 600; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unit .un { font-size: 10.5px; font-weight: 600; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .unit .uhp { height: 7px; background: var(--deck-2); border-radius: 4px; overflow: hidden; position: relative; }
 .unit .uhp i { display: block; height: 100%; background: var(--hp); transition: width .25s ease; }
 .unit .ush { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--shield) 80%, transparent); transition: width .25s; width: 0; }
-.unit .uv { font-size: 11px; color: var(--moon); font-weight: 600; font-variant-numeric: tabular-nums; }
+.unit .uv { font-size: 10.5px; color: var(--moon); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .unit .ust { position: absolute; top: 2px; right: 4px; font-size: 12px; }
-.unit.act { transform: translateY(-6px) scale(1.06); border-color: var(--moon); box-shadow: 0 0 0 2px var(--moon); }
-.b-enemies .unit.act { transform: translateY(6px) scale(1.06); }
+.unit.act { transform: translateY(-6px) scale(1.06); border-color: var(--moon); box-shadow: 0 0 0 2px var(--moon); z-index: 2; }
+.b-enemies .unit.act { transform: translateY(8px) scale(1.06); }
 .unit.hurt { animation: shake .3s; }
 .unit.dead { opacity: .25; filter: grayscale(1); }
 .unit.revive { animation: pop .5s; }
 @keyframes shake { 0%,100% { translate: 0; } 25% { translate: -6px 0; } 50% { translate: 5px 0; } 75% { translate: -3px 0; } }
 @keyframes pop { 0% { transform: scale(.6); } 70% { transform: scale(1.15); } }
 #fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.float { position: absolute; font-family: var(--f-display); font-weight: 700; font-size: 19px; text-shadow: 0 2px 5px rgba(0,0,0,.85); animation: floatup .9s ease-out forwards; transform: translateX(-50%); white-space: nowrap; }
+.float { position: absolute; font-family: var(--f-display); font-weight: 700; font-size: 19px; text-shadow: 0 2px 5px rgba(0,0,0,.85); animation: floatup .9s ease-out forwards; transform: translateX(-50%); white-space: nowrap; z-index: 3; }
 .float.dmg { color: var(--moon); } .float.crit { color: var(--gold); font-size: 25px; } .float.heal { color: var(--good); } .float.sh { color: var(--shield); } .float.miss { color: var(--dim); font-size: 14px; } .float.dot { color: var(--good); font-size: 16px; } .float.info { color: var(--gold); font-size: 14px; }
 @keyframes floatup { from { opacity: 1; margin-top: 0; } to { opacity: 0; margin-top: -46px; } }
+.burst { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; border: 3px solid var(--moon); animation: burst .35s ease-out forwards; z-index: 2; }
+.burst.crit { border-color: var(--gold); width: 80px; height: 80px; margin: -40px 0 0 -40px; }
+.burst.heal { border-color: var(--good); }
+@keyframes burst { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.2); opacity: 0; } }
+.beam { position: absolute; height: 3px; transform-origin: 0 50%; background: linear-gradient(90deg, transparent, var(--gold)); border-radius: 2px; animation: beam .28s ease-out forwards; z-index: 1; }
+.beam.foe { background: linear-gradient(90deg, transparent, var(--hp)); }
+@keyframes beam { from { opacity: 1; } to { opacity: 0; } }
 .legend { display: flex; justify-content: center; gap: 12px; font-size: 11px; color: var(--dim); flex-wrap: wrap; }
 .legend i { display: inline-block; width: 10px; height: 6px; border-radius: 3px; margin-right: 4px; vertical-align: 1px; }
 
@@ -350,89 +362,109 @@ p { margin: 0; }
 const G = 1.07;                 // Wachstum der Kampfwerte pro Level
 const MAX_LV = 60;
 const MAX_ROUNDS = 30;
-const STAGE_CAP = [20, 40, 60]; // Max-Level je Entwicklungsstufe
-const SLOT_LV = [1, 1, 4, 8, 12, 18]; // ab welchem Heldenlevel ein Teamplatz frei wird
+const STAGE_CAP = [20, 40, 60]; // Max-Level je Entwicklungsform
+const SLOT_LV = [1, 1, 3, 6, 10, 15, 22]; // ab welchem Heldenlevel ein Kartenplatz frei wird (7 Plätze)
 const WAVE = [1, 1, 2, 2, 2, 3, 3, 3, 3];
 const recLv = s => Math.round(1 + (s - 1) * 1.2);       // empfohlenes Level je Etappe (1–50)
 const isBoss = s => s % 10 === 0;
 const zoneOf = s => Math.floor((s - 1) / 10);
 const stageNo = s => (s - 1) % 10 + 1;
 const slotsAt = L => SLOT_LV.filter(x => x <= L).length;
-const heroNeed = L => Math.round(12 * Math.pow(1.1, L - 1) * (3 + .35 * L)); // ca. 3 Siege für Level 2, ca. 24 Siege am Ende
+const heroNeed = L => Math.round(12 * Math.pow(1.1, L - 1) * (3 + .35 * L));
 const cardNeed = l => Math.round(heroNeed(l) * .8);
+const ptsFor = L => 3 + Math.floor(L / 15);   // Sternenpunkte beim Erreichen von Level L
+const BOSS_PTS = 5;
 const pct = v => Math.round(v * 100) + " %";
 
 const RAR = { c:{ n:"Gewöhnlich", m:1, cost:1 }, r:{ n:"Selten", m:1.12, cost:1.5 }, e:{ n:"Episch", m:1.25, cost:2.2 }, l:{ n:"Legendär", m:1.4, cost:3 } };
 const STAGE_MUL = [1, 1.3, 1.7];
 const EVO_COST = [0, 400, 4000];
 const ROLES = {
-  tank:     { n:"Tank",        hp:110, atk:6,  spd:3 },
-  krieger:  { n:"Krieger",     hp:78,  atk:10, spd:5 },
-  schuetze: { n:"Schütze",     hp:52,  atk:13, spd:7 },
-  magier:   { n:"Magier",      hp:55,  atk:11, spd:4 },
-  heiler:   { n:"Heiler",      hp:62,  atk:7,  spd:6 },
-  support:  { n:"Unterstützer",hp:66,  atk:8,  spd:5 }
+  tank:     { n:"Tank",         hp:110, atk:6,  spd:3, key:"tank" },
+  krieger:  { n:"Krieger",      hp:78,  atk:10, spd:5, key:"warrior" },
+  schuetze: { n:"Schütze",      hp:52,  atk:13, spd:7, key:"shooter" },
+  magier:   { n:"Magier",       hp:55,  atk:11, spd:4, key:"mage" },
+  heiler:   { n:"Heiler",       hp:62,  atk:7,  spd:6, key:"healer" },
+  support:  { n:"Unterstützer", hp:66,  atk:8,  spd:5, key:"support" }
 };
 
-// Fähigkeiten: v = Wert je Entwicklungsstufe
+// Fähigkeiten: v = Wert je Entwicklungsform
 const AB = {
-  taunt:     { n:"Spott",        v:[.15,.25,.35], d:v => `Lockt die Gegner an und nimmt ${pct(v)} weniger Schaden.` },
-  shieldTeam:{ n:"Schutzfeld",   v:[.2,.32,.45],  d:v => `Zu Kampfbeginn bekommt das ganze Team einen Schild von ${pct(v)} seiner Lebenspunkte.` },
-  heal:      { n:"Reparatur",    v:[1.6,2.2,3],   d:v => `Heilt das schwächste Teammitglied, sobald jemand verletzt ist (${pct(v)} des Angriffs).` },
-  aoe:       { n:"Kettenblitz",  v:[.9,1.2,1.6],  d:v => `Jede 3. Runde trifft sie alle Gegner gleichzeitig (${pct(v)} des Angriffs).` },
-  poison:    { n:"Sporengift",   v:[.3,.45,.6],   d:v => `Treffer vergiften: 3 Runden lang ${pct(v)} des Angriffs als Schaden.` },
-  crit:      { n:"Funkeln",      v:[.25,.35,.5],  d:v => `${pct(v)} Chance auf doppelten Schaden.` },
-  lifesteal: { n:"Blutdurst",    v:[.35,.5,.7],   d:v => `Heilt sich bei jedem Treffer um ${pct(v)} des Schadens.` },
-  stun:      { n:"Frost",        v:[.18,.25,.33], d:v => `${pct(v)} Chance, das Ziel einzufrieren. Es setzt dann eine Runde aus.` },
-  aura:      { n:"Schlachtruf",  v:[.08,.13,.2],  d:v => `Das ganze Team macht ${pct(v)} mehr Schaden.` },
-  revive:    { n:"Wiedergeburt", v:[.3,.5,.75],   d:v => `Holt das erste gefallene Teammitglied mit ${pct(v)} Leben zurück.` },
-  execute:   { n:"Hinrichtung",  v:[.6,1,1.5],    d:v => `${pct(v)} mehr Schaden gegen fast besiegte Gegner.` },
-  double:    { n:"Schattenhieb", v:[.3,.45,.6],   d:v => `${pct(v)} Chance, zweimal anzugreifen.` },
-  thorns:    { n:"Stacheln",     v:[.25,.4,.6],   d:v => `Wer sie angreift, bekommt ${pct(v)} des Schadens zurück.` },
-  dodge:     { n:"Ausweichen",   v:[.18,.26,.35], d:v => `${pct(v)} Chance, einem Angriff auszuweichen.` },
-  rage:      { n:"Wut",          v:[.07,.1,.14],  d:v => `Wird mit jedem eigenen Angriff ${pct(v)} stärker.` },
-  burn:      { n:"Plasmabrand",  v:[.35,.5,.7],   d:v => `Setzt zu Kampfbeginn alle Gegner 4 Runden lang in Brand (${pct(v)} des Angriffs pro Runde).` },
-  luck:      { n:"Goldnase",     v:[.15,.25,.4],  d:v => `Nach jedem Sieg ${pct(v)} mehr Münzen.` },
-  wisdom:    { n:"Weisheit",     v:[.1,.16,.25],  d:v => `Nach jedem Kampf ${pct(v)} mehr EP für Held und Team.` },
-  martyr:    { n:"Explosion",    v:[2,3,4.5],     d:v => `Explodiert beim Fallen und trifft alle Gegner (${pct(v)} des Angriffs).` },
-  snipe:     { n:"Zielfernrohr", v:[.25,.4,.6],   d:v => `Greift immer den schwächsten Gegner an und macht ${pct(v)} mehr Schaden.` },
-  barrier:   { n:"Bollwerk",     v:[1.8,2.6,3.6], d:v => `Jede 2. Runde bekommt das schwächste Teammitglied einen Schild (${pct(v)} des Angriffs).` },
-  shred:     { n:"Säure",        v:[.06,.09,.13], d:v => `Jeder Treffer macht das Ziel dauerhaft ${pct(v)} verwundbarer.` },
-  dragon:    { n:"Drachenatem",  v:[1,1.4,1.9],   d:v => `Jede 3. Runde trifft er alle Gegner (${pct(v)} des Angriffs) und setzt sie in Brand.` },
-  divine:    { n:"Segen",        v:[.7,1,1.4],    d:v => `Greift nicht an, heilt aber jede Runde das ganze Team (${pct(v)} des Angriffs).` }
+  taunt:     { n:"Spott",          v:[.15,.25,.35], d:v => `Lockt die Gegner an und nimmt ${pct(v)} weniger Schaden.` },
+  shieldTeam:{ n:"Schutzfeld",     v:[.2,.32,.45],  d:v => `Zu Kampfbeginn bekommt das ganze Team einen Schild von ${pct(v)} seiner Lebenspunkte.` },
+  heal:      { n:"Reparatur",      v:[1.6,2.2,3],   d:v => `Heilt das schwächste Teammitglied, sobald jemand verletzt ist (${pct(v)} des Angriffs).` },
+  aoe:       { n:"Kettenblitz",    v:[.9,1.2,1.6],  d:v => `Jede 3. Runde trifft sie alle Gegner gleichzeitig (${pct(v)} des Angriffs).` },
+  poison:    { n:"Sporengift",     v:[.3,.45,.6],   d:v => `Treffer vergiften: 3 Runden lang ${pct(v)} des Angriffs als Schaden.` },
+  crit:      { n:"Funkeln",        v:[.25,.35,.5],  d:v => `${pct(v)} Chance auf doppelten Schaden.` },
+  lifesteal: { n:"Blutdurst",      v:[.35,.5,.7],   d:v => `Heilt sich bei jedem Treffer um ${pct(v)} des Schadens.` },
+  stun:      { n:"Frost",          v:[.18,.25,.33], d:v => `${pct(v)} Chance, das Ziel einzufrieren. Es setzt dann eine Runde aus.` },
+  aura:      { n:"Schlachtruf",    v:[.08,.13,.2],  d:v => `Das ganze Team macht ${pct(v)} mehr Schaden.` },
+  revive:    { n:"Wiedergeburt",   v:[.3,.5,.75],   d:v => `Holt das erste gefallene Teammitglied mit ${pct(v)} Leben zurück.` },
+  execute:   { n:"Hinrichtung",    v:[.6,1,1.5],    d:v => `${pct(v)} mehr Schaden gegen fast besiegte Gegner.` },
+  double:    { n:"Schattenhieb",   v:[.3,.45,.6],   d:v => `${pct(v)} Chance, zweimal anzugreifen.` },
+  thorns:    { n:"Stacheln",       v:[.25,.4,.6],   d:v => `Wer sie angreift, bekommt ${pct(v)} des Schadens zurück.` },
+  dodge:     { n:"Ausweichen",     v:[.18,.26,.35], d:v => `${pct(v)} Chance, einem Angriff auszuweichen.` },
+  rage:      { n:"Wut",            v:[.07,.1,.14],  d:v => `Wird mit jedem eigenen Angriff ${pct(v)} stärker.` },
+  burn:      { n:"Plasmabrand",    v:[.35,.5,.7],   d:v => `Setzt zu Kampfbeginn alle Gegner 4 Runden lang in Brand (${pct(v)} des Angriffs pro Runde).` },
+  luck:      { n:"Goldnase",       v:[.15,.25,.4],  d:v => `Nach jedem Sieg ${pct(v)} mehr Münzen.` },
+  wisdom:    { n:"Weisheit",       v:[.1,.16,.25],  d:v => `Nach jedem Kampf ${pct(v)} mehr EP für Held und Team.` },
+  martyr:    { n:"Explosion",      v:[2,3,4.5],     d:v => `Explodiert beim Fallen und trifft alle Gegner (${pct(v)} des Angriffs).` },
+  snipe:     { n:"Zielfernrohr",   v:[.25,.4,.6],   d:v => `Greift immer den schwächsten Gegner an und macht ${pct(v)} mehr Schaden.` },
+  barrier:   { n:"Bollwerk",       v:[1.8,2.6,3.6], d:v => `Jede 2. Runde bekommt das schwächste Teammitglied einen Schild (${pct(v)} des Angriffs).` },
+  shred:     { n:"Säure",          v:[.06,.09,.13], d:v => `Jeder Treffer macht das Ziel dauerhaft ${pct(v)} verwundbarer.` },
+  dragon:    { n:"Drachenatem",    v:[1,1.4,1.9],   d:v => `Jede 3. Runde trifft er alle Gegner (${pct(v)} des Angriffs) und setzt sie in Brand.` },
+  divine:    { n:"Segen",          v:[.7,1,1.4],    d:v => `Greift nicht an, heilt aber jede Runde das ganze Team (${pct(v)} des Angriffs).` },
+  chain:     { n:"Kettenhieb",     v:[.4,.6,.85],   d:v => `Jeder Treffer springt auf einen zweiten Gegner über (${pct(v)} des Schadens).` },
+  guard:     { n:"Leibwächter",    v:[.25,.35,.45], d:v => `Fängt ${pct(v)} des Schadens ab, den Teammitglieder abbekommen.` },
+  charge:    { n:"Aufladung",      v:[2.5,3.2,4],   d:v => `Jeder 3. Angriff ist aufgeladen und macht das ${String(v).replace(".", ",")}-Fache an Schaden.` },
+  berserk:   { n:"Raserei",        v:[.8,1.2,1.7],  d:v => `Je weniger Leben sie hat, desto härter schlägt sie zu (bis zu ${pct(v)} mehr Schaden).` },
+  drain:     { n:"Kraftraub",      v:[.05,.07,.1],  d:v => `Jeder Treffer schwächt das Ziel: Es macht ${pct(v)} weniger Schaden (stapelbar).` },
+  mark:      { n:"Zielmarkierung", v:[.15,.22,.3],  d:v => `Markiert ihr Ziel. Das ganze Team macht ${pct(v)} mehr Schaden gegen markierte Gegner.` },
+  counter:   { n:"Konter",         v:[.35,.45,.6],  d:v => `${pct(v)} Chance, sofort zurückzuschlagen, wenn er angegriffen wird.` },
+  laststand: { n:"Letztes Gefecht",v:[.5,.7,.9],    d:v => `Fällt er unter 30 % Leben, bekommt er einmal einen Schild von ${pct(v)} seiner Lebenspunkte.` },
+  timebomb:  { n:"Zeitzünder",     v:[3,4,5.5],     d:v => `In Runde 4 explodiert die Ladung und trifft alle Gegner (${pct(v)} des Angriffs).` }
 };
 
-// Begleiter mit drei Entwicklungsstufen
+// Karten: lv = ab welchem Heldenlevel sie freigeschaltet wird. Seltenheit ergibt sich aus diesem Level.
 const COMP = [
-  { id:"kiesel",  r:"c", role:"tank",     ab:"taunt",     f:[["Kieselgolem","🪨"],["Felsgolem","🗿"],["Monolith","🏛️"]] },
-  { id:"funkel",  r:"c", role:"schuetze", ab:"crit",      f:[["Funkelkäfer","🐞"],["Leuchtkäfer","🪲"],["Sternkäfer","🌟"]] },
-  { id:"sani",    r:"c", role:"heiler",   ab:"heal",      f:[["Sanibot","🤖"],["Medibot","🩺"],["Lebensbaum","🌳"]] },
-  { id:"spore",   r:"c", role:"magier",   ab:"poison",    f:[["Mondspore","🍄"],["Sporennebel","🌫️"],["Seuchenkönig","☣️"]] },
-  { id:"drohne",  r:"c", role:"support",  ab:"shieldTeam",f:[["Postdrohne","🛸"],["Schilddrohne","🛰️"],["Orbitalwächter","🌐"]] },
-  { id:"krabbe",  r:"c", role:"tank",     ab:"thorns",    f:[["Kraterkrabbe","🦀"],["Stachelkrabbe","🦞"],["Kristallkrabbe","💎"]] },
-  { id:"fuchs",   r:"c", role:"krieger",  ab:"dodge",     f:[["Mondfuchs","🦊"],["Schattenwolf","🐺"],["Sternenwolf","🌙"]] },
-  { id:"wurm",    r:"c", role:"krieger",  ab:"rage",      f:[["Wutwurm","🐛"],["Echsenkrieger","🦎"],["Mondrache","🐉"]] },
-  { id:"falke",   r:"c", role:"schuetze", ab:"snipe",     f:[["Sternfalke","🐦"],["Kometenfalke","🦅"],["Himmelsjäger","🏹"]] },
-  { id:"eule",    r:"c", role:"support",  ab:"wisdom",    f:[["Mondeule","🦉"],["Bücherwurm","📚"],["Orakel","🔮"]] },
-  { id:"blitz",   r:"r", role:"magier",   ab:"aoe",       f:[["Funkenzauberer","🧙"],["Blitzmagier","⚡"],["Sturmrufer","🌩️"]] },
-  { id:"fleder",  r:"r", role:"krieger",  ab:"lifesteal", f:[["Mondfledermaus","🦇"],["Nachtjäger","🧛"],["Blutmond","🌑"]] },
-  { id:"ninja",   r:"r", role:"schuetze", ab:"double",    f:[["Kurierninja","🥷"],["Schattenklinge","🗡️"],["Phantom","👤"]] },
-  { id:"waechter",r:"r", role:"tank",     ab:"barrier",   f:[["Schildwächterin","🛡️"],["Bastion","🏰"],["Zitadelle","🏯"]] },
-  { id:"kobold",  r:"r", role:"support",  ab:"luck",      f:[["Goldkobold","🪙"],["Schatzkobold","💰"],["Midas","👑"]] },
-  { id:"frost",   r:"r", role:"magier",   ab:"stun",      f:[["Frostgeist","❄️"],["Eiswächter","🥶"],["Polarstern","🧊"]] },
-  { id:"henker",  r:"r", role:"krieger",  ab:"execute",   f:[["Meteorjäger","☄️"],["Kometenhenker","🪓"],["Weltenrichter","⚖️"]] },
-  { id:"phoenix", r:"e", role:"heiler",   ab:"revive",    f:[["Sonnenküken","🐣"],["Feuervogel","🦜"],["Phönix","🔥"]] },
-  { id:"hexe",    r:"e", role:"magier",   ab:"burn",      f:[["Nebelhexe","🧙‍♀️"],["Plasmahexe","🔮"],["Sternenhexe","✨"]] },
-  { id:"bombe",   r:"e", role:"krieger",  ab:"martyr",    f:[["Knallkomet","💣"],["Sprengkomet","💥"],["Sonnenkern","☀️"]] },
-  { id:"banner",  r:"e", role:"support",  ab:"aura",      f:[["Fahnenträger","🚩"],["Kommandant","🎖️"],["Sternenmarschall","⭐"]] },
-  { id:"spinne",  r:"e", role:"schuetze", ab:"shred",     f:[["Säurespinne","🕷️"],["Ätzspinne","🕸️"],["Leerenweberin","🌀"]] },
-  { id:"drache",  r:"l", role:"magier",   ab:"dragon",    f:[["Sternendrache","🐲"],["Galaxiendrache","🐉"],["Urdrache","🌌"]] },
-  { id:"engel",   r:"l", role:"heiler",   ab:"divine",    f:[["Lichtgeist","👼"],["Seraph","😇"],["Mondgöttin","🌕"]] }
+  { id:"kiesel",  lv:1,  role:"tank",     ab:"taunt",     f:[["Kieselgolem","🪨"],["Felsgolem","🗿"],["Monolith","🏛️"]] },
+  { id:"funkel",  lv:1,  role:"schuetze", ab:"crit",      f:[["Funkelkäfer","🐞"],["Leuchtkäfer","🪲"],["Sternkäfer","🌟"]] },
+  { id:"sani",    lv:1,  role:"heiler",   ab:"heal",      f:[["Sanibot","🤖"],["Medibot","🩺"],["Lebensbaum","🌳"]] },
+  { id:"falke",   lv:2,  role:"schuetze", ab:"snipe",     f:[["Sternfalke","🐦"],["Kometenfalke","🦅"],["Himmelsjäger","🏹"]] },
+  { id:"spore",   lv:3,  role:"magier",   ab:"poison",    f:[["Mondspore","🍄"],["Sporennebel","🌫️"],["Seuchenkönig","☣️"]] },
+  { id:"fuchs",   lv:4,  role:"krieger",  ab:"dodge",     f:[["Mondfuchs","🦊"],["Schattenwolf","🐺"],["Sternenwolf","🌙"]] },
+  { id:"drohne",  lv:5,  role:"support",  ab:"shieldTeam",f:[["Postdrohne","🛸"],["Schilddrohne","🛰️"],["Orbitalwächter","🌐"]] },
+  { id:"krabbe",  lv:6,  role:"tank",     ab:"thorns",    f:[["Kraterkrabbe","🦀"],["Stachelkrabbe","🦞"],["Kristallkrabbe","💎"]] },
+  { id:"wurm",    lv:7,  role:"krieger",  ab:"rage",      f:[["Wutwurm","🐛"],["Echsenkrieger","🦎"],["Mondrache","🐉"]] },
+  { id:"eule",    lv:8,  role:"support",  ab:"wisdom",    f:[["Mondeule","🦉"],["Bücherwurm","📚"],["Orakel","🔮"]] },
+  { id:"blitz",   lv:10, role:"magier",   ab:"aoe",       f:[["Funkenzauberer","🧙"],["Blitzmagier","⚡"],["Sturmrufer","🌩️"]] },
+  { id:"fleder",  lv:11, role:"krieger",  ab:"lifesteal", f:[["Mondfledermaus","🦇"],["Nachtjäger","🧛"],["Blutmond","🌑"]] },
+  { id:"ninja",   lv:12, role:"schuetze", ab:"double",    f:[["Kurierninja","🥷"],["Schattenklinge","🗡️"],["Phantom","👤"]] },
+  { id:"waechter",lv:14, role:"tank",     ab:"barrier",   f:[["Schildwächterin","🛡️"],["Bastion","🏰"],["Zitadelle","🏯"]] },
+  { id:"kobold",  lv:15, role:"support",  ab:"luck",      f:[["Goldkobold","🪙"],["Schatzkobold","💰"],["Midas","👑"]] },
+  { id:"frost",   lv:16, role:"magier",   ab:"stun",      f:[["Frostgeist","❄️"],["Eiswächter","🥶"],["Polarstern","🧊"]] },
+  { id:"henker",  lv:18, role:"krieger",  ab:"execute",   f:[["Meteorjäger","☄️"],["Kometenhenker","🪓"],["Weltenrichter","⚖️"]] },
+  { id:"kette",   lv:19, role:"krieger",  ab:"chain",     f:[["Kettenkämpfer","🔗"],["Blitzkettenritter","⛓️"],["Sternenketten-Titan","🌠"]] },
+  { id:"phoenix", lv:20, role:"heiler",   ab:"revive",    f:[["Sonnenküken","🐣"],["Feuervogel","🦜"],["Phönix","🔥"]] },
+  { id:"hexe",    lv:22, role:"magier",   ab:"burn",      f:[["Nebelhexe","🧙‍♀️"],["Plasmahexe","🔮"],["Sternenhexe","✨"]] },
+  { id:"baer",    lv:23, role:"tank",     ab:"guard",     f:[["Mondbär","🐻"],["Nashornwächter","🦏"],["Mammutkoloss","🐘"]] },
+  { id:"bombe",   lv:24, role:"krieger",  ab:"martyr",    f:[["Knallkomet","💣"],["Sprengkomet","💥"],["Sonnenkern","☀️"]] },
+  { id:"banner",  lv:26, role:"support",  ab:"aura",      f:[["Fahnenträger","🚩"],["Kommandant","🎖️"],["Sternenmarschall","⭐"]] },
+  { id:"lade",    lv:27, role:"schuetze", ab:"charge",    f:[["Kondensator","🔋"],["Plasmawerfer","⚛️"],["Sternenkanone","💠"]] },
+  { id:"spinne",  lv:28, role:"schuetze", ab:"shred",     f:[["Säurespinne","🕷️"],["Ätzspinne","🕸️"],["Leerenweberin","🌀"]] },
+  { id:"katze",   lv:30, role:"krieger",  ab:"berserk",   f:[["Wildkatze","🐱"],["Säbelzahn","🐯"],["Sternenlöwe","🦁"]] },
+  { id:"egel",    lv:32, role:"magier",   ab:"drain",     f:[["Mondegel","🪱"],["Schattenschlange","🐍"],["Seelenfresser","👹"]] },
+  { id:"spaeher", lv:34, role:"support",  ab:"mark",      f:[["Späher","🔭"],["Scharfschützin","🎯"],["Sternenauge","👁️"]] },
+  { id:"fechter", lv:36, role:"krieger",  ab:"counter",   f:[["Fechter","🤺"],["Klingenmeister","⚔️"],["Dreizackfürst","🔱"]] },
+  { id:"igel",    lv:38, role:"tank",     ab:"laststand", f:[["Mondigel","🦔"],["Panzerschildkröte","🐢"],["Bergtitan","🏔️"]] },
+  { id:"drache",  lv:40, role:"magier",   ab:"dragon",    f:[["Sternendrache","🐲"],["Galaxiendrache","🐉"],["Urdrache","🌌"]] },
+  { id:"zuender", lv:42, role:"magier",   ab:"timebomb",  f:[["Knallfrosch","🧨"],["Kometenzünder","💫"],["Urknallkern","🎆"]] },
+  { id:"engel",   lv:45, role:"heiler",   ab:"divine",    f:[["Lichtgeist","👼"],["Seraph","😇"],["Mondgöttin","🌕"]] }
 ];
+COMP.forEach(c => c.r = c.lv < 10 ? "c" : c.lv < 20 ? "r" : c.lv < 35 ? "e" : "l");
 const CC = Object.fromEntries(COMP.map(c => [c.id, c]));
-const STARTER = ["kiesel", "funkel", "sani"];
 
-// Heldenfähigkeiten, die mit dem Level automatisch dazukommen
+// Fähigkeiten der Hauptkarte, kommen mit dem Level automatisch dazu
 const HERO_AB = [
   { lv:1,  n:"Kurierschlag",      d:"Greift jede Runde einen Gegner an." },
   { lv:5,  k:"hShield", n:"Mondschild",       d:"Zu Kampfbeginn bekommt das ganze Team einen Schild." },
@@ -447,76 +479,166 @@ const HERO_AB = [
 const HERO_TITLES = [[1,"Kurierlehrling","var(--r-c)"],[10,"Mondkurier","var(--r-r)"],[20,"Sternenbote","var(--good)"],[30,"Kometenmeister","var(--r-e)"],[40,"Hüter der Umlaufbahn","var(--shield)"],[50,"Legende des Mondes","var(--r-l)"]];
 const heroTitle = L => HERO_TITLES.filter(t => t[0] <= L).pop();
 
-// Talentbaum: Stufe t braucht 5·t Punkte im selben Zweig
-const TALENTS = [
-  { b:"a", id:"a1", t:0, max:5, n:"Scharfe Klingen", d:r => `Team macht ${r*4} % mehr Schaden` },
-  { b:"a", id:"a2", t:0, max:5, n:"Präzision",       d:r => `Team trifft ${r*3} % öfter kritisch` },
-  { b:"a", id:"a3", t:1, max:5, n:"Wucht",           d:r => `Kritische Treffer machen ${r*15} % mehr Schaden` },
-  { b:"a", id:"a4", t:1, max:5, n:"Erstschlag",      d:r => `${r*10} % mehr Schaden in den ersten 2 Runden` },
-  { b:"a", id:"a5", t:2, max:5, n:"Kurierzorn",      d:r => `Held macht ${r*8} % mehr Schaden` },
-  { b:"a", id:"a6", t:2, max:5, n:"Bossjäger",       d:r => `${r*6} % mehr Schaden gegen Bosse` },
-  { b:"a", id:"a7", t:3, max:1, n:"Sternenfall",     d:r => `Held trifft jede 3. Runde alle Gegner` },
-  { b:"d", id:"d1", t:0, max:5, n:"Panzerung",       d:r => `Team hat ${r*5} % mehr Leben` },
-  { b:"d", id:"d2", t:0, max:5, n:"Schildgenerator", d:r => `Schild zu Kampfbeginn: ${r*4} % der Lebenspunkte` },
-  { b:"d", id:"d3", t:1, max:5, n:"Nanoheilung",     d:r => `Team heilt ${(r*1.5).toLocaleString("de-DE")} % Leben pro Runde` },
-  { b:"d", id:"d4", t:1, max:5, n:"Ausweichmanöver", d:r => `Team weicht ${r*2} % der Angriffe aus` },
-  { b:"d", id:"d5", t:2, max:5, n:"Heldenrüstung",   d:r => `Held nimmt ${r*5} % weniger Schaden` },
-  { b:"d", id:"d6", t:2, max:5, n:"Dornenhülle",     d:r => `Angreifer bekommen ${r*5} % des Schadens zurück` },
-  { b:"d", id:"d7", t:3, max:1, n:"Unbeugsam",       d:r => `Held überlebt einmal pro Kampf einen tödlichen Treffer` },
-  { b:"k", id:"k1", t:0, max:5, n:"Schnelllerner",   d:r => `${r*6} % mehr EP für den Helden` },
-  { b:"k", id:"k2", t:0, max:5, n:"Kartentrainer",   d:r => `${r*8} % mehr EP für Karten` },
-  { b:"k", id:"k3", t:1, max:5, n:"Goldader",        d:r => `${r*10} % mehr Münzen` },
-  { b:"k", id:"k4", t:1, max:5, n:"Trainingsrabatt", d:r => `Training kostet ${r*8} % weniger` },
-  { b:"k", id:"k5", t:2, max:5, n:"Glückspilz",      d:r => `${r*2} % höhere Chance auf Kartenfunde` },
-  { b:"k", id:"k6", t:2, max:5, n:"Mentor",          d:r => `Karten auf der Bank lernen ${r*10} % mit` },
-  { b:"k", id:"k7", t:3, max:1, n:"Sternenstunde",   d:r => `25 % mehr EP für Held und alle Karten` }
+/* =========================================================
+   UPGRADE-BAUM
+   Jeder Ast hat eine Mittelbahn (muss man durchlaufen) und zwei Seitenbahnen.
+   Ein Knoten wird einmal gekauft. Spätere Knoten derselben Bahn verstärken denselben Bereich wieder.
+   ========================================================= */
+const EFX = {
+  atk:v => `Team macht ${pct(v)} mehr Schaden`, crit:v => `Team trifft ${pct(v)} öfter kritisch`, critDmg:v => `Kritische Treffer machen ${pct(v)} mehr Schaden`,
+  first:v => `${pct(v)} mehr Schaden in den ersten 2 Runden`, heroAtk:v => `Der Held macht ${pct(v)} mehr Schaden`, boss:v => `${pct(v)} mehr Schaden gegen Bosse`,
+  exec:v => `${pct(v)} mehr Schaden gegen fast besiegte Gegner`, aoe:v => `Flächenangriffe machen ${pct(v)} mehr Schaden`, dot:v => `Gift und Brand machen ${pct(v)} mehr Schaden`,
+  multi:v => `Jede Karte hat ${pct(v)} Chance auf einen Zusatzangriff`, pierce:v => `Treffer durchdringen ${pct(v)} von gegnerischen Schilden und Rüstung`,
+  fall:() => `Der Held trifft jede 3. Runde alle Gegner`,
+  hp:v => `Team hat ${pct(v)} mehr Leben`, shield:v => `Zu Kampfbeginn Schild von ${pct(v)} der Lebenspunkte`, regen:v => `Team heilt jede Runde ${pct(v)} Leben`,
+  dodge:v => `Team weicht ${pct(v)} der Angriffe aus`, heroDr:v => `Der Held nimmt ${pct(v)} weniger Schaden`, dr:v => `Team nimmt ${pct(v)} weniger Schaden`,
+  thorns:v => `Angreifer bekommen ${pct(v)} des Schadens zurück`, healUp:v => `Alle Heilungen sind ${pct(v)} stärker`, heroHp:v => `Der Held hat ${pct(v)} mehr Leben`,
+  unb:() => `Der Held überlebt einmal pro Kampf einen tödlichen Treffer`, teamRevive:() => `Einmal pro Kampf steht das erste gefallene Teammitglied mit 40 % Leben wieder auf`,
+  cardHp:v => `Alle Karten haben ${pct(v)} mehr Leben`, cardAtk:v => `Alle Karten machen ${pct(v)} mehr Schaden`, abil:v => `Alle Kartenfähigkeiten sind ${pct(v)} stärker`,
+  tank:v => `Tanks haben ${pct(v)} mehr Leben`, shooter:v => `Schützen machen ${pct(v)} mehr Schaden`, mage:v => `Magier machen ${pct(v)} mehr Schaden`,
+  warrior:v => `Krieger haben ${pct(v)} mehr Leben und Schaden`, healer:v => `Heiler heilen ${pct(v)} mehr`, support:v => `Unterstützer haben ${pct(v)} mehr Leben und Schaden`,
+  cardXp:v => `Karten bekommen ${pct(v)} mehr EP`, mentor:v => `Karten auf der Bank lernen ${pct(v)} der Kampf-EP mit`, train:v => `Training kostet ${pct(v)} weniger`,
+  evo:v => `Entwickeln kostet ${pct(v)} weniger`, newLv:v => `Neue Karten starten ${v} Level höher`,
+  xp:v => `Der Held bekommt ${pct(v)} mehr EP`, coins:v => `${pct(v)} mehr Münzen`, lossXp:v => `Niederlagen geben ${pct(v)} mehr EP`,
+  firstCo:v => `Neue Etappen geben ${pct(v)} mehr Münzen`, bossXp:v => `Bosse geben ${pct(v)} mehr EP`, ptsLv:v => `Alle 5 Level ${v} Sternenpunkt extra`
+};
+// [Bahn 0=links 1=Mitte 2=rechts, Symbol, Name, Effekt, Wert]
+const TREE_DEF = [
+  { k:"a", n:"Angriff", c:"var(--t-a)", rows:[
+    [[1,"🗡️","Scharfe Klingen I","atk",.04]],
+    [[0,"🎯","Präzision I","crit",.04],[1,"🧑‍🚀","Kurierzorn I","heroAtk",.08],[2,"⚡","Erstschlag I","first",.15]],
+    [[1,"🗡️","Scharfe Klingen II","atk",.05]],
+    [[0,"💥","Wucht I","critDmg",.2],[1,"✌️","Doppelschlag I","multi",.05],[2,"👑","Bossjäger I","boss",.1]],
+    [[1,"🗡️","Scharfe Klingen III","atk",.06]],
+    [[0,"🎯","Präzision II","crit",.05],[1,"🔩","Durchschlag I","pierce",.15],[2,"🪓","Gnadenstoß I","exec",.3]],
+    [[1,"🧑‍🚀","Kurierzorn II","heroAtk",.12]],
+    [[0,"💥","Wucht II","critDmg",.3],[1,"🌊","Flächenwucht I","aoe",.2],[2,"⚡","Erstschlag II","first",.25]],
+    [[1,"🗡️","Scharfe Klingen IV","atk",.07]],
+    [[0,"🎯","Präzision III","crit",.06],[1,"✌️","Doppelschlag II","multi",.07],[2,"👑","Bossjäger II","boss",.15]],
+    [[1,"☠️","Giftklingen","dot",.3]],
+    [[0,"💥","Wucht III","critDmg",.4],[1,"🔩","Durchschlag II","pierce",.2],[2,"🪓","Gnadenstoß II","exec",.5]],
+    [[1,"🗡️","Scharfe Klingen V","atk",.1]],
+    [[0,"🌊","Flächenwucht II","aoe",.3],[1,"🌠","Sternenfall","fall",1,1],[2,"🧑‍🚀","Kurierzorn III","heroAtk",.2]]
+  ]},
+  { k:"d", n:"Abwehr", c:"var(--t-d)", rows:[
+    [[1,"🛡️","Panzerung I","hp",.05]],
+    [[0,"🔵","Schildgenerator I","shield",.05],[1,"❤️","Heldenherz I","heroHp",.1],[2,"💨","Ausweichen I","dodge",.03]],
+    [[1,"🛡️","Panzerung II","hp",.06]],
+    [[0,"💚","Nanoheilung I","regen",.01],[1,"🧱","Rüstung I","dr",.04],[2,"🌵","Dornen I","thorns",.08]],
+    [[1,"🛡️","Panzerung III","hp",.07]],
+    [[0,"🔵","Schildgenerator II","shield",.07],[1,"✨","Lichtquelle I","healUp",.2],[2,"💨","Ausweichen II","dodge",.04]],
+    [[1,"🦺","Heldenrüstung I","heroDr",.08]],
+    [[0,"💚","Nanoheilung II","regen",.015],[1,"🧱","Rüstung II","dr",.05],[2,"🌵","Dornen II","thorns",.12]],
+    [[1,"🛡️","Panzerung IV","hp",.08]],
+    [[0,"🔵","Schildgenerator III","shield",.1],[1,"🚑","Rettungskapsel","teamRevive",1,1],[2,"💨","Ausweichen III","dodge",.05]],
+    [[1,"🦺","Heldenrüstung II","heroDr",.1]],
+    [[0,"💚","Nanoheilung III","regen",.02],[1,"✨","Lichtquelle II","healUp",.3],[2,"🌵","Dornen III","thorns",.15]],
+    [[1,"🛡️","Panzerung V","hp",.1]],
+    [[0,"🧱","Rüstung III","dr",.06],[1,"🗿","Unbeugsam","unb",1,1],[2,"❤️","Heldenherz II","heroHp",.2]]
+  ]},
+  { k:"c", n:"Karten", c:"var(--t-c)", rows:[
+    [[1,"🃏","Kartenkraft I","cardAtk",.05]],
+    [[0,"🪨","Felsenhaut I","tank",.1],[1,"📘","Kartenschule I","cardXp",.1],[2,"🏹","Zielwasser I","shooter",.1]],
+    [[1,"🎴","Kartenhülle I","cardHp",.05]],
+    [[0,"🩺","Heilkunde I","healer",.15],[1,"🔮","Fähigkeitsfokus I","abil",.1],[2,"🧙","Arkanwissen I","mage",.1]],
+    [[1,"🃏","Kartenkraft II","cardAtk",.06]],
+    [[0,"⚔️","Kriegerdrill I","warrior",.1],[1,"🧬","Evolutionsrabatt I","evo",.15],[2,"🚩","Teamgeist I","support",.1]],
+    [[1,"🎴","Kartenhülle II","cardHp",.06]],
+    [[0,"🪨","Felsenhaut II","tank",.15],[1,"🔮","Fähigkeitsfokus II","abil",.12],[2,"🏹","Zielwasser II","shooter",.15]],
+    [[1,"🐣","Frischer Start","newLv",3]],
+    [[0,"🩺","Heilkunde II","healer",.2],[1,"🃏","Kartenkraft III","cardAtk",.08],[2,"🧙","Arkanwissen II","mage",.15]],
+    [[1,"🧑‍🏫","Mentor I","mentor",.2]],
+    [[0,"⚔️","Kriegerdrill II","warrior",.15],[1,"🔮","Fähigkeitsfokus III","abil",.15],[2,"🚩","Teamgeist II","support",.15]],
+    [[1,"🎴","Kartenhülle III","cardHp",.08]],
+    [[0,"🧑‍🏫","Mentor II","mentor",.3],[1,"👑","Kartenkraft IV","cardAtk",.1,1],[2,"🧬","Evolutionsrabatt II","evo",.2]]
+  ]},
+  { k:"k", n:"Kurier", c:"var(--t-k)", rows:[
+    [[1,"📖","Schnelllerner I","xp",.08]],
+    [[0,"🪙","Goldader I","coins",.1],[1,"📘","Lernkarten I","cardXp",.08],[2,"🔁","Aus Fehlern lernen I","lossXp",.5]],
+    [[1,"📖","Schnelllerner II","xp",.1]],
+    [[0,"🏷️","Trainingsrabatt I","train",.15],[1,"👑","Bosswissen I","bossXp",.3],[2,"🚀","Pioniergeist I","firstCo",.5]],
+    [[1,"🪙","Goldader II","coins",.15]],
+    [[0,"★","Sternenquelle I","ptsLv",1],[1,"📖","Schnelllerner III","xp",.12],[2,"🔁","Aus Fehlern lernen II","lossXp",.5]],
+    [[1,"📘","Lernkarten II","cardXp",.12]],
+    [[0,"🏷️","Trainingsrabatt II","train",.2],[1,"🪙","Goldader III","coins",.2],[2,"👑","Bosswissen II","bossXp",.4]],
+    [[1,"📖","Schnelllerner IV","xp",.14]],
+    [[0,"★","Sternenquelle II","ptsLv",1],[1,"📘","Lernkarten III","cardXp",.15],[2,"🚀","Pioniergeist II","firstCo",.5]],
+    [[1,"🪙","Goldader IV","coins",.25]],
+    [[0,"🏷️","Trainingsrabatt III","train",.25],[1,"📖","Schnelllerner V","xp",.16],[2,"🧑‍🏫","Bankunterricht","mentor",.2]],
+    [[1,"📘","Lernkarten IV","cardXp",.2]],
+    [[0,"★","Sternenquelle III","ptsLv",1],[1,"⏳","Sternenstunde","xp",.25,1],[2,"🪙","Goldader V","coins",.3]]
+  ]}
 ];
-const TM = Object.fromEntries(TALENTS.map(t => [t.id, t]));
-const BRANCHES = [
-  { k:"a", n:"Angriff", c:"var(--t-a)", d:"Mehr Schaden" },
-  { k:"d", n:"Abwehr",  c:"var(--t-d)", d:"Mehr Überleben" },
-  { k:"k", n:"Kurier",  c:"var(--t-k)", d:"Schneller leveln" }
-];
+const CW = 84, BGAP = 30, RH = 104, PADX = 30, PADY = 70;
+const TREE = [], TN = {};
+(function buildTree() {
+  const root = { id:"root", root:true, x:0, y:PADY, parents:[], icon:"🧑‍🚀", n:"Mondkurier" };
+  TREE.push(root); TN.root = root;
+  TREE_DEF.forEach((br, bi) => {
+    const laneX = l => PADX + (bi * 3 + l) * CW + bi * BGAP + CW / 2;
+    const lastInLane = [null, null, null];
+    br.rows.forEach((row, ri) => {
+      const r = ri + 1, prevMid = ri === 0 ? "root" : `${br.k}${ri}m`;
+      row.forEach(([lane, icon, n, key, v, flag]) => {
+        const id = `${br.k}${r}${"lmr"[lane]}`;
+        const parents = lane === 1 ? [prevMid] : [prevMid].concat(lastInLane[lane] ? [lastInLane[lane]] : []);
+        const node = { id, b:br.k, bc:br.c, lane, row:r, icon, n, key, v, flag:!!flag, cost:1 + Math.floor(r / 3) + (flag ? 2 : 0),
+          parents, x:laneX(lane), y:PADY + 40 + r * RH };
+        TREE.push(node); TN[id] = node; lastInLane[lane] = id;
+      });
+    });
+    br.x = laneX(1);
+  });
+  const W = PADX * 2 + 12 * CW + 3 * BGAP;
+  root.x = W / 2;
+  TREE.W = W; TREE.H = PADY + 40 + 15 * RH;
+})();
+const treeTotal = () => TREE.reduce((a, n) => a + (n.cost || 0), 0);
 
-// Gegner je Zone: [Name, Emoji, Rolle, Fähigkeit, Fähigkeitsstufe]
+/* ---------- Gegner ---------- */
 const ZONES = [
   { n:"Mondkrater", sub:"Graue Staubebenen. Hier beginnt jede Kurierroute.", bg:"radial-gradient(120% 90% at 80% 0%, #5b6280, transparent 60%)",
     en:[["Kraterkriecher","🦂","krieger"],["Staubgeist","👻","magier","poison",0],["Mondmilbe","🕷️","schuetze"],["Kraterkäfer","🪲","tank","taunt",0]],
-    boss:["Regolith-Golem","🗿","tank","thorns",0], w:{c:80,r:18,e:2,l:0} },
+    boss:["Regolith-Golem","🗿","tank","thorns",0] },
   { n:"Asteroidengürtel", sub:"Treibende Felsen, Piratennester und Funkstille.", bg:"radial-gradient(120% 90% at 80% 0%, #7a4e2c, transparent 60%)",
     en:[["Felsdrohne","🤖","schuetze","crit",0],["Weltraumpirat","🏴‍☠️","krieger","lifesteal",0],["Meteorschnecke","🐌","tank","taunt",1],["Schrottmechaniker","🔧","heiler","heal",0]],
-    boss:["Kapitänin Nova","🦹","krieger","double",1], w:{c:55,r:35,e:9,l:1} },
+    boss:["Kapitänin Nova","🦹","krieger","double",1] },
   { n:"Orionnebel", sub:"Leuchtende Gaswolken, in denen etwas Hungriges treibt.", bg:"radial-gradient(120% 90% at 80% 0%, #6a2f7a, transparent 60%)",
     en:[["Nebelqualle","🪼","magier","poison",1],["Sternenfresser","👾","krieger","rage",1],["Plasmawurm","🐛","schuetze","stun",0],["Nebelgeist","🌫️","heiler","heal",1]],
-    boss:["Nebelhexe Lyra","🧙‍♀️","magier","aoe",2], w:{c:35,r:40,e:20,l:5} },
+    boss:["Nebelhexe Lyra","🧙‍♀️","magier","aoe",2] },
   { n:"Kometenschweif", sub:"Eis, Geschwindigkeit und das Reich eines gefrorenen Königs.", bg:"radial-gradient(120% 90% at 80% 0%, #2d6a8a, transparent 60%)",
     en:[["Eisgeist","🥶","magier","stun",1],["Kometenreiter","🏇","krieger","execute",1],["Frostkristall","💎","tank","thorns",1],["Schneefee","❄️","support","aura",1]],
-    boss:["Kometenkönig","🤴","tank","taunt",2], w:{c:20,r:40,e:30,l:10} },
+    boss:["Kometenkönig","🤴","tank","taunt",2] },
   { n:"Schwarzes Loch", sub:"Die letzte Zustellung. Hinter dem Horizont kehrt nichts zurück.", bg:"radial-gradient(120% 90% at 80% 0%, #3a1030, transparent 60%)",
     en:[["Leerenwandler","🌑","krieger","lifesteal",2],["Zeitverzerrer","⌛","support","shieldTeam",2],["Gravitonbestie","🐙","tank","taunt",2],["Schattenjäger","👤","schuetze","double",2]],
-    boss:["Ereignishorizont","🕳️","magier","dragon",2], w:{c:10,r:35,e:38,l:17} }
+    boss:["Ereignishorizont","🕳️","magier","dragon",2] }
 ];
-// Gegnerstärke je Etappe (per Simulation abgestimmt: ca. 70 % Siegchance auf dem empfohlenen Level)
-const EK = [2.88,3.31,1.47,2.44,1.98,1.67,1.82,2.12,1.98,2.31,6.45,8.29,3.85,3.62,4.2,3.17,3.14,3.18,4.21,3.37,13.55,15.66,5.84,7.32,6.49,5.48,4.57,5.43,4.9,2.97,15.84,16.33,9.14,10.52,10.05,7.17,8.86,9.93,8.75,6.13,23.7,22.85,11.14,11.51,11.45,8.79,7.27,8,7.74,4.57];
+// Gegnerstärke je Etappe (per Simulation abgestimmt)
+const EK = [2.92,3.68,2.25,2.95,2.91,2.53,2.11,2.59,2.78,2.51,8.1,9.99,5.29,5.39,5.66,4.09,4.3,4.23,6.65,5.53,24.96,26.95,11.33,15.26,14.76,11.23,10.83,11.01,11.98,6.65,51.35,27.41,19.4,21.39,21.55,12.46,20.05,20.88,19.02,17.19,62.14,70.92,25.18,30.91,28.63,26.86,18.28,22.64,20.67,10.74];
 
 /* =========================================================
    SPIELSTAND
    ========================================================= */
-const KEY = "sternenkarten-v2";
+const KEY = "sternenkarten-v3";
 function defSave() {
-  const cards = {}; STARTER.forEach(id => cards[id] = { l:1, xp:0, st:0 });
-  return { v:2, lv:1, xp:0, tp:0, tal:{}, co:50, cards, team:["kiesel","funkel"], prog:0, zone:0, auto:false,
-    stats:{ wins:0, losses:0 }, seen:false };
+  const cards = {}; COMP.filter(c => c.lv <= 1).forEach(c => cards[c.id] = { l:1, xp:0, st:0 });
+  return { v:3, lv:1, xp:0, sp:0, tree:{}, co:50, cards, team:["kiesel","funkel"], prog:0, zone:0, auto:false, stats:{ wins:0, losses:0 }, seen:false };
 }
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const o = JSON.parse(raw);
+    if (raw) { const o = JSON.parse(raw); if (o && o.v === 3) { const d = defSave(); return { ...d, ...o, stats:{ ...d.stats, ...o.stats } }; } }
+    // Spielstand der Vorversion übernehmen: Level, Münzen, Karten und Fortschritt bleiben, Talente werden zu Sternenpunkten
+    const old = localStorage.getItem("sternenkarten-v2");
+    if (old) {
+      const o = JSON.parse(old), s = defSave();
       if (o && o.v === 2) {
-        const d = defSave(), s = { ...d, ...o, stats:{ ...d.stats, ...o.stats } };
-        if (s.dust) { s.co += s.dust; delete s.dust; }           // alter Sternenstaub wird zu Münzen
-        if (s.tal.k4 && !TM.k4) delete s.tal.k4;
+        Object.assign(s, { lv:o.lv, xp:o.xp, co:(o.co || 0) + (o.dust || 0), prog:o.prog || 0, stats:o.stats || s.stats, seen:true });
+        s.sp = 0; for (let L = 2; L <= s.lv; L++) s.sp += ptsFor(L);
+        s.sp += Math.floor((s.prog || 0) / 10) * BOSS_PTS;
+        Object.entries(o.cards || {}).forEach(([id, c]) => { if (CC[id]) s.cards[id] = c; });
+        COMP.filter(c => c.lv <= s.lv && !s.cards[c.id]).forEach(c => s.cards[c.id] = { l:Math.min(STAGE_CAP[0], Math.max(1, Math.round(s.lv * .75))), xp:0, st:0 });
+        s.team = (o.team || []).filter(id => s.cards[id]).slice(0, slotsAt(s.lv));
         return s;
       }
     }
@@ -525,7 +647,7 @@ function load() {
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 let S = null;
-const UI = { tab:"home", branch:"a", speed:1 };
+const UI = { tab:"home", speed:1, zoom:1 };
 let B = null;
 
 /* =========================================================
@@ -533,50 +655,56 @@ let B = null;
    ========================================================= */
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 const $ = s => document.querySelector(s);
-function talentFx(st = S) {
-  const t = id => st.tal[id] || 0;
-  return {
-    atk:t("a1")*.04, crit:t("a2")*.03, critDmg:t("a3")*.15, first:t("a4")*.1, heroAtk:t("a5")*.08, boss:t("a6")*.06, fall:t("a7"),
-    hp:t("d1")*.05, shield:t("d2")*.04, regen:t("d3")*.015, dodge:t("d4")*.02, heroDr:t("d5")*.05, thorns:t("d6")*.05, unb:t("d7"),
-    xp:t("k1")*.06 + t("k7")*.25, cardXp:t("k2")*.08 + t("k7")*.25, coins:t("k3")*.1, train:t("k4")*.08, drop:t("k5")*.02, mentor:t("k6")*.1
-  };
+function treeFx(st = S) {
+  const T = {};
+  Object.keys(EFX).forEach(k => T[k] = 0);
+  TREE.forEach(n => { if (!n.root && st.tree[n.id]) T[n.key] += n.v; });
+  return T;
 }
 const heroHas = (k, L = S.lv) => HERO_AB.some(a => a.k === k && a.lv <= L);
 function heroStats(st = S) {
-  const L = st.lv, T = talentFx(st), m = Math.pow(G, L - 1), hc = heroHas("hCrit", L);
-  return { hp:Math.round(150 * m * (1 + T.hp)), atk:Math.round(13 * m * (1 + T.heroAtk)), spd:5,
+  const L = st.lv, T = treeFx(st), m = Math.pow(G, L - 1), hc = heroHas("hCrit", L);
+  return { hp:Math.round(150 * m * (1 + T.hp + T.heroHp)), atk:Math.round(13 * m * (1 + T.heroAtk)), spd:5,
     crit:.05 + T.crit + (hc ? .25 : 0), critDmg:(hc ? 2.5 : 2) + T.critDmg };
 }
-function cardStats(id, l, stg) {
+function cardStats(id, l, stg, T) {
   const c = CC[id], R = ROLES[c.role], m = RAR[c.r].m * STAGE_MUL[stg] * Math.pow(G, l - 1);
-  return { hp:Math.round(R.hp * m), atk:Math.round(R.atk * m), spd:R.spd };
+  let hp = R.hp * m, atk = R.atk * m;
+  if (T) {
+    const rk = R.key;
+    hp *= 1 + T.cardHp + (rk === "tank" ? T.tank : 0) + (rk === "warrior" ? T.warrior : 0) + (rk === "support" ? T.support : 0);
+    atk *= 1 + T.cardAtk + (rk === "shooter" ? T.shooter : 0) + (rk === "mage" ? T.mage : 0) + (rk === "warrior" ? T.warrior : 0) + (rk === "support" ? T.support : 0);
+  }
+  return { hp:Math.round(hp), atk:Math.round(atk), spd:R.spd };
 }
+const abVal = (k, stg, T) => { const v = AB[k].v[stg] * (1 + (T ? T.abil : 0)); return ["dodge","stun","double","crit","counter"].includes(k) ? Math.min(.75, v) : v; };
 const cardCap = (c, st = S) => Math.min(st.lv, STAGE_CAP[c.st]);
 const form = (id, stg) => CC[id].f[stg];
-const evoCost = (id, toStage) => Math.round(EVO_COST[toStage] * RAR[CC[id].r].cost);
-const packPrice = () => Math.round(100 * Math.pow(1.08, S.lv - 1));
+const evoCost = (id, toStage) => Math.round(EVO_COST[toStage] * RAR[CC[id].r].cost * (1 - treeFx().evo));
 const resetPrice = () => Math.round(200 * Math.pow(1.06, S.lv - 1));
-const trainCost = c => Math.max(1, Math.round((cardNeed(c.l) - c.xp) * .7 * (1 - talentFx().train)));
+const trainCost = c => Math.max(1, Math.round((cardNeed(c.l) - c.xp) * .7 * (1 - treeFx().train)));
 const unitPower = u => Math.sqrt(u.max * u.atk) * (1 + (u.ab ? .15 : 0));
+const newCardLv = () => Math.min(STAGE_CAP[0], Math.max(1, Math.round(S.lv * .75) + treeFx().newLv));
 
 /* =========================================================
    KAMPF-ENGINE (wird vorab komplett berechnet, dann abgespielt)
    ========================================================= */
 let UID = 1;
 function mkUnit(o) {
-  return Object.assign({ uid:UID++, shield:0, dots:[], stun:0, rage:0, shred:0, alive:true, dr:0, dodge:0, crit:.05, critDmg:2, thorns:0, habs:[] }, o);
+  return Object.assign({ uid:UID++, shield:0, dots:[], stun:0, rage:0, shred:0, weaken:0, mark:0, cnt:0, alive:true, dr:0, dodge:0, crit:.05, critDmg:2, thorns:0, healMul:1, habs:[] }, o);
 }
 function buildTeam(st = S) {
-  const T = talentFx(st), h = heroStats(st), L = st.lv;
+  const T = treeFx(st), h = heroStats(st), L = st.lv;
   const P = [mkUnit({ side:"p", hero:true, n:"Mondkurier", e:"🧑‍🚀", hp:h.hp, max:h.hp, atk:h.atk, spd:h.spd, crit:h.crit, critDmg:h.critDmg,
-    dodge:T.dodge, dr:T.heroDr, thorns:T.thorns, habs:HERO_AB.filter(a => a.k && a.lv <= L).map(a => a.k) })];
+    dodge:T.dodge, dr:Math.min(.75, T.dr + T.heroDr), thorns:T.thorns, habs:HERO_AB.filter(a => a.k && a.lv <= L).map(a => a.k) })];
   st.team.slice(0, slotsAt(L)).forEach(id => {
     const c = st.cards[id]; if (!c) return;
-    const s = cardStats(id, c.l, c.st), def = CC[id], ab = { k:def.ab, v:AB[def.ab].v[c.st] }, f = form(id, c.st);
+    const s = cardStats(id, c.l, c.st, T), def = CC[id], ab = { k:def.ab, v:abVal(def.ab, c.st, T) }, f = form(id, c.st);
     const hp = Math.round(s.hp * (1 + T.hp));
     P.push(mkUnit({ side:"p", cid:id, n:f[0], e:f[1], hp, max:hp, atk:s.atk, spd:s.spd, ab,
       crit:.05 + T.crit + (ab.k === "crit" ? ab.v : 0), critDmg:2 + T.critDmg,
-      dodge:T.dodge + (ab.k === "dodge" ? ab.v : 0), dr:ab.k === "taunt" ? ab.v : 0, thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0) }));
+      dodge:Math.min(.6, T.dodge + (ab.k === "dodge" ? ab.v : 0)), dr:Math.min(.75, T.dr + (ab.k === "taunt" ? ab.v : 0)),
+      thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0), healMul:1 + (ROLES[def.role].key === "healer" ? T.healer : 0) }));
   });
   const aura = T.atk + (heroHas("hAura", L) ? .15 : 0) + P.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
   P.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
@@ -608,11 +736,18 @@ function simulate(P, E, T) {
   const mates = u => (u.side === "p" ? P : E).filter(x => x.alive);
   const snap = u => ({ u:u.uid, hp:Math.max(0, Math.round(u.hp)), sh:Math.round(u.shield) });
   const over = () => !E.some(x => x.alive) || !P.some(x => x.alive);
-  let round = 0;
+  const isP = u => u.side === "p";
+  let round = 0, teamRevUsed = false;
 
   const addShield = (u, v) => { u.shield += v; ev.push({ t:"sh", ...snap(u), v:Math.round(v) }); };
-  const heal = (u, v, src) => { if (!u.alive) return; const b = u.hp; u.hp = Math.min(u.max, u.hp + v); const g = Math.round(u.hp - b); if (g > 0) ev.push({ t:"heal", a:src && src.uid, ...snap(u), v:g }); };
+  const heal = (u, v, src) => {
+    if (!u.alive) return;
+    if (src && isP(src)) v *= (1 + T.healUp) * (src.healMul || 1);
+    const b = u.hp; u.hp = Math.min(u.max, u.hp + v); const g = Math.round(u.hp - b);
+    if (g > 0) ev.push({ t:"heal", a:src && src.uid, ...snap(u), v:g });
+  };
   function kill(u) {
+    if (u.alive && u.hp > 0 && u.ab && u.ab.k === "laststand" && !u.lsUsed && u.hp < u.max * .3) { u.lsUsed = true; addShield(u, u.max * u.ab.v); ev.push({ t:"banner", msg:`${u.n}: Letztes Gefecht!` }); }
     if (u.hp > 0 || !u.alive) return;
     if (u.hero && T.unb && !u.unbUsed) { u.unbUsed = true; u.hp = 1; u.shield += u.max * .3; ev.push({ t:"save", ...snap(u), msg:"Unbeugsam: Der Held hält durch!" }); return; }
     if (u.hero && u.habs.includes("hRevive") && !u.revUsed) { u.revUsed = true; u.hp = u.max * .4; ev.push({ t:"revive", ...snap(u), msg:"Zweiter Atem: Der Held steht wieder auf!" }); return; }
@@ -623,36 +758,63 @@ function simulate(P, E, T) {
       foes(u).forEach(f => directDmg(u, f, u.atk * u.ab.v));
     }
     const ph = mates(u).find(f => f.ab && f.ab.k === "revive" && !f.revGiven);
-    if (ph) { ph.revGiven = true; u.alive = true; u.hp = u.max * ph.ab.v; ev.push({ t:"revive", ...snap(u), msg:`${ph.n} holt ${u.n} zurück!` }); }
+    if (ph) { ph.revGiven = true; u.alive = true; u.hp = u.max * ph.ab.v; ev.push({ t:"revive", ...snap(u), msg:`${ph.n} holt ${u.n} zurück!` }); return; }
+    if (isP(u) && !u.hero && T.teamRevive && !teamRevUsed) { teamRevUsed = true; u.alive = true; u.hp = u.max * .4; ev.push({ t:"revive", ...snap(u), msg:`Rettungskapsel: ${u.n} ist zurück!` }); }
+  }
+  function applyDmg(t, d, a) {
+    // Leibwächter fängt einen Teil ab
+    const g = mates(t).find(m => m !== t && m.ab && m.ab.k === "guard");
+    if (g && a && a.side !== t.side) {
+      const part = Math.round(d * g.ab.v); d -= part;
+      const ga = Math.min(g.shield, part); g.shield -= ga; g.hp -= part - ga;
+      ev.push({ t:"hit", a:a.uid, ...snap(g), v:part, guard:true }); kill(g);
+    }
+    const pierce = a && isP(a) ? T.pierce : 0;
+    const abs = Math.min(t.shield, d * (1 - pierce)); t.shield -= abs; t.hp -= d - abs;
+    return d;
   }
   function directDmg(src, t, d) {
     if (!t.alive) return;
     d = Math.max(1, Math.round(d * (1 - t.dr)));
-    const abs = Math.min(t.shield, d); t.shield -= abs; t.hp -= d - abs;
+    applyDmg(t, d, src);
     ev.push({ t:"hit", a:src.uid, ...snap(t), v:d, aoe:true });
     kill(t);
   }
-  function hit(a, t, mult, aoe) {
-    if (!t || !t.alive) return 0;
+  function hit(a, t, mult, aoe, noCounter) {
+    if (!t || !t.alive || !a.alive) return 0;
     if (Math.random() < t.dodge) { ev.push({ t:"miss", a:a.uid, u:t.uid, aoe }); return 0; }
     const k = a.ab && a.ab.k, v = a.ab && a.ab.v;
-    let d = a.atk * (1 + a.rage) * mult * (.9 + Math.random() * .2);
-    if (a.side === "p" && round <= 2) d *= 1 + T.first;
-    if (a.side === "p" && t.boss) d *= 1 + T.boss;
+    let d = a.atk * (1 + a.rage) * (1 - a.weaken) * mult * (.9 + Math.random() * .2);
+    if (isP(a)) {
+      if (round <= 2) d *= 1 + T.first;
+      if (t.boss) d *= 1 + T.boss;
+      if (t.hp / t.max < .35) d *= 1 + T.exec;
+      if (aoe) d *= 1 + T.aoe;
+    }
     if (k === "execute" && t.hp / t.max < .35) d *= 1 + v;
+    if (k === "berserk") d *= 1 + v * (1 - a.hp / a.max);
+    d *= 1 + t.mark;
     const crit = Math.random() < a.crit; if (crit) d *= a.critDmg;
-    d *= (1 + t.shred) * (1 - t.dr);
+    const dr = isP(a) ? t.dr * (1 - T.pierce) : t.dr;
+    d *= (1 + t.shred) * (1 - dr);
     d = Math.max(1, Math.round(d));
-    const abs = Math.min(t.shield, d); t.shield -= abs; t.hp -= d - abs;
+    applyDmg(t, d, a);
     ev.push({ t:"hit", a:a.uid, ...snap(t), v:d, crit, aoe });
-    if (k === "poison") t.dots.push({ d:a.atk * v, r:3 });
+    const dotMul = isP(a) ? 1 + T.dot : 1;
+    if (k === "poison") t.dots.push({ d:a.atk * v * dotMul, r:3 });
     if (k === "shred") t.shred += v;
+    if (k === "drain") t.weaken = Math.min(.5, t.weaken + v);
+    if (k === "mark") t.mark = Math.max(t.mark, v);
     if (k === "stun" && t.hp > 0 && Math.random() < v) { t.stun = 1; ev.push({ t:"stun", u:t.uid }); }
     if (k === "lifesteal") heal(a, d * v, a);
+    if (k === "chain" && !aoe) { const o = foes(a).filter(f => f !== t); if (o.length) { const c2 = rnd(o); directDmg(a, c2, d * v); } }
     if (t.thorns > 0 && a.alive) {
       const r = Math.max(1, Math.round(d * t.thorns)); a.hp -= r; ev.push({ t:"hit", a:t.uid, ...snap(a), v:r, thorns:true }); kill(a);
     }
     kill(t);
+    if (!noCounter && !aoe && t.alive && t.ab && t.ab.k === "counter" && a.alive && Math.random() < t.ab.v) {
+      ev.push({ t:"skill", a:t.uid, msg:"Konter", quiet:1 }); hit(t, a, 1, false, true);
+    }
     return d;
   }
   function target(u) {
@@ -673,21 +835,25 @@ function simulate(P, E, T) {
       if (T.fall && round % 3 === 0) return aoeAll(u, 1, "Sternenfall");
       if (u.habs.includes("hStun") && round % 5 === 0) { ev.push({ t:"skill", a:u.uid, msg:"Gravitationswelle" }); foes(u).forEach(f => { f.stun = 1; ev.push({ t:"stun", u:f.uid }); }); }
     }
+    if (k === "timebomb" && round === 4) return aoeAll(u, v, AB.timebomb.n);
     if (k === "aoe" && round % 3 === 0) return aoeAll(u, v, AB.aoe.n);
-    if (k === "dragon" && round % 3 === 0) { aoeAll(u, v, AB.dragon.n); foes(u).forEach(f => f.dots.push({ d:u.atk * .4, r:3 })); return; }
+    if (k === "dragon" && round % 3 === 0) { aoeAll(u, v, AB.dragon.n); foes(u).forEach(f => f.dots.push({ d:u.atk * .4 * (isP(u) ? 1 + T.dot : 1), r:3 })); return; }
     if (k === "divine") { ev.push({ t:"skill", a:u.uid, msg:AB.divine.n, quiet:1 }); mates(u).forEach(f => heal(f, u.atk * v, u)); return; }
     if (k === "heal") { const lo = lowest(u); if (lo.hp / lo.max < .75) { ev.push({ t:"skill", a:u.uid, msg:AB.heal.n, quiet:1 }); heal(lo, u.atk * v, u); return; } }
     if (k === "barrier" && round % 2 === 0) { ev.push({ t:"skill", a:u.uid, msg:AB.barrier.n, quiet:1 }); addShield(lowest(u), u.atk * v); return; }
-    hit(u, target(u), 1 + (k === "snipe" ? v : 0));
+    let mult = 1 + (k === "snipe" ? v : 0);
+    if (k === "charge") { u.cnt++; if (u.cnt % 3 === 0) { mult *= v; ev.push({ t:"skill", a:u.uid, msg:AB.charge.n, quiet:1 }); } }
+    hit(u, target(u), mult);
     if (k === "rage") u.rage += v;
     if (k === "double" && u.alive && Math.random() < v) hit(u, target(u), 1);
+    if (isP(u) && !u.hero && T.multi && u.alive && Math.random() < T.multi) hit(u, target(u), 1);
   }
 
   // Kampfbeginn
   for (const u of all) {
     const k = u.ab && u.ab.k;
     if (k === "shieldTeam") mates(u).forEach(f => addShield(f, f.max * u.ab.v));
-    if (k === "burn") foes(u).forEach(f => f.dots.push({ d:u.atk * u.ab.v, r:4 }));
+    if (k === "burn") foes(u).forEach(f => f.dots.push({ d:u.atk * u.ab.v * (isP(u) ? 1 + T.dot : 1), r:4 }));
     if (u.hero && u.habs.includes("hShield")) P.forEach(f => addShield(f, u.max * .12));
   }
   if (T.shield) P.forEach(f => addShield(f, f.max * T.shield));
@@ -712,7 +878,7 @@ function simulate(P, E, T) {
       }
       if (!u.alive) continue;
       if (u.hero && u.habs.includes("hRegen")) heal(u, u.max * .04);
-      if (u.side === "p" && T.regen) heal(u, u.max * T.regen);
+      if (isP(u) && T.regen) heal(u, u.max * T.regen);
     }
     if (over()) break;
   }
@@ -731,74 +897,54 @@ function addCardXP(id, n) {
   return c.l - before;
 }
 function addHeroXP(n) {
-  const out = { lv:[], abs:[], slots:[] };
+  const out = { lv:[], abs:[], slots:[], cards:[], pts:0 };
   if (S.lv >= MAX_LV) return out;
   S.xp += n;
   while (S.lv < MAX_LV && S.xp >= heroNeed(S.lv)) {
-    S.xp -= heroNeed(S.lv); S.lv++; S.tp++; out.lv.push(S.lv);
+    S.xp -= heroNeed(S.lv); S.lv++; out.lv.push(S.lv);
+    const p = ptsFor(S.lv) + (S.lv % 5 === 0 ? treeFx().ptsLv : 0);
+    S.sp += p; out.pts += p;
     HERO_AB.filter(a => a.lv === S.lv).forEach(a => out.abs.push(a.n));
     if (SLOT_LV.includes(S.lv)) out.slots.push(S.lv);
+    COMP.filter(c => c.lv === S.lv && !S.cards[c.id]).forEach(c => {
+      S.cards[c.id] = { l:newCardLv(), xp:0, st:0 }; out.cards.push(c.id);
+      if (S.team.length < slotsAt(S.lv)) S.team.push(c.id);
+    });
   }
   if (S.lv >= MAX_LV) S.xp = 0;
   if (out.lv.length) Object.keys(S.cards).forEach(id => addCardXP(id, 0));
   return out;
 }
-function pickRarity(w) {
-  const tot = Object.values(w).reduce((a, b) => a + b, 0); let r = Math.random() * tot;
-  for (const k in w) { r -= w[k]; if (r <= 0) return k; }
-  return "c";
-}
-function rollCard(w) {
-  const r = pickRarity(w), pool = COMP.filter(c => c.r === r);
-  return rnd(pool.length ? pool : COMP).id;
-}
-// Neue Karte oder Duplikat gutschreiben
-function grantCard(id) {
-  if (S.cards[id]) {
-    const coins = Math.round(30 * Math.pow(1.08, S.lv - 1) * RAR[CC[id].r].cost);
-    S.co += coins;
-    const up = addCardXP(id, cardNeed(S.cards[id].l));
-    return { id, dup:true, coins, up };
-  }
-  const l = Math.min(STAGE_CAP[0], Math.max(1, Math.floor(S.lv * .6)));
-  S.cards[id] = { l, xp:0, st:0 };
-  if (S.team.length < slotsAt(S.lv)) S.team.push(id);
-  return { id, dup:false, l };
-}
 function teamBonus(k) {
-  return S.team.slice(0, slotsAt(S.lv)).reduce((a, id) => { const c = S.cards[id]; return a + (c && CC[id].ab === k ? AB[k].v[c.st] : 0); }, 0);
+  const T = treeFx();
+  return S.team.slice(0, slotsAt(S.lv)).reduce((a, id) => { const c = S.cards[id]; return a + (c && CC[id].ab === k ? abVal(k, c.st, T) : 0); }, 0);
 }
 function grantRewards(win, s) {
-  const E = recLv(s), boss = isBoss(s), T = talentFx(), wis = teamBonus("wisdom"), luck = teamBonus("luck");
-  let base = 12 * Math.pow(1.1, E - 1) * (boss ? 3 : 1);
-  if (!win) base *= .3;
+  const E = recLv(s), boss = isBoss(s), T = treeFx(), wis = teamBonus("wisdom"), luck = teamBonus("luck");
+  let base = 12 * Math.pow(1.1, E - 1) * (boss ? 3 * (1 + T.bossXp) : 1);
+  if (!win) base *= .3 * (1 + T.lossXp);
   const hx = Math.round(base * (1 + T.xp + wis));
   const cx = Math.round(base * .8 * (1 + T.cardXp + wis));
   const first = win && s > S.prog;
-  const co = win ? Math.round(9 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 : 1) * (1 + T.coins + luck)) : 0;
+  const co = win ? Math.round(9 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 * (1 + T.firstCo) : 1) * (1 + T.coins + luck)) : 0;
   S.co += co;
-  if (win) { S.stats.wins++; if (first) S.prog = s; } else S.stats.losses++;
+  let bossPts = 0;
+  if (win) { S.stats.wins++; if (first) { S.prog = s; if (boss) { bossPts = BOSS_PTS; S.sp += bossPts; } } } else S.stats.losses++;
   const team = S.team.slice(0, slotsAt(S.lv)).filter(id => S.cards[id]);
   const cards = team.map(id => { const c = S.cards[id], from = c.l; addCardXP(id, cx); return { id, from, to:c.l }; });
   if (T.mentor) Object.keys(S.cards).filter(id => !team.includes(id)).forEach(id => addCardXP(id, Math.round(cx * T.mentor)));
   const hero = addHeroXP(hx);
-  cards.forEach(c => c.to = S.cards[c.id].l); // Deckel kann durch Helden-Level-Up gestiegen sein
-  let drop = null;
-  if (win && (boss || Math.random() < .08 + T.drop)) {
-    const w = { ...ZONES[zoneOf(s)].w };
-    if (boss) { w.c = 0; w.r = Math.max(w.r, 10); }
-    drop = grantCard(rollCard(w));
-  }
+  cards.forEach(c => c.to = S.cards[c.id].l);
   save();
-  return { win, s, hx, cx, co, first, hero, cards, drop };
+  return { win, s, hx, cx, co, first, hero, cards, bossPts };
 }
 
 // Siegchance per Probekämpfen schätzen (zwischengespeichert, solange sich das Team nicht ändert)
 const oddsCache = {};
 function winChance(s) {
-  const key = [s, S.lv, JSON.stringify(S.tal), S.team.slice(0, slotsAt(S.lv)).map(id => id + S.cards[id].l + "." + S.cards[id].st).join(",")].join("|");
+  const key = [s, S.lv, Object.keys(S.tree).sort().join(""), S.team.slice(0, slotsAt(S.lv)).map(id => id + S.cards[id].l + "." + S.cards[id].st).join(",")].join("|");
   if (oddsCache[key] == null) {
-    let w = 0; const n = 30, T = talentFx();
+    let w = 0; const n = 30, T = treeFx();
     for (let i = 0; i < n; i++) if (simulate(buildTeam(), makeWave(s), T).win) w++;
     oddsCache[key] = w / n;
   }
@@ -810,11 +956,14 @@ function chanceHTML(s) {
   if (c >= .4) return `<span class="chance even">${p} · Knapp</span>`;
   return `<span class="chance hard">${p} · Zu schwer</span>`;
 }
-// Beste Etappe zum EP-Sammeln: die höchste mit mindestens 80 % Siegchance
 function farmStage() {
   for (let s = S.prog; s >= 1; s--) if (winChance(s) >= .8) return s;
   return S.prog >= 1 ? 1 : 0;
 }
+// Baum: Knoten ist kaufbar, wenn alle Vorgänger gekauft sind
+const nodeOwned = id => id === "root" || !!S.tree[id];
+const nodeOpen = n => !n.root && !S.tree[n.id] && n.parents.every(nodeOwned);
+const buyable = () => TREE.filter(n => nodeOpen(n) && S.sp >= n.cost);
 
 /* =========================================================
    OBERFLÄCHE
@@ -833,8 +982,7 @@ const ICONS = {
   home: '<svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
   map: '<svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
   team: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="11" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
-  tal: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M12 7v5M12 12l-5 5M12 12l5 5"/></svg>',
-  shop: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>'
+  tree: '<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="13" r="2"/><circle cx="12" cy="13" r="2"/><circle cx="19" cy="13" r="2"/><circle cx="12" cy="21" r="1.5"/><path d="M12 6v5M11 5 6 11M13 5l5 6M12 15v4"/></svg>'
 };
 const evolvable = () => Object.keys(S.cards).filter(id => { const c = S.cards[id]; return c.st < 2 && c.l >= STAGE_CAP[c.st]; });
 const freeSlots = () => Math.max(0, Math.min(slotsAt(S.lv), Object.keys(S.cards).length) - S.team.length);
@@ -844,42 +992,41 @@ function renderTop() {
   $("#top").innerHTML = `<div class="lvl-badge">Level ${S.lv}</div>
     <div class="xpwrap">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
       <div class="xptext">${mx ? "Maximales Level erreicht" : `${S.xp} / ${n} EP bis Level ${S.lv + 1}`}</div></div>
-    <div class="coins"><span class="coin">${S.co}</span></div>`;
+    <div class="wallet"><span class="sp" title="Sternenpunkte">${S.sp}</span><span class="coin" title="Münzen">${S.co}</span></div>`;
 }
 function renderNav() {
-  const tabs = [["home","Start"],["map","Etappen"],["team","Team"],["tal","Talente"],["shop","Shop"]];
-  const badge = { tal:S.tp, team:evolvable().length + freeSlots() };
+  const tabs = [["home","Start"],["map","Etappen"],["team","Team"],["tree","Baum"]];
+  const badge = { tree:buyable().length, team:evolvable().length + freeSlots() };
   $("#nav").innerHTML = tabs.map(([k, n]) =>
     `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}"><span class="badge">${ICONS[k]}${badge[k] ? `<b>${badge[k]}</b>` : ""}</span>${n}</button>`).join("");
 }
 function render() {
   renderTop(); renderNav();
-  $("#main").innerHTML = ({ home:screenHome, map:screenMap, team:screenTeam, tal:screenTal, shop:screenShop })[UI.tab]();
+  const m = $("#main");
+  m.classList.toggle("fill", UI.tab === "tree");
+  m.innerHTML = ({ home:screenHome, map:screenMap, team:screenTeam, tree:screenTree })[UI.tab]();
+  if (UI.tab === "tree") afterTree();
 }
 
 /* ---------- Start ---------- */
 function screenHome() {
   const t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV, h = heroStats();
-  const s = Math.min(50, S.prog + 1), Z = ZONES[zoneOf(s)], c = winChance(s), done = S.prog >= 50;
-  const fs = farmStage();
-  const next = HERO_AB.find(a => a.lv > S.lv), nextSlot = SLOT_LV.find(x => x > S.lv);
-  // Was gibt es gerade zu tun?
-  const todos = [];
-  if (S.tp) todos.push({ i:"✦", b:`${S.tp} Talentpunkt${S.tp > 1 ? "e" : ""} verteilen`, s:"Macht dein ganzes Team stärker.", act:'data-act="tab" data-k="tal"' });
+  const s = Math.min(50, S.prog + 1), Z = ZONES[zoneOf(s)], c = winChance(s), done = S.prog >= 50, fs = farmStage();
+  const next = HERO_AB.find(a => a.lv > S.lv), nextSlot = SLOT_LV.find(x => x > S.lv), nextCard = COMP.find(cc => cc.lv > S.lv);
+  const todos = [], nb = buyable().length;
+  if (nb) todos.push({ i:"★", b:`${S.sp} Sternenpunkte im Baum ausgeben`, s:`${nb} Upgrade${nb > 1 ? "s" : ""} kannst du dir gerade leisten.`, act:'data-act="tab" data-k="tree"' });
   evolvable().forEach(id => { const c2 = S.cards[id], nf = form(id, c2.st + 1), cost = evoCost(id, c2.st + 1);
     todos.push({ i:nf[1], b:`${form(id, c2.st)[0]} kann sich entwickeln`, s:S.co >= cost ? `Wird zu ${nf[0]} · kostet ${cost} Münzen` : `Dir fehlen noch ${cost - S.co} Münzen`, act:`data-act="card" data-id="${id}"`, hot:S.co >= cost }); });
   if (freeSlots()) todos.push({ i:"＋", b:"Freier Platz im Team", s:"Setze eine weitere Karte ein.", act:'data-act="tab" data-k="team"' });
-  if (S.co >= packPrice() && Object.keys(S.cards).length < COMP.length) todos.push({ i:"🎁", b:"Sternenpack kaufen", s:`Neue Karte für ${packPrice()} Münzen`, act:'data-act="tab" data-k="shop"' });
 
   return `<button class="herobar" data-act="heroInfo" style="--hc:${t[2]}">
       <span class="portrait">🧑‍🚀</span>
-      <span class="hb"><span class="ht">${t[1]}</span><span class="hn">Mondkurier · Level ${S.lv}</span>
+      <span class="hb"><span class="ht">Hauptkarte · ${t[1]}</span><span class="hn">Mondkurier · Level ${S.lv}</span>
         ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${h.hp} Leben · ${h.atk} Angriff · Fähigkeiten ansehen</span></span>
       <span class="chev">›</span></button>
-
     ${done ? `<div class="nextfight" style="--zbg:${Z.bg}"><div class="nf-kicker">Geschafft</div>
         <div class="nf-title">Alle 50 Etappen bestanden!</div>
-        <p class="muted">Du kannst jede Etappe erneut spielen, um weiter zu leveln und alle Karten zu sammeln.</p>
+        <p class="muted">Spiele Etappen erneut, um weiter zu leveln und den ganzen Baum freizuschalten.</p>
         <button class="btn big" data-act="tab" data-k="map">Etappen ansehen</button></div>`
     : `<div class="nextfight" style="--zbg:${Z.bg}">
       <div class="nf-top"><div><div class="nf-kicker">${isBoss(s) ? "Bosskampf" : "Nächster Kampf"}</div>
@@ -890,23 +1037,22 @@ function screenHome() {
         <button class="btn ghost wide" data-act="fight" data-s="${fs}">EP sammeln in Etappe ${stageNo(fs)} · ${Math.round(winChance(fs) * 100)} %</button>` : ""}
       <button class="switchrow" data-act="auto"><span><b>Automatisch wiederholen</b><br>Nach jedem Sieg startet derselbe Kampf neu.</span><span class="sw ${S.auto ? "on" : ""}"></span></button>
     </div>`}
-
     <div class="label">Das kannst du jetzt tun</div>
     <div class="todos">${todos.length ? todos.map(x => `<button class="todo ${x.hot !== false ? "hot" : ""}" ${x.act}>
         <span class="ti">${x.i}</span><span class="tt"><b>${x.b}</b><span>${x.s}</span></span><span class="chev">›</span></button>`).join("")
       : `<div class="todo" style="cursor:default"><span class="ti">✓</span><span class="tt"><b>Alles erledigt</b><span>Kämpfe weiter, um EP für das nächste Level zu sammeln.</span></span></div>`}</div>
-
-    ${next || nextSlot ? `<div class="label">Nächste Belohnungen</div><div class="panel goal">
-      ${next ? `<div>Level <b>${next.lv}</b>: neue Heldenfähigkeit <b>${next.n}</b></div>` : ""}
+    ${next || nextSlot || nextCard ? `<div class="label">Nächste Belohnungen</div><div class="panel goal">
+      ${nextCard ? `<div>Level <b>${nextCard.lv}</b>: neue Karte <b>${nextCard.f[0][1]} ${nextCard.f[0][0]}</b></div>` : ""}
+      ${next ? `<div>Level <b>${next.lv}</b>: neue Fähigkeit der Hauptkarte <b>${next.n}</b></div>` : ""}
       ${nextSlot ? `<div>Level <b>${nextSlot}</b>: neuer Platz im Team</div>` : ""}
-      <div>Jedes Level: <b>1 Talentpunkt</b> und mehr Leben und Angriff</div></div>` : ""}`;
+      <div>Jedes Level: <b>${ptsFor(S.lv + 1)} Sternenpunkte</b> für den Baum</div></div>` : ""}`;
 }
 function heroModal() {
   const h = heroStats(), t = heroTitle(S.lv);
   modal(`<div class="mhead" style="--rc:${t[2]}"><span class="me" style="border-radius:50%">🧑‍🚀</span>
-      <div class="mt"><h2>Der Mondkurier</h2><p>${t[1]} · Level ${S.lv} von ${MAX_LV}</p></div></div>
+      <div class="mt"><h2>Der Mondkurier</h2><p>Hauptkarte · ${t[1]} · Level ${S.lv} von ${MAX_LV}</p></div></div>
     <div class="stats3"><div><b>${h.hp}</b><span>Leben</span></div><div><b>${h.atk}</b><span>Angriff</span></div><div><b>${Math.round(h.crit * 100)} %</b><span>Krit</span></div></div>
-    <p>Die Heldenkarte kämpft immer mit. Mit jedem Level steigen Leben und Angriff automatisch, und auf bestimmten Leveln lernt sie neue Fähigkeiten:</p>
+    <p>Die Hauptkarte kämpft immer mit. Mit jedem Level steigen Leben und Angriff automatisch, und auf bestimmten Leveln lernt sie neue Fähigkeiten:</p>
     <div class="ablist">${HERO_AB.map(a => `<div class="abrow ${a.lv > S.lv ? "locked" : ""}"><span class="lvtag">${a.lv > S.lv ? "LV " + a.lv : "✓ LV " + a.lv}</span>
       <div><div class="an">${a.n}</div><div class="ad">${a.d}</div></div></div>`).join("")}</div>
     <p style="font-size:14px">Bisher: ${S.stats.wins} Siege, ${S.stats.losses} Niederlagen, ${S.prog} von 50 Etappen.</p>
@@ -918,7 +1064,7 @@ function heroModal() {
 function screenMap() {
   const z = S.zone, Z = ZONES[z], zOpen = i => i === 0 || S.prog >= i * 10;
   const stages = Array.from({ length:10 }, (_, i) => z * 10 + i + 1);
-  return `<div class="screen-title"><h2>Etappen</h2><p>Die Prozentzahl ist deine Siegchance mit dem jetzigen Team.</p></div>
+  return `<div class="screen-title"><h2>Etappen</h2><p>Die Prozentzahl ist deine Siegchance mit dem jetzigen Team. Erstmals besiegte Bosse geben ${BOSS_PTS} Sternenpunkte.</p></div>
     <div class="zonetabs">${ZONES.map((x, i) => `<button class="ztab ${i === z ? "on" : ""} ${zOpen(i) ? "" : "lock"}" data-act="zone" data-z="${i}">
       <b>${zOpen(i) ? "" : "🔒 "}Zone ${i + 1}</b><span>${x.n}</span></button>`).join("")}</div>
     <div class="zonehead" style="--zbg:${Z.bg}"><h3>${Z.n}</h3><p>${Z.sub}</p></div>
@@ -933,29 +1079,35 @@ function screenMap() {
 
 /* ---------- Team ---------- */
 function screenTeam() {
-  const n = slotsAt(S.lv), order = { l:0, e:1, r:2, c:3 };
-  const bench = Object.keys(S.cards).filter(id => !S.team.includes(id)).sort((a, b) => S.cards[b].l - S.cards[a].l || order[CC[a].r] - order[CC[b].r]);
-  const missing = COMP.length - Object.keys(S.cards).length;
+  const n = slotsAt(S.lv);
+  const bench = Object.keys(S.cards).filter(id => !S.team.includes(id)).sort((a, b) => S.cards[b].l - S.cards[a].l || CC[b].lv - CC[a].lv);
+  const future = COMP.filter(c => !S.cards[c.id]);
+  const t = heroTitle(S.lv);
   const slot = i => {
-    if (i >= n) return `<div class="slot locked">🔒<span>Frei ab Level ${SLOT_LV[i]}</span></div>`;
+    if (i >= n) return `<div class="slot locked">🔒<span>ab Level ${SLOT_LV[i]}</span></div>`;
     const id = S.team[i];
-    if (!id) return `<button class="slot empty" data-act="pick"><span style="font-size:26px">＋</span><span>Karte einsetzen</span></button>`;
+    if (!id) return `<button class="slot empty" data-act="pick"><span style="font-size:24px">＋</span><span>Karte einsetzen</span></button>`;
     const c = S.cards[id], f = form(id, c.st), ev = c.st < 2 && c.l >= STAGE_CAP[c.st];
     return `<button class="slot full r-${CC[id].r}" data-act="card" data-id="${id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span>
-      <span class="sl">Level ${c.l}</span>${ev ? '<span class="flag">Entwickeln</span>' : `<span class="sa">${AB[CC[id].ab].n}</span>`}</button>`;
+      <span class="sl">Lv ${c.l}</span>${ev ? '<span class="flag">Entwickeln</span>' : ""}</button>`;
   };
   const row = id => {
     const c = S.cards[id], d = CC[id], f = form(id, c.st), ev = c.st < 2 && c.l >= STAGE_CAP[c.st];
     return `<button class="crow r-${d.r}" data-act="card" data-id="${id}"><span class="ce">${f[1]}</span>
-      <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${AB[d.ab].n}: ${AB[d.ab].d(AB[d.ab].v[c.st])}</span>${ev ? '<span><span class="flag">Kann sich entwickeln</span></span>' : ""}</span>
+      <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${AB[d.ab].n}: ${AB[d.ab].d(abVal(d.ab, c.st, treeFx()))}</span>${ev ? '<span><span class="flag">Kann sich entwickeln</span></span>' : ""}</span>
       <span class="clv">Lv ${c.l}</span></button>`;
   };
-  return `<div class="screen-title"><h2>Team</h2><p>Der Held kämpft immer. Dazu kommen bis zu ${n} Karten. Tippe eine Karte an für Details.</p></div>
-    <div class="label">Im Kampf · ${S.team.length} von ${n}</div>
-    <div class="slots">${[0,1,2,3,4,5].map(slot).join("")}</div>
+  return `<div class="screen-title"><h2>Team</h2><p>Die Hauptkarte kämpft immer. Dazu kommen bis zu 7 Karten. Tippe eine Karte an für Details.</p></div>
+    <div class="label">Im Kampf · ${S.team.length + 1} von ${n + 1}</div>
+    <div class="lineup">
+      <button class="slot hero" data-act="heroInfo" style="--hc:${t[2]}"><span class="se">🧑‍🚀</span><span class="sn">Mondkurier</span><span class="sl">Lv ${S.lv}</span><span class="flag">Hauptkarte</span></button>
+      ${[0,1,2,3,4,5,6].map(slot).join("")}</div>
     <div class="label">Auf der Bank · ${bench.length}</div>
-    ${bench.length ? `<div class="clist">${bench.map(row).join("")}</div>` : `<p class="muted" style="font-size:14px">Keine weiteren Karten. Neue Karten findest du in Kämpfen und im Shop.</p>`}
-    ${missing ? `<div class="panel" style="font-size:14px;color:var(--dim)">Noch <b style="color:var(--moon)">${missing} von ${COMP.length}</b> Karten unentdeckt. Du findest sie nach Siegen (Bosse geben immer eine) und im Shop.</div>` : ""}`;
+    ${bench.length ? `<div class="clist">${bench.map(row).join("")}</div>` : `<p class="muted" style="font-size:14px">Alle deine Karten sind im Team.</p>`}
+    ${future.length ? `<div class="label">Kommende Karten · ${future.length}</div>
+      <div class="clist">${future.slice(0, 4).map(d => `<div class="crow future r-${d.r}"><span class="ce">${d.f[0][1]}</span>
+        <span class="ci"><span class="cn">${d.f[0][0]}</span><span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}</span></span><span class="clv">ab Lv ${d.lv}</span></div>`).join("")}</div>
+      ${future.length > 4 ? `<p class="muted" style="font-size:14px">Und ${future.length - 4} weitere Karten bis Level ${future[future.length - 1].lv}.</p>` : ""}` : ""}`;
 }
 function pickModal() {
   const bench = Object.keys(S.cards).filter(id => !S.team.includes(id)).sort((a, b) => S.cards[b].l - S.cards[a].l);
@@ -963,23 +1115,23 @@ function pickModal() {
     ${bench.length ? `<div class="clist">${bench.map(id => { const c = S.cards[id], d = CC[id], f = form(id, c.st);
       return `<button class="crow r-${d.r}" data-act="putIn" data-id="${id}"><span class="ce">${f[1]}</span>
         <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}</span></span><span class="clv">Lv ${c.l}</span></button>`; }).join("")}</div>`
-    : `<p>Du hast gerade keine Karte auf der Bank. Neue Karten findest du in Kämpfen und im Shop.</p>`}
+    : `<p>Du hast gerade keine Karte auf der Bank. Neue Karten bekommst du mit höherem Heldenlevel.</p>`}
     <button class="btn ghost" data-act="close">Schließen</button>`);
 }
 function cardModal(id) {
-  const c = S.cards[id], d = CC[id], f = form(id, c.st), s = cardStats(id, c.l, c.st), cap = cardCap(c), inTeam = S.team.includes(id);
+  const T = treeFx(), c = S.cards[id], d = CC[id], f = form(id, c.st), s = cardStats(id, c.l, c.st, T), cap = cardCap(c), inTeam = S.team.includes(id);
   const need = cardNeed(c.l), atStageCap = c.l >= STAGE_CAP[c.st], canTrain = c.l < cap, tc = trainCost(c);
   const evoOK = atStageCap && c.st < 2, ec = c.st < 2 ? evoCost(id, c.st + 1) : 0, nf = c.st < 2 ? form(id, c.st + 1) : null;
   const teamFull = S.team.length >= slotsAt(S.lv);
   let prog;
-  if (evoOK) prog = `<div class="bb">Diese Stufe ist voll. <b>Entwickle die Karte</b>, damit sie weiter leveln kann.</div>`;
+  if (evoOK) prog = `<div class="bb">Diese Form ist voll ausgelevelt. <b>Entwickle die Karte</b>, damit sie weiter leveln kann.</div>`;
   else if (c.l >= MAX_LV) prog = `<div class="bb">Maximales Level erreicht.</div>`;
-  else if (!canTrain) prog = `<div class="bb">Karten können nicht über dein Heldenlevel (${S.lv}) steigen. Level zuerst den Helden.</div>`;
+  else if (!canTrain) prog = `<div class="bb">Karten können nicht über dein Heldenlevel (${S.lv}) steigen. Level zuerst die Hauptkarte.</div>`;
   else prog = `${bar(c.xp, need)}<div class="bb">${c.xp} / ${need} EP bis Level ${c.l + 1}. Karten im Team bekommen nach jedem Kampf EP.</div>`;
   modal(`<div class="mhead r-${d.r}"><span class="me">${f[1]}</span>
       <div class="mt"><h2>${f[0]}</h2><p><span class="rar">${RAR[d.r].n}</span> · ${ROLES[d.role].n} · Level ${c.l}</p></div></div>
-    <div class="box"><div class="bt">Fähigkeit: ${AB[d.ab].n}</div><div class="bb">${AB[d.ab].d(AB[d.ab].v[c.st])}</div></div>
-    <div class="stats3"><div><b>${s.hp}</b><span>Leben</span></div><div><b>${s.atk}</b><span>Angriff</span></div><div><b>${stars(c.st)}</b><span>Stufe</span></div></div>
+    <div class="box"><div class="bt">Fähigkeit: ${AB[d.ab].n}</div><div class="bb">${AB[d.ab].d(abVal(d.ab, c.st, T))}</div></div>
+    <div class="stats3"><div><b>${s.hp}</b><span>Leben</span></div><div><b>${s.atk}</b><span>Angriff</span></div><div><b>${stars(c.st)}</b><span>Form</span></div></div>
     <div class="box"><div class="bt">Fortschritt</div>${prog}</div>
     <div class="row">
       ${canTrain ? `<button class="btn ghost" data-act="train" data-id="${id}" ${S.co < tc ? "disabled" : ""}>+1 Level · <span class="coin">${tc}</span></button>` : ""}
@@ -987,57 +1139,64 @@ function cardModal(id) {
     </div>
     <div class="box"><div class="bt">Entwicklung</div>
       <div class="evorow r-${d.r}">${d.f.map((x, i) => `<div class="${i === c.st ? "on" : ""}"><div class="ee">${x[1]}</div><div class="en">${x[0]}</div><div class="el">${i === 0 ? "Start" : "ab Level " + STAGE_CAP[i - 1]}</div></div>`).join("")}</div>
-      ${nf ? `<div class="bb" style="font-size:14px;color:var(--dim)">Als ${nf[0]}: ${AB[d.ab].d(AB[d.ab].v[c.st + 1])}</div>` : ""}
+      ${nf ? `<div class="bb" style="font-size:14px;color:var(--dim)">Als ${nf[0]}: ${AB[d.ab].d(abVal(d.ab, c.st + 1, T))}</div>` : ""}
       ${evoOK ? `<button class="btn wide" data-act="evolve" data-id="${id}" ${S.co < ec ? "disabled" : ""}>Jetzt entwickeln · <span class="coin">${ec}</span></button>` : ""}
     </div>
     <button class="btn ghost" data-act="close">Schließen</button>`);
 }
 
-/* ---------- Talente ---------- */
-const spentIn = b => TALENTS.filter(t => t.b === b).reduce((a, t) => a + (S.tal[t.id] || 0), 0);
-function screenTal() {
-  const br = BRANCHES.find(b => b.k === UI.branch), sp = spentIn(br.k);
-  const tiers = [0, 1, 2, 3].map(tier => {
-    const locked = sp < tier * 5;
-    const head = tier === 0 ? "Grundlagen" : `Stufe ${tier + 1} · ${locked ? `frei ab ${tier * 5} Punkten in ${br.n} (noch ${tier * 5 - sp})` : "freigeschaltet"}`;
-    return `<div class="tier">${head}</div>` + TALENTS.filter(t => t.b === br.k && t.t === tier).map(t => {
-      const r = S.tal[t.id] || 0, max = r >= t.max;
-      const desc = r ? `${t.d(r)}${max ? "" : ` <em>→ nächster Rang: ${t.d(r + 1)}</em>`}` : `<em>${t.d(1)}</em>`;
-      return `<div class="trow ${locked ? "locked" : ""} ${max ? "maxed" : ""}" style="--bc:${br.c}">
-        <div class="tinfo"><span class="tname">${t.n}</span><span class="tdesc">${desc}</span>
-          <span class="pips">${Array.from({ length:t.max }, (_, i) => `<i class="${i < r ? "on" : ""}"></i>`).join("")}</span></div>
-        <button class="plus" data-act="learn" data-id="${t.id}" aria-label="${t.n} verbessern" ${locked || max || S.tp < 1 ? "disabled" : ""}>${max ? "✓" : "+"}</button></div>`;
-    }).join("");
+/* ---------- Baum ---------- */
+function screenTree() {
+  const owned = Object.keys(S.tree).length, total = TREE.length - 1;
+  const lines = [];
+  TREE.forEach(n => n.parents.forEach(pid => {
+    const p = TN[pid], own = nodeOwned(pid) && nodeOwned(n.id), nxt = nodeOwned(pid) && !nodeOwned(n.id);
+    lines.push(`<line x1="${p.x}" y1="${p.y}" x2="${n.x}" y2="${n.y}" class="${own ? "own" : nxt ? "next" : ""}" style="--bc:${n.bc}"/>`);
+  }));
+  const heads = TREE_DEF.map(br => `<div class="bhead" style="--bc:${br.c};left:${br.x}px;top:${PADY + 40 + RH * .5}px">${br.n}</div>`).join("");
+  const nodes = TREE.map(n => {
+    if (n.root) return `<div class="tnode root" style="left:${n.x}px;top:${n.y}px">${n.icon}<span class="tl" style="top:80px;color:var(--moon)">Mondkurier<br>${S.sp} ★ frei</span></div>`;
+    const own = !!S.tree[n.id], open = nodeOpen(n), can = open && S.sp >= n.cost;
+    const cls = own ? "own" : can ? "buy" : open ? "open" : "locked";
+    return `<button class="tnode ${cls} ${n.flag ? "flagship" : ""}" style="--bc:${n.bc};left:${n.x}px;top:${n.y}px" data-act="node" data-id="${n.id}" aria-label="${n.n}">${n.icon}<span class="tc">${n.cost}★</span><span class="tl">${n.n}</span></button>`;
   }).join("");
-  return `<div class="screen-title"><h2>Talente</h2><p>${S.tp ? `Du hast <b style="color:var(--good)">${S.tp} Punkt${S.tp > 1 ? "e" : ""}</b> zum Verteilen. Tippe auf +.` : "Jedes Level gibt dir 1 Talentpunkt."}</p></div>
-    <div class="btabs">${BRANCHES.map(b => `<button class="btab ${b.k === UI.branch ? "on" : ""}" style="--bc:${b.c}" data-act="branch" data-k="${b.k}"><b>${b.n}</b><span>${b.d} · ${spentIn(b.k)}</span></button>`).join("")}</div>
-    ${tiers}
-    <button class="btn ghost wide" data-act="talReset" ${Object.keys(S.tal).length && S.co >= resetPrice() ? "" : "disabled"}>Alle Talente zurücksetzen · <span class="coin">${resetPrice()}</span></button>`;
+  const z = UI.zoom;
+  return `<div class="screen-title"><h2>Upgrade-Baum</h2><p>${S.sp ? `Du hast <b style="color:var(--good)">${S.sp} Sternenpunkte</b>. Grün leuchtende Knoten kannst du jetzt kaufen.` : "Jedes Level bringt Sternenpunkte. Bosse geben beim ersten Sieg extra."} ${owned} von ${total} freigeschaltet.</p></div>
+    <div class="treebar">${TREE_DEF.map((br, i) => `<button class="bjump" style="--bc:${br.c}" data-act="jump" data-i="${i}">${br.n}</button>`).join("")}
+      <button class="zoom" data-act="zoom">${z < 1 ? "Näher" : "Übersicht"}</button></div>
+    <div class="treewrap" id="treeWrap"><div class="treesize" style="width:${TREE.W * z}px;height:${TREE.H * z}px">
+      <div class="tree" style="width:${TREE.W}px;height:${TREE.H}px;transform:scale(${z})">
+        <svg width="${TREE.W}" height="${TREE.H}" viewBox="0 0 ${TREE.W} ${TREE.H}" aria-hidden="true">${lines.join("")}</svg>
+        ${heads}${nodes}</div></div></div>
+    <div class="legendrow"><span style="--c:var(--good)">kaufbar</span><span style="--c:var(--good);--f:transparent">als Nächstes</span><span style="--c:var(--t-c);--f:var(--t-c)">gekauft</span><span style="--c:var(--line)">gesperrt</span></div>`;
 }
-
-/* ---------- Shop ---------- */
-function screenShop() {
-  const p = packPrice(), w = ZONES[Math.min(4, Math.floor(S.prog / 10))].w;
-  return `<div class="screen-title"><h2>Shop</h2><p>Hier gibst du Münzen für neue Karten aus. Training und Entwicklung bezahlst du direkt bei der Karte.</p></div>
-    <div class="panel">
-      <div class="offer"><div class="packart">✦</div><div class="oi"><h3>Sternenpack</h3>
-        <p>1 zufällige Karte. Hast du sie schon, steigt sie 1 Level und du bekommst Münzen zurück.</p>
-        <button class="btn sm" data-act="pack" data-n="1" ${S.co < p ? "disabled" : ""}>Kaufen · <span class="coin">${p}</span></button></div></div>
-      <div class="offer"><div class="packart big">✦✦</div><div class="oi"><h3>Großes Sternenpack</h3>
-        <p>3 Karten, mindestens eine davon selten oder besser.</p>
-        <button class="btn sm" data-act="pack" data-n="3" ${S.co < Math.round(p * 2.5) ? "disabled" : ""}>Kaufen · <span class="coin">${Math.round(p * 2.5)}</span></button></div></div>
-    </div>
-    <div class="label">Chancen im Pack</div>
-    <div class="panel oddsline">${Object.entries(w).map(([k, v]) => `<span class="r-${k}"><span class="rar">${RAR[k].n}</span> ${v} %</span>`).join("")}</div>
-    <p class="muted" style="font-size:14px;line-height:1.45">Je weiter du in den Zonen kommst, desto häufiger sind seltene Karten. Neue Karten starten auf Level ${Math.max(1, Math.min(20, Math.floor(S.lv * .6)))}.</p>`;
+function afterTree() {
+  const w = $("#treeWrap"); if (!w) return;
+  if (UI.treeScroll) { w.scrollLeft = UI.treeScroll[0]; w.scrollTop = UI.treeScroll[1]; }
+  else { w.scrollLeft = (TREE.W * UI.zoom - w.clientWidth) / 2; }
+  w.onscroll = () => { UI.treeScroll = [w.scrollLeft, w.scrollTop]; };
+}
+function nodeModal(id) {
+  const n = TN[id], own = !!S.tree[id], open = nodeOpen(n), br = TREE_DEF.find(b => b.k === n.b);
+  const missing = n.parents.filter(p => !nodeOwned(p)).map(p => TN[p].n);
+  const same = TREE.filter(x => x.b === n.b && x.lane === n.lane && x.key === n.key && x.id !== n.id && !x.root);
+  modal(`<div class="mhead" style="--rc:${n.bc}"><span class="me" style="border-radius:50%">${n.icon}</span>
+      <div class="mt"><h2>${n.n}</h2><p>Ast ${br.n} · ${n.flag ? "Meilenstein" : "Upgrade"} · ${n.cost} Sternenpunkte</p></div></div>
+    <div class="box"><div class="bt">Wirkung</div><div class="bb">${EFX[n.key](n.v)}.</div></div>
+    ${same.length ? `<div class="box"><div class="bt">Gleicher Bereich im Baum</div><div class="bb" style="font-size:14px;color:var(--dim)">${same.map(x => `${S.tree[x.id] ? "✓" : "○"} ${x.n}: ${EFX[x.key](x.v)}`).join("<br>")}</div></div>` : ""}
+    ${own ? `<p>Schon freigeschaltet.</p>` : !open ? `<p>Erst freischalten: ${missing.join(" und ")}.</p>` : S.sp < n.cost ? `<p>Dir fehlen noch ${n.cost - S.sp} Sternenpunkte. Du bekommst sie durch Level-Aufstiege.</p>` : ""}
+    <div class="row"><button class="btn ghost" data-act="close">Schließen</button>
+      ${own ? "" : `<button class="btn green" data-act="buyNode" data-id="${id}" ${!open || S.sp < n.cost ? "disabled" : ""}>Freischalten · ${n.cost} ★</button>`}</div>
+    ${Object.keys(S.tree).length ? `<button class="btn ghost sm" data-act="treeReset" style="align-self:center">Baum zurücksetzen (${resetPrice()} Münzen)</button>` : ""}`);
 }
 
 function helpModal() {
   modal(`<h2>So spielst du</h2>
     <div class="steps">
       <div><i>1</i><p>Kämpfen<span>Kämpfe laufen von allein. Tippe auf „Kämpfen“ und schau zu, oder spule vor.</span></p></div>
-      <div><i>2</i><p>Leveln<span>Jeder Kampf gibt EP. Neue Level machen deinen Helden stärker und bringen Talentpunkte und neue Fähigkeiten.</span></p></div>
-      <div><i>3</i><p>Karten verbessern<span>Karten im Team leveln mit. Auf Level 20 und 40 entwickeln sie sich in eine stärkere Form.</span></p></div>
+      <div><i>2</i><p>Leveln<span>Jeder Kampf gibt EP. Neue Level stärken die Hauptkarte und schalten neue Karten frei.</span></p></div>
+      <div><i>3</i><p>Upgrade-Baum<span>Jedes Level gibt Sternenpunkte. Damit kaufst du Upgrades im Baum, Schritt für Schritt nach unten.</span></p></div>
+      <div><i>4</i><p>Karten entwickeln<span>Karten im Team leveln mit und entwickeln sich auf Level 20 und 40 in eine stärkere Form.</span></p></div>
     </div>
     <p>Ist ein Kampf zu schwer, sammle erst EP in einer leichteren Etappe. Die Siegchance zeigt dir, wo du stehst.</p>
     <button class="btn" data-act="close">Los geht's</button>`);
@@ -1049,8 +1208,7 @@ function helpModal() {
 function startBattle(s) {
   UID = 1;
   const P = buildTeam(), E = makeWave(s), units = P.concat(E).map(u => ({ ...u }));
-  const res = simulate(P, E, talentFx());
-  const speed = UI.speed;
+  const res = simulate(P, E, treeFx());
   B = { s, res, units:Object.fromEntries(units.map(u => [u.uid, u])), i:0, timer:null, done:false };
   const tile = u => `<div class="unit ${u.hero ? "hero" : ""} ${u.boss ? "boss" : ""}" id="u${u.uid}">
       <span class="ust" id="st${u.uid}"></span><span class="ue">${u.e}</span><span class="un">${u.n}</span>
@@ -1059,28 +1217,46 @@ function startBattle(s) {
   bt.style.setProperty("--zbg", ZONES[zoneOf(s)].bg);
   bt.innerHTML = `<div class="bwrap">
     <div class="b-top"><div><div class="bz">${ZONES[zoneOf(s)].n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Kampf beginnt</div></div>
-      <div class="speeds">${[1,2,4].map(x => `<button data-act="speed" data-x="${x}" class="${speed === x ? "on" : ""}">${x}×</button>`).join("")}<button data-act="skip">Ergebnis</button></div></div>
+      <div class="speeds">${[1,2,4].map(x => `<button data-act="speed" data-x="${x}" class="${UI.speed === x ? "on" : ""}">${x}×</button>`).join("")}<button data-act="skip">Ergebnis</button></div></div>
     <div class="b-enemies"><div class="sidelabel foe">Gegner</div><div class="side">${units.filter(u => u.side === "e").map(tile).join("")}</div></div>
     <div class="b-log" id="bLog"><span>${S.auto ? "Automatisch wiederholen ist an" : "Dein Team kämpft von allein."}</span></div>
     <div class="b-team"><div class="sidelabel own">Dein Team</div><div class="side">${units.filter(u => u.side === "p").map(tile).join("")}</div>
       <div class="legend"><span><i style="background:var(--hp)"></i>Leben</span><span><i style="background:var(--shield)"></i>Schild</span><span>❄ eingefroren</span></div></div>
     <div id="fx"></div></div>`;
   bt.hidden = false;
-  B.timer = setTimeout(step, 600 / speed);
+  B.timer = setTimeout(step, 600 / UI.speed);
 }
 function setHP(uid, hp, sh) {
   const u = B.units[uid], el = $("#u" + uid); if (!el) return;
   el.querySelector(".uhp i").style.width = Math.max(0, hp / u.max * 100) + "%";
   el.querySelector(".ush").style.width = Math.min(100, sh / u.max * 100) + "%";
-  $("#hv" + uid).textContent = sh > 0 ? `${hp} + ${sh} Schild` : hp;
+  $("#hv" + uid).textContent = sh > 0 ? `${hp} +${sh}⛨` : hp;
+}
+function centerOf(uid) {
+  const layer = $("#fx"), el = $("#u" + uid); if (!layer || !el) return null;
+  const r = el.getBoundingClientRect(), lr = layer.getBoundingClientRect();
+  return { x:r.left - lr.left + r.width / 2, y:r.top - lr.top + r.height / 2, h:r.height };
 }
 function floatAt(uid, text, cls) {
-  const layer = $("#fx"), el = $("#u" + uid); if (!layer || !el) return;
-  const r = el.getBoundingClientRect(), lr = layer.getBoundingClientRect(), f = document.createElement("div");
+  const c = centerOf(uid); if (!c) return;
+  const f = document.createElement("div");
   f.className = "float " + cls; f.textContent = text;
-  f.style.left = (r.left - lr.left + r.width / 2 + (Math.random() * 24 - 12)) + "px";
-  f.style.top = (r.top - lr.top + r.height * .25) + "px";
-  layer.appendChild(f); setTimeout(() => f.remove(), 900);
+  f.style.left = (c.x + (Math.random() * 24 - 12)) + "px"; f.style.top = (c.y - c.h * .3) + "px";
+  $("#fx").appendChild(f); setTimeout(() => f.remove(), 900);
+}
+function burst(uid, cls) {
+  const c = centerOf(uid); if (!c) return;
+  const b = document.createElement("div"); b.className = "burst " + (cls || "");
+  b.style.left = c.x + "px"; b.style.top = c.y + "px";
+  $("#fx").appendChild(b); setTimeout(() => b.remove(), 400);
+}
+function beam(from, to) {
+  const a = centerOf(from), b = centerOf(to); if (!a || !b) return;
+  const el = document.createElement("div"), dx = b.x - a.x, dy = b.y - a.y;
+  el.className = "beam " + (B.units[from] && B.units[from].side === "e" ? "foe" : "");
+  el.style.left = a.x + "px"; el.style.top = a.y + "px";
+  el.style.width = Math.hypot(dx, dy) + "px"; el.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+  $("#fx").appendChild(el); setTimeout(() => el.remove(), 300);
 }
 const say = html => { const l = $("#bLog"); if (l) l.innerHTML = `<span>${html}</span>`; };
 function flash(uid, cls) { const el = $("#u" + uid); if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
@@ -1090,11 +1266,14 @@ function applyEv(e, quiet) {
   switch (e.t) {
     case "round": $("#bRound").textContent = `Runde ${e.n}`; return 150;
     case "act": if (!quiet) { document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act")); const el = $("#u" + e.u); if (el) el.classList.add("act"); } return 40;
-    case "hit": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, (e.crit ? "Krit! " : "") + e.v, e.crit ? "crit" : "dmg"); flash(e.u, "hurt");
-      if (!e.aoe) say(e.thorns ? `${nm(e.u)} sticht sich an ${nm(e.a)}: ${e.v} Schaden` : `${nm(e.a)} trifft ${nm(e.u)}: <b>${e.v}</b> Schaden${e.crit ? " (kritisch)" : ""}`); }
-      return e.aoe ? 110 : e.thorns ? 150 : 340;
+    case "hit": setHP(e.u, e.hp, e.sh); if (!quiet) {
+        if (!e.aoe && !e.thorns && !e.guard) beam(e.a, e.u);
+        floatAt(e.u, (e.crit ? "Krit! " : "") + e.v, e.crit ? "crit" : "dmg"); flash(e.u, "hurt"); burst(e.u, e.crit ? "crit" : "");
+        if (e.guard) say(`${nm(e.u)} fängt ${e.v} Schaden ab`);
+        else if (!e.aoe) say(e.thorns ? `${nm(e.u)} sticht sich an ${nm(e.a)}: ${e.v} Schaden` : `${nm(e.a)} trifft ${nm(e.u)}: <b>${e.v}</b> Schaden${e.crit ? " (kritisch)" : ""}`); }
+      return e.aoe ? 110 : e.thorns || e.guard ? 150 : 340;
     case "miss": if (!quiet) { floatAt(e.u, "ausgewichen", "miss"); if (!e.aoe) say(`${nm(e.u)} weicht ${nm(e.a)} aus`); } return e.aoe ? 110 : 260;
-    case "heal": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, "+" + e.v, "heal"); if (e.a && e.a !== e.u) say(`${nm(e.a)} heilt ${nm(e.u)} um ${e.v}`); } return 200;
+    case "heal": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, "+" + e.v, "heal"); burst(e.u, "heal"); if (e.a && e.a !== e.u) say(`${nm(e.a)} heilt ${nm(e.u)} um ${e.v}`); } return 200;
     case "sh": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "Schild " + e.v, "sh"); return 110;
     case "dot": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, "Gift " + e.v, "dot"); say(`${nm(e.u)} leidet unter Gift oder Brand: ${e.v}`); } return 170;
     case "stun": { const s = $("#st" + e.u); if (s) s.textContent = "❄"; if (!quiet) floatAt(e.u, "eingefroren", "info"); return 140; }
@@ -1127,29 +1306,27 @@ function finishBattle() {
   setTimeout(() => { if (B) showResult(R); }, 500);
 }
 function showResult(R) {
-  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV, auto = S.auto && R.win, lvUp = R.hero.lv.length;
+  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV, auto = S.auto && R.win && !R.hero.cards.length, lvUp = R.hero.lv.length;
   const cardLines = R.cards.map(c => {
     const st = S.cards[c.id], f = form(c.id, st.st), up = c.to > c.from;
     return `<div class="cg"><span class="ge">${f[1]}</span><span class="gn">${f[0]}</span>
       <span class="gl ${up ? "up" : ""}">${up ? `Level ${c.from} → ${c.to}` : `Level ${c.to}`}</span>${bar(st.xp, cardNeed(st.l), st.l >= cardCap(st) ? "gold" : "")}</div>`;
   }).join("");
-  let drop = "";
-  if (R.drop) {
-    const d = CC[R.drop.id], f = form(R.drop.id, S.cards[R.drop.id].st);
-    drop = `<div class="drop r-${d.r}"><div class="dm">${R.drop.dup ? "Karte doppelt gefunden" : "Neue Karte gefunden!"}</div><div class="de">${f[1]}</div><div class="dn">${f[0]}</div>
-      <div class="dm"><span class="rar">${RAR[d.r].n}</span> · ${AB[d.ab].n} · ${R.drop.dup ? `+1 Level und ${R.drop.coins} Münzen` : `startet auf Level ${R.drop.l}`}</div></div>`;
-  }
+  const newCards = R.hero.cards.map(id => { const d = CC[id];
+    return `<div class="drop r-${d.r}"><div class="dm">Neue Karte freigeschaltet!</div><div class="de">${d.f[0][1]}</div><div class="dn">${d.f[0][0]}</div>
+      <div class="dm"><span class="rar">${RAR[d.r].n}</span> · ${ROLES[d.role].n} · ${AB[d.ab].n} · startet auf Level ${S.cards[id].l}${S.team.includes(id) ? " · schon im Team" : ""}</div></div>`; }).join("");
   const nextOpen = R.win && R.s < 50 && R.s === S.prog;
   const loseMsg = B.res.timeout ? "Nach 30 Runden ist die Zeit abgelaufen. Dein Team macht noch zu wenig Schaden." : "Dein Team ist gefallen.";
   modal(`<div class="result-head ${R.win ? "win" : "lose"}"><h2>${R.win ? "Sieg!" : "Niederlage"}</h2>
-      <p>${R.win ? (R.first ? "Neue Etappe geschafft! Dafür gibt es doppelte Münzen." : `Gewonnen in ${B.res.rounds} Runden.`) : `${loseMsg} Du bekommst trotzdem ein paar EP. Werde stärker und versuch es erneut.`}</p></div>
-    <div class="gains"><span class="x">+${R.hx} EP</span>${R.co ? `<span class="coin">+${R.co}</span>` : ""}</div>
-    <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${mx ? "Maximum" : `${S.xp} / ${n} EP bis Level ${S.lv + 1}`}</div></div>
-    ${lvUp ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${lvUp} Talentpunkt${lvUp > 1 ? "e" : ""} · mehr Leben und Angriff</span>
-      ${R.hero.abs.map(a => `<span>Neue Heldenfähigkeit: <b style="display:inline;font-size:inherit">${a}</b></span>`).join("")}${R.hero.slots.length ? "<span>Ein neuer Platz im Team ist frei</span>" : ""}</div>` : ""}
+      <p>${R.win ? (R.first ? "Neue Etappe geschafft! Dafür gibt es extra Münzen." : `Gewonnen in ${B.res.rounds} Runden.`) : `${loseMsg} Du bekommst trotzdem ein paar EP.`}</p></div>
+    <div class="gains"><span class="x">+${R.hx} EP</span>${R.co ? `<span class="coin">+${R.co}</span>` : ""}${R.bossPts ? `<span class="sp">+${R.bossPts}</span>` : ""}</div>
+    <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Hauptkarte Level ${S.lv} · ${mx ? "Maximum" : `${S.xp} / ${n} EP bis Level ${S.lv + 1}`}</div></div>
+    ${lvUp ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${R.hero.pts} Sternenpunkte für den Baum · mehr Leben und Angriff</span>
+      ${R.hero.abs.map(a => `<span>Neue Fähigkeit der Hauptkarte: ${a}</span>`).join("")}${R.hero.slots.length ? "<span>Ein neuer Platz im Team ist frei</span>" : ""}</div>` : ""}
+    ${newCards}
     ${cardLines ? `<div class="label" style="margin:0">Deine Karten · je +${R.cx} EP</div>${cardLines}` : ""}
-    ${drop}
     ${auto ? `<div class="autoline" id="autoLine">Nächster Kampf startet gleich …</div>` : ""}
+    ${lvUp && !auto ? `<button class="btn green wide" data-act="toTree">Sternenpunkte im Baum ausgeben</button>` : ""}
     ${nextOpen && !auto ? `<button class="btn big" data-act="again" data-s="${R.s + 1}">Weiter zu Etappe ${stageNo(R.s + 1)}</button>` : ""}
     <div class="row">
       <button class="btn ghost" data-act="leave">Zum Start</button>
@@ -1205,39 +1382,34 @@ function act(el, ev) {
     case "again": { const s = +el.dataset.s; if (B) clearTimeout(B.autoT); modal(""); S.zone = zoneOf(s); startBattle(s); break; }
     case "autoOff": { S.auto = false; save(); if (B) clearTimeout(B.autoT); const l = $("#autoLine"); if (l) l.textContent = "Automatisch wiederholen ist aus."; el.hidden = true; break; }
     case "leave": UI.tab = "home"; leaveBattle(); break;
-    case "branch": UI.branch = el.dataset.k; render(); break;
-    case "learn": {
-      const t = TM[id], r = S.tal[id] || 0;
-      if (S.tp < 1 || r >= t.max || spentIn(t.b) < t.t * 5) return;
-      S.tp--; S.tal[id] = r + 1; save();
-      const sc = $("#main").scrollTop; render(); $("#main").scrollTop = sc; break;
+    case "toTree": UI.tab = "tree"; UI.treeScroll = null; leaveBattle(); break;
+    case "node": nodeModal(id); break;
+    case "buyNode": {
+      const n = TN[id]; if (!nodeOpen(n) || S.sp < n.cost) return;
+      S.sp -= n.cost; S.tree[id] = 1; save(); modal(""); render();
+      toast(`${n.icon} ${n.n} freigeschaltet`); break;
     }
-    case "talReset": {
+    case "jump": {
+      const w = $("#treeWrap"), br = TREE_DEF[+el.dataset.i];
+      if (w) w.scrollTo({ left:Math.max(0, br.x * UI.zoom - w.clientWidth / 2), top:0, behavior:"smooth" }); break;
+    }
+    case "zoom": {
+      const w = $("#treeWrap"), old = UI.zoom, cx = w ? (w.scrollLeft + w.clientWidth / 2) / old : TREE.W / 2;
+      UI.zoom = old < 1 ? 1 : .55; UI.treeScroll = null; render();
+      const w2 = $("#treeWrap"); if (w2) w2.scrollLeft = Math.max(0, cx * UI.zoom - w2.clientWidth / 2); break;
+    }
+    case "treeReset": {
+      const p = resetPrice(); if (S.co < p) { toast(`Dafür brauchst du ${p} Münzen.`); return; }
+      modal(`<h2>Baum zurücksetzen?</h2><p>Du bekommst alle ausgegebenen Sternenpunkte zurück und kannst sie neu verteilen. Das kostet ${p} Münzen.</p>
+        <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn" data-act="treeResetOk">Zurücksetzen</button></div>`); break;
+    }
+    case "treeResetOk": {
       const p = resetPrice(); if (S.co < p) return;
-      modal(`<h2>Talente zurücksetzen?</h2><p>Du bekommst alle ${Object.values(S.tal).reduce((x, y) => x + y, 0)} Punkte zurück und kannst sie neu verteilen. Das kostet ${p} Münzen.</p>
-        <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn" data-act="talResetOk">Zurücksetzen</button></div>`); break;
-    }
-    case "talResetOk": {
-      const p = resetPrice(); if (S.co < p) return;
-      S.co -= p; S.tp += Object.values(S.tal).reduce((x, y) => x + y, 0); S.tal = {}; save(); modal(""); render(); break;
-    }
-    case "pack": {
-      const n = +el.dataset.n, p = n === 1 ? packPrice() : Math.round(packPrice() * 2.5);
-      if (S.co < p) return;
-      S.co -= p;
-      const w = ZONES[Math.min(4, Math.floor(S.prog / 10))].w, got = [];
-      for (let i = 0; i < n; i++) got.push(grantCard(rollCard(n === 3 && i === 0 ? { ...w, c:0, r:Math.max(w.r, 10) } : w)));
-      save(); render();
-      modal(`<h2>${n === 1 ? "Sternenpack" : "Großes Sternenpack"}</h2>${got.map(g => {
-        const d = CC[g.id], f = form(g.id, S.cards[g.id].st);
-        return `<div class="drop r-${d.r}"><div class="dm">${g.dup ? "Schon vorhanden" : "Neu!"}</div><div class="de">${f[1]}</div><div class="dn">${f[0]}</div>
-          <div class="dm"><span class="rar">${RAR[d.r].n}</span> · ${AB[d.ab].n} · ${g.dup ? `+1 Level und ${g.coins} Münzen` : `Level ${g.l}`}</div></div>`;
-      }).join("")}<button class="btn" data-act="close">Super</button>`);
-      break;
+      S.co -= p; Object.keys(S.tree).forEach(k => { S.sp += TN[k] ? TN[k].cost : 0; }); S.tree = {}; save(); modal(""); render(); break;
     }
     case "help": helpModal(); break;
     case "resetAsk":
-      modal(`<h2>Neu starten?</h2><p>Level, Karten, Talente und Münzen gehen verloren. Das lässt sich nicht rückgängig machen.</p>
+      modal(`<h2>Neu starten?</h2><p>Level, Karten, Baum und Münzen gehen verloren. Das lässt sich nicht rückgängig machen.</p>
         <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn danger" data-act="reset">Alles löschen</button></div>`); break;
     case "reset": S = defSave(); S.seen = true; save(); modal(""); UI.tab = "home"; render(); toast("Neues Spiel gestartet"); break;
   }
@@ -1248,8 +1420,7 @@ document.addEventListener("click", ev => { const el = ev.target.closest("[data-a
    START
    ========================================================= */
 function start(data) {
-  S = (data && data.S && data.S.v === 2) ? data.S : load();
-  if (S.dust != null) { S.co += S.dust || 0; delete S.dust; }
+  S = (data && data.S && data.S.v === 3) ? data.S : load();
   render();
   if (!S.seen) { S.seen = true; save(); helpModal(); }
 }
