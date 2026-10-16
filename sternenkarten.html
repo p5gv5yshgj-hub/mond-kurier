@@ -416,25 +416,36 @@ p { margin: 0; }
    GRUNDWERTE
    ========================================================= */
 const G = 1.07;                 // Wachstum der Kampfwerte pro Level
-const MAX_LV = 60;
+const MAX_LV = 999;             // praktisch endlos
 const MAX_ROUNDS = 30;
-const STAGE_CAP = [20, 40, 60]; // Max-Level je Entwicklungsform
-const SLOT_LV = [1, 1, 3, 6, 10, 15, 22]; // ab welchem Heldenlevel ein Kartenplatz frei wird (7 Plätze)
+const FORM_LV = [1, 25, 50];    // ab diesem Level entwickeln sich die Begleiter in die nächste Form
 const WAVE = [1, 1, 2, 2, 2, 3, 3, 3, 3];
-const recLv = s => Math.round(1 + (s - 1) * 1.2);       // empfohlenes Level je Etappe (1–50)
+const recLv = s => Math.round(1 + (s - 1) * 1.2);       // empfohlenes Level je Etappe
 const isBoss = s => s % 10 === 0;
 const zoneOf = s => Math.floor((s - 1) / 10);
 const stageNo = s => (s - 1) % 10 + 1;
-const slotsAt = L => SLOT_LV.filter(x => x <= L).length;
-const heroNeed = L => Math.round(12 * Math.pow(1.1, L - 1) * (3 + .35 * L));
-const cardNeed = l => Math.round(heroNeed(l) * .8);
+const heroNeed = L => Math.round(12 * Math.pow(1.1, L - 1) * (3 + .35 * Math.min(L, 60) + .1 * Math.max(0, L - 60)));
 const ptsFor = L => 3 + Math.floor(L / 15);   // Sternenpunkte beim Erreichen von Level L
 const BOSS_PTS = 5;
+const rankCost = r => 2 + Math.floor(r / 2);   // Sternenpunkte für den nächsten Rang eines Begleiters
+const RANK_BONUS = .06;
 const pct = v => Math.round(v * 100) + " %";
+// Große Zahlen lesbar machen
+function fmt(n) {
+  n = Math.round(n);
+  if (Math.abs(n) < 100000) return n.toLocaleString("de-DE");
+  if (Math.abs(n) >= 1e18) return n.toExponential(1).replace(".", ",");
+  for (const [v, u] of [[1e15, "Brd."], [1e12, "Bio."], [1e9, "Mrd."], [1e6, "Mio."], [1e3, "Tsd."]])
+    if (Math.abs(n) >= v) return (n / v).toLocaleString("de-DE", { maximumFractionDigits:1 }) + " " + u;
+  return String(n);
+}
+function roman(n) {
+  const R = [[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]]; let o = "";
+  for (const [v, r] of R) while (n >= v) { o += r; n -= v; }
+  return o;
+}
 
-const RAR = { c:{ n:"Gewöhnlich", m:1, cost:1 }, r:{ n:"Selten", m:1.12, cost:1.5 }, e:{ n:"Episch", m:1.25, cost:2.2 }, l:{ n:"Legendär", m:1.4, cost:3 } };
 const STAGE_MUL = [1, 1.3, 1.7];
-const EVO_COST = [0, 400, 4000];
 const ROLES = {
   tank:     { n:"Tank",         hp:110, atk:6,  spd:3, key:"tank" },
   krieger:  { n:"Krieger",      hp:78,  atk:10, spd:5, key:"warrior" },
@@ -481,43 +492,18 @@ const AB = {
   timebomb:  { n:"Zeitzünder",     v:[3,4,5.5],     d:v => `In Runde 4 explodiert die Ladung und trifft alle Gegner (${pct(v)} des Angriffs).` }
 };
 
-// Karten: lv = ab welchem Heldenlevel sie freigeschaltet wird. Seltenheit ergibt sich aus diesem Level.
+// Die 8 festen Begleiter: lv = ab welchem Heldenlevel sie dazukommen. Sie leveln automatisch mit dem Helden.
 const COMP = [
-  { id:"kiesel",  lv:1,  role:"tank",     ab:"taunt",     f:[["Kieselgolem","🪨"],["Felsgolem","🗿"],["Monolith","🏛️"]] },
-  { id:"funkel",  lv:1,  role:"schuetze", ab:"crit",      f:[["Funkelkäfer","🐞"],["Leuchtkäfer","🪲"],["Sternkäfer","🌟"]] },
-  { id:"sani",    lv:1,  role:"heiler",   ab:"heal",      f:[["Sanibot","🤖"],["Medibot","🩺"],["Lebensbaum","🌳"]] },
-  { id:"falke",   lv:2,  role:"schuetze", ab:"snipe",     f:[["Sternfalke","🐦"],["Kometenfalke","🦅"],["Himmelsjäger","🏹"]] },
-  { id:"spore",   lv:3,  role:"magier",   ab:"poison",    f:[["Mondspore","🍄"],["Sporennebel","🌫️"],["Seuchenkönig","☣️"]] },
-  { id:"fuchs",   lv:4,  role:"krieger",  ab:"dodge",     f:[["Mondfuchs","🦊"],["Schattenwolf","🐺"],["Sternenwolf","🌙"]] },
-  { id:"drohne",  lv:5,  role:"support",  ab:"shieldTeam",f:[["Postdrohne","🛸"],["Schilddrohne","🛰️"],["Orbitalwächter","🌐"]] },
-  { id:"krabbe",  lv:6,  role:"tank",     ab:"thorns",    f:[["Kraterkrabbe","🦀"],["Stachelkrabbe","🦞"],["Kristallkrabbe","💎"]] },
-  { id:"wurm",    lv:7,  role:"krieger",  ab:"rage",      f:[["Wutwurm","🐛"],["Echsenkrieger","🦎"],["Mondrache","🐉"]] },
-  { id:"eule",    lv:8,  role:"support",  ab:"wisdom",    f:[["Mondeule","🦉"],["Bücherwurm","📚"],["Orakel","🔮"]] },
-  { id:"blitz",   lv:10, role:"magier",   ab:"aoe",       f:[["Funkenzauberer","🧙"],["Blitzmagier","⚡"],["Sturmrufer","🌩️"]] },
-  { id:"fleder",  lv:11, role:"krieger",  ab:"lifesteal", f:[["Mondfledermaus","🦇"],["Nachtjäger","🧛"],["Blutmond","🌑"]] },
-  { id:"ninja",   lv:12, role:"schuetze", ab:"double",    f:[["Kurierninja","🥷"],["Schattenklinge","🗡️"],["Phantom","👤"]] },
-  { id:"waechter",lv:14, role:"tank",     ab:"barrier",   f:[["Schildwächterin","🛡️"],["Bastion","🏰"],["Zitadelle","🏯"]] },
-  { id:"kobold",  lv:15, role:"support",  ab:"luck",      f:[["Goldkobold","🪙"],["Schatzkobold","💰"],["Midas","👑"]] },
-  { id:"frost",   lv:16, role:"magier",   ab:"stun",      f:[["Frostgeist","❄️"],["Eiswächter","🥶"],["Polarstern","🧊"]] },
-  { id:"henker",  lv:18, role:"krieger",  ab:"execute",   f:[["Meteorjäger","☄️"],["Kometenhenker","🪓"],["Weltenrichter","⚖️"]] },
-  { id:"kette",   lv:19, role:"krieger",  ab:"chain",     f:[["Kettenkämpfer","🔗"],["Blitzkettenritter","⛓️"],["Sternenketten-Titan","🌠"]] },
-  { id:"phoenix", lv:20, role:"heiler",   ab:"revive",    f:[["Sonnenküken","🐣"],["Feuervogel","🦜"],["Phönix","🔥"]] },
-  { id:"hexe",    lv:22, role:"magier",   ab:"burn",      f:[["Nebelhexe","🧙‍♀️"],["Plasmahexe","🔮"],["Sternenhexe","✨"]] },
-  { id:"baer",    lv:23, role:"tank",     ab:"guard",     f:[["Mondbär","🐻"],["Nashornwächter","🦏"],["Mammutkoloss","🐘"]] },
-  { id:"bombe",   lv:24, role:"krieger",  ab:"martyr",    f:[["Knallkomet","💣"],["Sprengkomet","💥"],["Sonnenkern","☀️"]] },
-  { id:"banner",  lv:26, role:"support",  ab:"aura",      f:[["Fahnenträger","🚩"],["Kommandant","🎖️"],["Sternenmarschall","⭐"]] },
-  { id:"lade",    lv:27, role:"schuetze", ab:"charge",    f:[["Kondensator","🔋"],["Plasmawerfer","⚛️"],["Sternenkanone","💠"]] },
-  { id:"spinne",  lv:28, role:"schuetze", ab:"shred",     f:[["Säurespinne","🕷️"],["Ätzspinne","🕸️"],["Leerenweberin","🌀"]] },
-  { id:"katze",   lv:30, role:"krieger",  ab:"berserk",   f:[["Wildkatze","🐱"],["Säbelzahn","🐯"],["Sternenlöwe","🦁"]] },
-  { id:"egel",    lv:32, role:"magier",   ab:"drain",     f:[["Mondegel","🪱"],["Schattenschlange","🐍"],["Seelenfresser","👹"]] },
-  { id:"spaeher", lv:34, role:"support",  ab:"mark",      f:[["Späher","🔭"],["Scharfschützin","🎯"],["Sternenauge","👁️"]] },
-  { id:"fechter", lv:36, role:"krieger",  ab:"counter",   f:[["Fechter","🤺"],["Klingenmeister","⚔️"],["Dreizackfürst","🔱"]] },
-  { id:"igel",    lv:38, role:"tank",     ab:"laststand", f:[["Mondigel","🦔"],["Panzerschildkröte","🐢"],["Bergtitan","🏔️"]] },
-  { id:"drache",  lv:40, role:"magier",   ab:"dragon",    f:[["Sternendrache","🐲"],["Galaxiendrache","🐉"],["Urdrache","🌌"]] },
-  { id:"zuender", lv:42, role:"magier",   ab:"timebomb",  f:[["Knallfrosch","🧨"],["Kometenzünder","💫"],["Urknallkern","🎆"]] },
-  { id:"engel",   lv:45, role:"heiler",   ab:"divine",    f:[["Lichtgeist","👼"],["Seraph","😇"],["Mondgöttin","🌕"]] }
+  { id:"kiesel", lv:1,  r:"c", m:1,    role:"tank",     ab:"taunt",     f:[["Kieselgolem","🪨"],["Felsgolem","🗿"],["Monolith","🏛️"]] },
+  { id:"funkel", lv:3,  r:"c", m:1,    role:"schuetze", ab:"crit",      f:[["Funkelkäfer","🐞"],["Leuchtkäfer","🪲"],["Sternkäfer","🌟"]] },
+  { id:"sani",   lv:6,  r:"c", m:1,    role:"heiler",   ab:"heal",      f:[["Sanibot","🤖"],["Medibot","🩺"],["Lebensbaum","🌳"]] },
+  { id:"blitz",  lv:10, r:"r", m:1.05, role:"magier",   ab:"aoe",       f:[["Funkenzauberer","🧙"],["Blitzmagier","⚡"],["Sturmrufer","🌩️"]] },
+  { id:"fleder", lv:15, r:"r", m:1.08, role:"krieger",  ab:"lifesteal", f:[["Mondfledermaus","🦇"],["Nachtjäger","🧛"],["Blutmond","🌑"]] },
+  { id:"banner", lv:20, r:"e", m:1.1,  role:"support",  ab:"aura",      f:[["Fahnenträger","🚩"],["Kommandant","🎖️"],["Sternenmarschall","⭐"]] },
+  { id:"ninja",  lv:26, r:"e", m:1.12, role:"schuetze", ab:"double",    f:[["Kurierninja","🥷"],["Schattenklinge","🗡️"],["Phantom","👤"]] },
+  { id:"drache", lv:32, r:"l", m:1.15, role:"magier",   ab:"dragon",    f:[["Sternendrache","🐲"],["Galaxiendrache","🐉"],["Urdrache","🌌"]] }
 ];
-COMP.forEach(c => c.r = c.lv < 10 ? "c" : c.lv < 20 ? "r" : c.lv < 35 ? "e" : "l");
+const RAR_N = { c:"Gewöhnlich", r:"Selten", e:"Episch", l:"Legendär" };
 const CC = Object.fromEntries(COMP.map(c => [c.id, c]));
 
 // Fähigkeiten der Hauptkarte, kommen mit dem Level automatisch dazu
@@ -530,9 +516,11 @@ const HERO_AB = [
   { lv:25, k:"hStun",   n:"Gravitationswelle",d:"Jede 5. Runde setzen alle Gegner eine Runde aus." },
   { lv:30, k:"hAura",   n:"Vollmond",         d:"Das ganze Team macht 15 % mehr Schaden." },
   { lv:40, k:"hCrit",   n:"Kometenkern",      d:"Der Held trifft viel öfter kritisch, mit 2,5-fachem Schaden." },
-  { lv:50, k:"hNova",   n:"Supernova",        d:"Jede 6. Runde ein gewaltiger Treffer gegen alle Gegner." }
+  { lv:50, k:"hNova",   n:"Supernova",        d:"Jede 6. Runde ein gewaltiger Treffer gegen alle Gegner." },
+  { lv:70, k:"hUltUp",  n:"Sternenfeuer",     d:"Der Spezialangriff macht 50 % mehr Schaden." },
+  { lv:100, k:"hStart", n:"Vorgeladen",       d:"Der Held startet jeden Kampf mit halb voller Kurier-Energie." }
 ];
-const HERO_TITLES = [[1,"Kurierlehrling","var(--r-c)"],[10,"Mondkurier","var(--r-r)"],[20,"Sternenbote","var(--good)"],[30,"Kometenmeister","var(--r-e)"],[40,"Hüter der Umlaufbahn","var(--shield)"],[50,"Legende des Mondes","var(--r-l)"]];
+const HERO_TITLES = [[1,"Kurierlehrling","var(--r-c)"],[10,"Mondkurier","var(--r-r)"],[20,"Sternenbote","var(--good)"],[30,"Kometenmeister","var(--r-e)"],[40,"Hüter der Umlaufbahn","var(--shield)"],[50,"Legende des Mondes","var(--r-l)"],[75,"Sternenkaiser","var(--gold)"],[100,"Wächter der Galaxis","var(--gold)"],[150,"Unendlicher Kurier","var(--gold)"]];
 const heroTitle = L => HERO_TITLES.filter(t => t[0] <= L).pop();
 const titleIdx = L => HERO_TITLES.filter(t => t[0] <= L).length - 1;
 
@@ -544,7 +532,7 @@ const ULTS = [
 ];
 const ultAt = L => ULTS.filter(u => u.lv <= L).pop();
 
-// Ausrüstung des Helden: mit Münzen aufwerten, höchstens bis zum Heldenlevel
+// Ausrüstung des Helden: mit Münzen aufwerten, ohne Obergrenze (der Preis steigt mit jeder Stufe)
 const EQUIP = [
   { k:"w", n:"Waffe",      i:"⚔️", d:l => `Held macht ${l * 4} % mehr Schaden`,
     tiers:["Kurierstab","Mondklinge","Sternensäbel","Kometenspeer","Nebelklinge","Supernova-Schwert"] },
@@ -556,7 +544,7 @@ const EQUIP = [
     tiers:["Batterie","Mondkern","Sternenkern","Kometenkern","Nebelkern","Herz des Mondes"] }
 ];
 const eqTier = l => Math.min(5, Math.floor(l / 10));
-const eqCost = l => Math.round(25 * Math.pow(1.1, l));
+const eqCost = l => Math.round(25 * Math.pow(1.1, l) * (1 - (S ? treeFx().eqDisc : 0)));
 const TIER_COL = ["#9aa3b8", "#4fb3ff", "#7bd88f", "#b77bff", "#ffb347", "#f2c14e"];
 
 /* =========================================================
@@ -574,13 +562,13 @@ const EFX = {
   dodge:v => `Team weicht ${pct(v)} der Angriffe aus`, heroDr:v => `Der Held nimmt ${pct(v)} weniger Schaden`, dr:v => `Team nimmt ${pct(v)} weniger Schaden`,
   thorns:v => `Angreifer bekommen ${pct(v)} des Schadens zurück`, healUp:v => `Alle Heilungen sind ${pct(v)} stärker`, heroHp:v => `Der Held hat ${pct(v)} mehr Leben`,
   unb:() => `Der Held überlebt einmal pro Kampf einen tödlichen Treffer`, teamRevive:() => `Einmal pro Kampf steht das erste gefallene Teammitglied mit 40 % Leben wieder auf`,
-  cardHp:v => `Alle Karten haben ${pct(v)} mehr Leben`, cardAtk:v => `Alle Karten machen ${pct(v)} mehr Schaden`, abil:v => `Alle Kartenfähigkeiten sind ${pct(v)} stärker`,
+  cardHp:v => `Alle Begleiter haben ${pct(v)} mehr Leben`, cardAtk:v => `Alle Begleiter machen ${pct(v)} mehr Schaden`, abil:v => `Alle Fähigkeiten der Begleiter sind ${pct(v)} stärker`,
   tank:v => `Tanks haben ${pct(v)} mehr Leben`, shooter:v => `Schützen machen ${pct(v)} mehr Schaden`, mage:v => `Magier machen ${pct(v)} mehr Schaden`,
   warrior:v => `Krieger haben ${pct(v)} mehr Leben und Schaden`, healer:v => `Heiler heilen ${pct(v)} mehr`, support:v => `Unterstützer haben ${pct(v)} mehr Leben und Schaden`,
   cardXp:v => `Karten bekommen ${pct(v)} mehr EP`, mentor:v => `Karten auf der Bank lernen ${pct(v)} der Kampf-EP mit`, train:v => `Training kostet ${pct(v)} weniger`,
   evo:v => `Entwickeln kostet ${pct(v)} weniger`, newLv:v => `Neue Karten starten ${v} Level höher`,
   xp:v => `Der Held bekommt ${pct(v)} mehr EP`, coins:v => `${pct(v)} mehr Münzen`, lossXp:v => `Niederlagen geben ${pct(v)} mehr EP`,
-  firstCo:v => `Neue Etappen geben ${pct(v)} mehr Münzen`, bossXp:v => `Bosse geben ${pct(v)} mehr EP`, ptsLv:v => `Alle 5 Level ${v} Sternenpunkt extra`
+  firstCo:v => `Neue Etappen geben ${pct(v)} mehr Münzen`, eqDisc:v => `Ausrüstung kostet ${pct(v)} weniger`, bossXp:v => `Bosse geben ${pct(v)} mehr EP`, ptsLv:v => `Alle 5 Level ${v} Sternenpunkt extra`
 };
 // [Bahn 0=links 1=Mitte 2=rechts, Symbol, Name, Effekt, Wert]
 const TREE_DEF = [
@@ -616,36 +604,36 @@ const TREE_DEF = [
     [[1,"🛡️","Panzerung V","hp",.1]],
     [[0,"🧱","Rüstung III","dr",.06],[1,"🗿","Unbeugsam","unb",1,1],[2,"❤️","Heldenherz II","heroHp",.2]]
   ]},
-  { k:"c", n:"Karten", c:"var(--t-c)", rows:[
+  { k:"c", n:"Begleiter", c:"var(--t-c)", rows:[
     [[1,"🃏","Kartenkraft I","cardAtk",.05]],
-    [[0,"🪨","Felsenhaut I","tank",.1],[1,"📘","Kartenschule I","cardXp",.1],[2,"🏹","Zielwasser I","shooter",.1]],
+    [[0,"🪨","Felsenhaut I","tank",.1],[1,"🤝","Begleiterbund I","cardHp",.04],[2,"🏹","Zielwasser I","shooter",.1]],
     [[1,"🎴","Kartenhülle I","cardHp",.05]],
     [[0,"🩺","Heilkunde I","healer",.15],[1,"🔮","Fähigkeitsfokus I","abil",.1],[2,"🧙","Arkanwissen I","mage",.1]],
     [[1,"🃏","Kartenkraft II","cardAtk",.06]],
-    [[0,"⚔️","Kriegerdrill I","warrior",.1],[1,"🧬","Evolutionsrabatt I","evo",.15],[2,"🚩","Teamgeist I","support",.1]],
+    [[0,"⚔️","Kriegerdrill I","warrior",.1],[1,"🌀","Formwandel","abil",.08],[2,"🚩","Teamgeist I","support",.1]],
     [[1,"🎴","Kartenhülle II","cardHp",.06]],
     [[0,"🪨","Felsenhaut II","tank",.15],[1,"🔮","Fähigkeitsfokus II","abil",.12],[2,"🏹","Zielwasser II","shooter",.15]],
-    [[1,"🐣","Frischer Start","newLv",3]],
+    [[1,"💞","Seelenband","cardAtk",.06]],
     [[0,"🩺","Heilkunde II","healer",.2],[1,"🃏","Kartenkraft III","cardAtk",.08],[2,"🧙","Arkanwissen II","mage",.15]],
-    [[1,"🧑‍🏫","Mentor I","mentor",.2]],
+    [[1,"🤝","Begleiterbund II","cardHp",.06]],
     [[0,"⚔️","Kriegerdrill II","warrior",.15],[1,"🔮","Fähigkeitsfokus III","abil",.15],[2,"🚩","Teamgeist II","support",.15]],
     [[1,"🎴","Kartenhülle III","cardHp",.08]],
-    [[0,"🧑‍🏫","Mentor II","mentor",.3],[1,"👑","Kartenkraft IV","cardAtk",.1,1],[2,"🧬","Evolutionsrabatt II","evo",.2]]
+    [[0,"🪨","Felsenhaut III","tank",.2],[1,"👑","Kartenkraft IV","cardAtk",.1,1],[2,"🔥","Kampfgeist","cardAtk",.08]]
   ]},
   { k:"k", n:"Kurier", c:"var(--t-k)", rows:[
     [[1,"📖","Schnelllerner I","xp",.08]],
-    [[0,"🪙","Goldader I","coins",.1],[1,"📘","Lernkarten I","cardXp",.08],[2,"🔁","Aus Fehlern lernen I","lossXp",.5]],
+    [[0,"🪙","Goldader I","coins",.1],[1,"📗","Schnellstart","xp",.06],[2,"🔁","Aus Fehlern lernen I","lossXp",.5]],
     [[1,"📖","Schnelllerner II","xp",.1]],
-    [[0,"🏷️","Trainingsrabatt I","train",.15],[1,"👑","Bosswissen I","bossXp",.3],[2,"🚀","Pioniergeist I","firstCo",.5]],
+    [[0,"🏷️","Schmiederabatt I","eqDisc",.1],[1,"👑","Bosswissen I","bossXp",.3],[2,"🚀","Pioniergeist I","firstCo",.5]],
     [[1,"🪙","Goldader II","coins",.15]],
     [[0,"★","Sternenquelle I","ptsLv",1],[1,"📖","Schnelllerner III","xp",.12],[2,"🔁","Aus Fehlern lernen II","lossXp",.5]],
-    [[1,"📘","Lernkarten II","cardXp",.12]],
-    [[0,"🏷️","Trainingsrabatt II","train",.2],[1,"🪙","Goldader III","coins",.2],[2,"👑","Bosswissen II","bossXp",.4]],
+    [[1,"🪙","Goldregen","coins",.1]],
+    [[0,"🏷️","Schmiederabatt II","eqDisc",.15],[1,"🪙","Goldader III","coins",.2],[2,"👑","Bosswissen II","bossXp",.4]],
     [[1,"📖","Schnelllerner IV","xp",.14]],
-    [[0,"★","Sternenquelle II","ptsLv",1],[1,"📘","Lernkarten III","cardXp",.15],[2,"🚀","Pioniergeist II","firstCo",.5]],
+    [[0,"★","Sternenquelle II","ptsLv",1],[1,"👑","Bosswissen III","bossXp",.3],[2,"🚀","Pioniergeist II","firstCo",.5]],
     [[1,"🪙","Goldader IV","coins",.25]],
-    [[0,"🏷️","Trainingsrabatt III","train",.25],[1,"📖","Schnelllerner V","xp",.16],[2,"🧑‍🏫","Bankunterricht","mentor",.2]],
-    [[1,"📘","Lernkarten IV","cardXp",.2]],
+    [[0,"🏷️","Schmiederabatt III","eqDisc",.2],[1,"📖","Schnelllerner V","xp",.16],[2,"✨","Sternenfunke","ptsLv",1]],
+    [[1,"📖","Schnelllerner VI","xp",.15]],
     [[0,"★","Sternenquelle III","ptsLv",1],[1,"⏳","Sternenstunde","xp",.25,1],[2,"🪙","Goldader V","coins",.3]]
   ]}
 ];
@@ -693,34 +681,40 @@ const ZONES = [
     en:[["Leerenwandler","🌑","krieger","lifesteal",2],["Zeitverzerrer","⌛","support","shieldTeam",2],["Gravitonbestie","🐙","tank","taunt",2],["Schattenjäger","👤","schuetze","double",2]],
     boss:["Ereignishorizont","🕳️","magier","dragon",2] }
 ];
+const DEEP = ["Tiefer Raum", "Sternenwüste", "Nebelabgrund", "Kometenfriedhof", "Leerenrand"];
+function zoneAt(z) {
+  if (z < ZONES.length) return ZONES[z];
+  const b = ZONES[z % 5];
+  return { ...b, n:`${DEEP[z % 5]} ${roman(Math.floor(z / 5))}`, sub:"Endlose Weiten jenseits des Schwarzen Lochs. Jede Zone ist stärker als die davor.", deep:true };
+}
 // Gegnerstärke je Etappe (per Simulation abgestimmt)
-const EK = [3.08,3.72,2.55,3.43,3.42,3.16,2.87,3.35,3.56,2.94,9.5,11.76,6.72,7.26,7.39,5.85,7.14,7.55,10.47,7.96,33.67,39.58,18.19,22.16,23.92,17.05,18.56,17.01,21.43,11.93,87.01,40.65,33.12,39.15,45.06,22.09,37.27,36.13,39.52,37.1,146.94,151.24,51.65,70.6,59.77,62.54,37.1,57.4,49.26,30.55];
+const EK = [2.3,2.597,1.865,2.808,2.811,2.564,2.364,2.757,3.114,2.844,8.142,10.54,6.23,6.711,6.712,5.455,7.466,7.793,8.511,6.161,29.19,42.52,16.98,20.43,21.25,16.4,19.46,19.82,21.54,12.11,76.18,48.33,38.38,42.52,55.16,25.78,40.86,35.12,40.36,32.41,137.1,157.7,74.38,82.8,81.79,74.49,55.13,76.84,64.91,43.2,578.9,1951,161.5,208.9,163,136.7,118.4,124.3,145.1,76.98,596.7,474.6,302.1,268.5,312.2,170.1,237.6,189.2,190.9,115.5,1774,3989,347.3,413.6,377.8,206,280.6,197.1,262.4,152.1,1415,319.8,448.3,283,631.2,219.3,398.3,258.7,383.3,213.7,1113,765.3,413.5,382,435.3,314.2,269.6,334.9,256.2,230.8];
+// Nach den abgestimmten Etappen wächst die Stärke im gleichen Tempo weiter wie in den letzten 10 Etappen
+function ek(s) {
+  const n = EK.length;
+  if (s <= n) return EK[s - 1];
+  let r = 1; for (let i = n - 10; i < n; i++) r *= EK[i] / EK[i - 10];
+  r = Math.min(1.15, Math.max(1.02, Math.pow(r, 1 / 10)));
+  const k = Math.ceil((s - n) / 10), base = EK[n - 10 + ((s - n - 1) % 10)];
+  return base * Math.pow(r, k);
+}
 
 /* =========================================================
    SPIELSTAND
    ========================================================= */
-const KEY = "sternenkarten-v3";
+const KEY = "sternenkarten-v4";
 function defSave() {
-  const cards = {}; COMP.filter(c => c.lv <= 1).forEach(c => cards[c.id] = { l:1, xp:0, st:0 });
-  return { v:3, lv:1, xp:0, sp:0, tree:{}, co:50, eq:{ w:0, a:0, h:0, c:0 }, cards, team:["kiesel","funkel"], prog:0, zone:0, auto:false, stats:{ wins:0, losses:0 }, seen:false };
+  return { v:4, lv:1, xp:0, sp:0, tree:{}, co:50, eq:{ w:0, a:0, h:0, c:0 }, rank:{}, prog:0, zone:0, auto:false, stats:{ wins:0, losses:0 }, seen:false };
 }
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const o = JSON.parse(raw); if (o && o.v === 3) { const d = defSave(); return { ...d, ...o, stats:{ ...d.stats, ...o.stats } }; } }
-    // Spielstand der Vorversion übernehmen: Level, Münzen, Karten und Fortschritt bleiben, Talente werden zu Sternenpunkten
-    const old = localStorage.getItem("sternenkarten-v2");
+    if (raw) { const o = JSON.parse(raw); if (o && o.v === 4) { const d = defSave(); return { ...d, ...o, stats:{ ...d.stats, ...o.stats } }; } }
+    // Vorversion übernehmen: Level, Münzen, Baum, Ausrüstung und Fortschritt bleiben, die Karten werden zu festen Begleitern
+    const old = localStorage.getItem("sternenkarten-v3");
     if (old) {
-      const o = JSON.parse(old), s = defSave();
-      if (o && o.v === 2) {
-        Object.assign(s, { lv:o.lv, xp:o.xp, co:(o.co || 0) + (o.dust || 0), prog:o.prog || 0, stats:o.stats || s.stats, seen:true });
-        s.sp = 0; for (let L = 2; L <= s.lv; L++) s.sp += ptsFor(L);
-        s.sp += Math.floor((s.prog || 0) / 10) * BOSS_PTS;
-        Object.entries(o.cards || {}).forEach(([id, c]) => { if (CC[id]) s.cards[id] = c; });
-        COMP.filter(c => c.lv <= s.lv && !s.cards[c.id]).forEach(c => s.cards[c.id] = { l:Math.min(STAGE_CAP[0], Math.max(1, Math.round(s.lv * .75))), xp:0, st:0 });
-        s.team = (o.team || []).filter(id => s.cards[id]).slice(0, slotsAt(s.lv));
-        return s;
-      }
+      const o = JSON.parse(old), d = defSave();
+      if (o && o.v === 3) return { ...d, lv:o.lv, xp:o.xp, sp:o.sp || 0, tree:o.tree || {}, co:o.co || 0, eq:o.eq || d.eq, prog:o.prog || 0, stats:o.stats || d.stats, seen:true };
     }
   } catch (e) {}
   return defSave();
@@ -746,10 +740,12 @@ function heroStats(st = S) {
   const L = st.lv, T = treeFx(st), m = Math.pow(G, L - 1), hc = heroHas("hCrit", L), eq = st.eq || { w:0, a:0, h:0, c:0 };
   return { hp:Math.round(150 * m * (1 + T.hp + T.heroHp) * (1 + eq.a * .04)), atk:Math.round(13 * m * (1 + T.heroAtk) * (1 + eq.w * .04)), spd:5,
     crit:.05 + T.crit + (hc ? .25 : 0) + Math.min(.3, eq.h * .006), critDmg:(hc ? 2.5 : 2) + T.critDmg,
-    ultMul:1 + eq.c * .05, charge:(heroHas("hRain", L) ? 1.5 : 1) * (1 + eq.c * .01) };
+    ultMul:(1 + eq.c * .05) * (heroHas("hUltUp", L) ? 1.5 : 1), startEn:heroHas("hStart", L) ? 50 : 0, charge:(heroHas("hRain", L) ? 1.5 : 1) * (1 + eq.c * .01) };
 }
-function cardStats(id, l, stg, T) {
-  const c = CC[id], R = ROLES[c.role], m = RAR[c.r].m * STAGE_MUL[stg] * Math.pow(G, l - 1);
+const formOf = L => L >= FORM_LV[2] ? 2 : L >= FORM_LV[1] ? 1 : 0;
+const unlocked = (st = S) => COMP.filter(c => c.lv <= st.lv);
+function cardStats(id, L, T, rank) {
+  const c = CC[id], R = ROLES[c.role], m = c.m * STAGE_MUL[formOf(L)] * Math.pow(G, L - 1) * (1 + (rank || 0) * RANK_BONUS);
   let hp = R.hp * m, atk = R.atk * m;
   if (T) {
     const rk = R.key;
@@ -759,13 +755,9 @@ function cardStats(id, l, stg, T) {
   return { hp:Math.round(hp), atk:Math.round(atk), spd:R.spd };
 }
 const abVal = (k, stg, T) => { const v = AB[k].v[stg] * (1 + (T ? T.abil : 0)); return ["dodge","stun","double","crit","counter"].includes(k) ? Math.min(.75, v) : v; };
-const cardCap = (c, st = S) => Math.min(st.lv, STAGE_CAP[c.st]);
-const form = (id, stg) => CC[id].f[stg];
-const evoCost = (id, toStage) => Math.round(EVO_COST[toStage] * RAR[CC[id].r].cost * (1 - treeFx().evo));
-const resetPrice = () => Math.round(200 * Math.pow(1.06, S.lv - 1));
-const trainCost = c => Math.max(1, Math.round((cardNeed(c.l) - c.xp) * .7 * (1 - treeFx().train)));
+const form = (id, L) => CC[id].f[formOf(L)];
+const resetPrice = () => Math.round(200 * Math.pow(1.06, Math.min(S.lv, 120) - 1));
 const unitPower = u => Math.sqrt(u.max * u.atk) * (1 + (u.ab ? .15 : 0));
-const newCardLv = () => Math.min(STAGE_CAP[0], Math.max(1, Math.round(S.lv * .75) + treeFx().newLv));
 
 /* =========================================================
    KAMPF-ENGINE (wird vorab komplett berechnet, dann abgespielt)
@@ -778,29 +770,28 @@ function buildTeam(st = S) {
   const T = treeFx(st), h = heroStats(st), L = st.lv;
   const P = [mkUnit({ side:"p", hero:true, n:"Mondkurier", e:"🧑‍🚀", hp:h.hp, max:h.hp, atk:h.atk, spd:h.spd, crit:h.crit, critDmg:h.critDmg,
     dodge:T.dodge, dr:Math.min(.75, T.dr + T.heroDr), thorns:T.thorns, habs:HERO_AB.filter(a => a.k && a.lv <= L).map(a => a.k),
-    en:0, charge:h.charge, ultMul:h.ultMul, ult:ultAt(L), lv:L, eqs:{ ...(st.eq || { w:0, a:0, h:0, c:0 }) } })];
-  st.team.slice(0, slotsAt(L)).forEach(id => {
-    const c = st.cards[id]; if (!c) return;
-    const s = cardStats(id, c.l, c.st, T), def = CC[id], ab = { k:def.ab, v:abVal(def.ab, c.st, T) }, f = form(id, c.st);
+    en:h.startEn, charge:h.charge, ultMul:h.ultMul, ult:ultAt(L), lv:L, eqs:{ ...(st.eq || { w:0, a:0, h:0, c:0 }) } })];
+  unlocked(st).forEach(d => {
+    const id = d.id, s = cardStats(id, L, T, (st.rank || {})[id]), ab = { k:d.ab, v:abVal(d.ab, formOf(L), T) }, f = form(id, L);
     const hp = Math.round(s.hp * (1 + T.hp));
     P.push(mkUnit({ side:"p", cid:id, n:f[0], e:f[1], hp, max:hp, atk:s.atk, spd:s.spd, ab,
       crit:.05 + T.crit + (ab.k === "crit" ? ab.v : 0), critDmg:2 + T.critDmg,
       dodge:Math.min(.6, T.dodge + (ab.k === "dodge" ? ab.v : 0)), dr:Math.min(.75, T.dr + (ab.k === "taunt" ? ab.v : 0)),
-      thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0), healMul:1 + (ROLES[def.role].key === "healer" ? T.healer : 0) }));
+      thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0), healMul:1 + (ROLES[d.role].key === "healer" ? T.healer : 0) }));
   });
   const aura = T.atk + (heroHas("hAura", L) ? .15 : 0) + P.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
   P.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
   return P;
 }
 function waveIds(s) {
-  const Z = ZONES[zoneOf(s)], st = stageNo(s);
+  const Z = zoneAt(zoneOf(s)), st = stageNo(s);
   if (st === 10) return [Z.en[0], Z.boss, Z.en[3]];
   return Array.from({ length:WAVE[st - 1] }, (_, i) => Z.en[(st + i * 2) % 4]);
 }
 function makeWave(s) {
-  const Z = ZONES[zoneOf(s)], E = recLv(s), m = Math.pow(G, E - 1) * EK[s - 1];
+  const Z = zoneAt(zoneOf(s)), E = recLv(s), m = Math.pow(G, E - 1) * ek(s);
   const W = waveIds(s).map(d => {
-    const R = ROLES[d[2]], boss = d === Z.boss, ab = d[3] ? { k:d[3], v:AB[d[3]].v[d[4]] } : null;
+    const R = ROLES[d[2]], boss = d === Z.boss || d[0] === Z.boss[0], ab = d[3] ? { k:d[3], v:AB[d[3]].v[d[4]] } : null;
     const hp = Math.round(R.hp * m * (boss ? 3.4 : 1)), atk = Math.round(R.atk * m * (boss ? 1.5 : 1));
     return mkUnit({ side:"e", boss, n:d[0], e:d[1], hp, max:hp, atk, spd:R.spd, ab,
       crit:.05 + (ab && ab.k === "crit" ? ab.v : 0), dodge:ab && ab.k === "dodge" ? ab.v : 0,
@@ -981,15 +972,8 @@ function simulate(P, E, T) {
 /* =========================================================
    FORTSCHRITT
    ========================================================= */
-function addCardXP(id, n) {
-  const c = S.cards[id], before = c.l, cap = cardCap(c);
-  c.xp += n;
-  while (c.l < cap && c.xp >= cardNeed(c.l)) { c.xp -= cardNeed(c.l); c.l++; }
-  if (c.l >= cap) c.xp = Math.min(c.xp, cardNeed(c.l));
-  return c.l - before;
-}
 function addHeroXP(n) {
-  const out = { lv:[], abs:[], slots:[], cards:[], pts:0 };
+  const out = { lv:[], abs:[], comps:[], forms:[], pts:0 };
   if (S.lv >= MAX_LV) return out;
   S.xp += n;
   while (S.lv < MAX_LV && S.xp >= heroNeed(S.lv)) {
@@ -997,44 +981,37 @@ function addHeroXP(n) {
     const p = ptsFor(S.lv) + (S.lv % 5 === 0 ? treeFx().ptsLv : 0);
     S.sp += p; out.pts += p;
     HERO_AB.filter(a => a.lv === S.lv).forEach(a => out.abs.push(a.n));
-    if (SLOT_LV.includes(S.lv)) out.slots.push(S.lv);
-    COMP.filter(c => c.lv === S.lv && !S.cards[c.id]).forEach(c => {
-      S.cards[c.id] = { l:newCardLv(), xp:0, st:0 }; out.cards.push(c.id);
-      if (S.team.length < slotsAt(S.lv)) S.team.push(c.id);
-    });
+    ULTS.filter(u => u.lv === S.lv && u.lv > 1).forEach(u => out.abs.push("Spezialangriff " + u.n));
+    COMP.filter(c => c.lv === S.lv).forEach(c => out.comps.push(c.id));
+    if (FORM_LV.includes(S.lv) && S.lv > 1) out.forms.push(S.lv);
   }
   if (S.lv >= MAX_LV) S.xp = 0;
-  if (out.lv.length) Object.keys(S.cards).forEach(id => addCardXP(id, 0));
   return out;
 }
 function teamBonus(k) {
   const T = treeFx();
-  return S.team.slice(0, slotsAt(S.lv)).reduce((a, id) => { const c = S.cards[id]; return a + (c && CC[id].ab === k ? abVal(k, c.st, T) : 0); }, 0);
+  return unlocked().reduce((a, d) => a + (d.ab === k ? abVal(k, formOf(S.lv), T) : 0), 0);
 }
 function grantRewards(win, s) {
   const E = recLv(s), boss = isBoss(s), T = treeFx(), wis = teamBonus("wisdom"), luck = teamBonus("luck");
   let base = 12 * Math.pow(1.1, E - 1) * (boss ? 3 * (1 + T.bossXp) : 1);
   if (!win) base *= .3 * (1 + T.lossXp);
   const hx = Math.round(base * (1 + T.xp + wis));
-  const cx = Math.round(base * .8 * (1 + T.cardXp + wis));
   const first = win && s > S.prog;
   const co = win ? Math.round(9 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 * (1 + T.firstCo) : 1) * (1 + T.coins + luck)) : 0;
   S.co += co;
   let bossPts = 0;
   if (win) { S.stats.wins++; if (first) { S.prog = s; if (boss) { bossPts = BOSS_PTS; S.sp += bossPts; } } } else S.stats.losses++;
-  const team = S.team.slice(0, slotsAt(S.lv)).filter(id => S.cards[id]);
-  const cards = team.map(id => { const c = S.cards[id], from = c.l; addCardXP(id, cx); return { id, from, to:c.l }; });
-  if (T.mentor) Object.keys(S.cards).filter(id => !team.includes(id)).forEach(id => addCardXP(id, Math.round(cx * T.mentor)));
+  const fromLv = S.lv;
   const hero = addHeroXP(hx);
-  cards.forEach(c => c.to = S.cards[c.id].l);
   save();
-  return { win, s, hx, cx, co, first, hero, cards, bossPts };
+  return { win, s, hx, co, first, hero, bossPts, fromLv };
 }
 
 // Siegchance per Probekämpfen schätzen (zwischengespeichert, solange sich das Team nicht ändert)
 const oddsCache = {};
 function winChance(s) {
-  const key = [s, S.lv, Object.keys(S.tree).sort().join(""), S.team.slice(0, slotsAt(S.lv)).map(id => id + S.cards[id].l + "." + S.cards[id].st).join(",")].join("|");
+  const key = [s, S.lv, Object.keys(S.tree).sort().join(""), JSON.stringify(S.rank), JSON.stringify(S.eq)].join("|");
   if (oddsCache[key] == null) {
     let w = 0; const n = 30, T = treeFx();
     for (let i = 0; i < n; i++) if (simulate(buildTeam(), makeWave(s), T).win) w++;
@@ -1077,19 +1054,17 @@ const ICONS = {
   team: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="11" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
   tree: '<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="13" r="2"/><circle cx="12" cy="13" r="2"/><circle cx="19" cy="13" r="2"/><circle cx="12" cy="21" r="1.5"/><path d="M12 6v5M11 5 6 11M13 5l5 6M12 15v4"/></svg>'
 };
-const evolvable = () => Object.keys(S.cards).filter(id => { const c = S.cards[id]; return c.st < 2 && c.l >= STAGE_CAP[c.st]; });
-const freeSlots = () => Math.max(0, Math.min(slotsAt(S.lv), Object.keys(S.cards).length) - S.team.length);
-
+const rankable = () => unlocked().filter(d => S.sp >= rankCost(S.rank[d.id] || 0));
 function renderTop() {
   const n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
   $("#top").innerHTML = `<div class="lvl-badge">Level ${S.lv}</div>
     <div class="xpwrap">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
-      <div class="xptext">${mx ? "Maximales Level erreicht" : `${S.xp} / ${n} EP bis Level ${S.lv + 1}`}</div></div>
-    <div class="wallet"><span class="sp" title="Sternenpunkte">${S.sp}</span><span class="coin" title="Münzen">${S.co}</span></div>`;
+      <div class="xptext">${mx ? "Maximales Level erreicht" : `${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}`}</div></div>
+    <div class="wallet"><span class="sp" title="Sternenpunkte">${fmt(S.sp)}</span><span class="coin" title="Münzen">${fmt(S.co)}</span></div>`;
 }
 function renderNav() {
-  const tabs = [["home","Start"],["hero","Held"],["map","Etappen"],["team","Team"],["tree","Baum"]];
-  const badge = { tree:buyable().length, team:evolvable().length + freeSlots(), hero:eqUpgradable().length };
+  const tabs = [["home","Start"],["hero","Held"],["map","Etappen"],["team","Begleiter"],["tree","Baum"]];
+  const badge = { tree:buyable().length, team:buyable().length ? 0 : rankable().length, hero:eqUpgradable().length };
   $("#nav").innerHTML = tabs.map(([k, n]) =>
     `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}"><span class="badge">${ICONS[k]}${badge[k] ? `<b>${badge[k]}</b>` : ""}</span>${n}</button>`).join("");
 }
@@ -1099,13 +1074,14 @@ function render() {
   m.classList.toggle("fill", UI.tab === "tree");
   m.innerHTML = ({ home:screenHome, hero:screenHero, map:screenMap, team:screenTeam, tree:screenTree })[UI.tab]();
   if (UI.tab === "tree") afterTree();
+  if (UI.tab === "map") { const zt = $("#zoneTabs"), on = $("#zoneTabs .on"); if (zt && on) zt.scrollLeft = on.offsetLeft - zt.clientWidth / 2 + on.clientWidth / 2; }
 }
 
 /* ---------- Held zeichnen ---------- */
 let SVGID = 0;
 function heroSVG(L, eq, size = 120, anim = true) {
   eq = eq || { w:0, a:0, h:0, c:0 };
-  const t = titleIdx(L), c = k => TIER_COL[eqTier(eq[k])], id = "hs" + (++SVGID);
+  const t = Math.min(5, titleIdx(L)), c = k => TIER_COL[eqTier(eq[k])], id = "hs" + (++SVGID);
   const suit = c("a"), helm = c("h"), wpn = c("w"), core = c("c"), aura = TIER_COL[t];
   const star = (x, y, r, col) => `<path d="M${x} ${y - r} L${x + r * .3} ${y - r * .3} L${x + r} ${y} L${x + r * .3} ${y + r * .3} L${x} ${y + r} L${x - r * .3} ${y + r * .3} L${x - r} ${y} L${x - r * .3} ${y - r * .3} Z" fill="${col}"/>`;
   return `<svg class="hero-svg ${anim ? "idle" : ""}" width="${size}" height="${Math.round(size * 7 / 6)}" viewBox="0 0 120 140" role="img" aria-label="Der Mondkurier">
@@ -1138,29 +1114,30 @@ function heroSVG(L, eq, size = 120, anim = true) {
 }
 
 /* ---------- Held ---------- */
-const eqUpgradable = () => EQUIP.filter(e => S.eq[e.k] < S.lv && S.co >= eqCost(S.eq[e.k]));
+const eqUpgradable = () => EQUIP.filter(e => S.co >= eqCost(S.eq[e.k]));
 function screenHero() {
   const h = heroStats(), t = heroTitle(S.lv), ti = titleIdx(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV, U = ultAt(S.lv), nextU = ULTS.find(u => u.lv > S.lv);
   return `<div class="stage-hero" style="--hc:${t[2]}">
       ${heroSVG(S.lv, S.eq, 170)}
-      <div class="tt">${t[1]}</div><h2>Der Mondkurier</h2><div class="lvline">Level ${S.lv} von ${MAX_LV}</div>
-      ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="margin-top:4px">${mx ? "Maximales Level erreicht" : `${S.xp} / ${n} EP bis Level ${S.lv + 1}`}</div>
+      <div class="tt">${t[1]}</div><h2>Der Mondkurier</h2><div class="lvline">Level ${S.lv}</div>
+      ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="margin-top:4px">${mx ? "Maximales Level erreicht" : `${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}`}</div>
     </div>
-    <div class="stats4"><div><b>${h.hp}</b><span>Leben</span></div><div><b>${h.atk}</b><span>Angriff</span></div>
+    <div class="stats4"><div><b>${fmt(h.hp)}</b><span>Leben</span></div><div><b>${fmt(h.atk)}</b><span>Angriff</span></div>
       <div><b>${Math.round(h.crit * 100)} %</b><span>Krit</span></div><div><b>${Math.round(U.mult * h.ultMul * 100)} %</b><span>Spezial</span></div></div>
 
-    <div class="label">Ausrüstung · mit Münzen verbessern</div>
-    <div class="eqgrid">${EQUIP.map(e => { const l = S.eq[e.k], tc = TIER_COL[eqTier(l)], cap = l >= S.lv, cost = eqCost(l);
+    <div class="label">Ausrüstung · mit Münzen verbessern, ohne Obergrenze</div>
+    <div class="eqgrid">${EQUIP.map(e => { const l = S.eq[e.k], tc = TIER_COL[eqTier(l)], cap = false, cost = eqCost(l);
       return `<div class="eq" style="--tc:${tc}"><div class="eh"><span class="ei">${e.i}</span><span><span class="en">${e.tiers[eqTier(l)]}</span><br><span class="ek">${e.n} · Stufe ${l}</span></span></div>
         <span class="ed">${l ? e.d(l) : "Noch keine Wirkung"}${eqTier(l) < 5 ? `. Neues Aussehen ab Stufe ${(eqTier(l) + 1) * 10}.` : "."}</span>
-        <button class="btn sm ${cap ? "ghost" : ""}" data-act="eqUp" data-k="${e.k}" ${cap || S.co < cost ? "disabled" : ""}>${cap ? `Max. Heldenlevel ${S.lv}` : `Stufe ${l + 1} · <span class="coin">${cost}</span>`}</button></div>`; }).join("")}</div>
+        <button class="btn sm ${cap ? "ghost" : ""}" data-act="eqUp" data-k="${e.k}" ${cap || S.co < cost ? "disabled" : ""}>${cap ? `Max. Heldenlevel ${S.lv}` : `Stufe ${l + 1} · <span class="coin">${fmt(cost)}</span>`}</button></div>`; }).join("")}</div>
 
     <div class="label">Spezialangriff</div>
     <div class="panel ultbox"><span class="uicon">☄️</span><div><b>${U.n}</b><p class="muted" style="font-size:14px">${U.d} Wird ausgelöst, sobald die Kurier-Energie voll ist. Sie lädt sich bei jeder Aktion und bei jedem Treffer auf.</p>
       ${nextU ? `<p style="font-size:13px;color:var(--gold);margin-top:4px">Ab Level ${nextU.lv}: ${nextU.n}</p>` : ""}</div></div>
 
     <div class="label">Erscheinung · wächst mit dem Level</div>
-    <div class="forms" style="--hc:${t[2]}">${HERO_TITLES.map((x, i) => `<div class="${i === ti ? "on" : i < ti ? "done" : ""}">${heroSVG(x[0], i <= ti ? S.eq : null, 44, false)}<span>Lv ${x[0]}</span></div>`).join("")}</div>
+    <div class="forms" style="--hc:${t[2]}">${HERO_TITLES.slice(0, 6).map((x, i) => `<div class="${i === ti ? "on" : i < ti ? "done" : ""}">${heroSVG(x[0], i <= ti ? S.eq : null, 44, false)}<span>Lv ${x[0]}</span></div>`).join("")}</div>
+    <p class="muted" style="font-size:13px">Weitere Titel: ${HERO_TITLES.slice(6).map(x => `<b style="color:${S.lv >= x[0] ? "var(--gold)" : "var(--moon)"}">${x[1]}</b> ab Level ${x[0]}`).join(", ")}.</p>
 
     <div class="label">Fähigkeiten nach Level</div>
     <div class="ablist">${HERO_AB.map(a => `<div class="abrow ${a.lv > S.lv ? "locked" : ""}"><span class="lvtag">${a.lv > S.lv ? "LV " + a.lv : "✓ LV " + a.lv}</span>
@@ -1175,20 +1152,19 @@ const eqDots = () => `<span class="eqdots">${EQUIP.map(e => `<span style="--tc:$
 /* ---------- Start ---------- */
 function screenHome() {
   const t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV, h = heroStats();
-  const s = Math.min(50, S.prog + 1), Z = ZONES[zoneOf(s)], c = winChance(s), done = S.prog >= 50, fs = farmStage();
-  const next = HERO_AB.find(a => a.lv > S.lv), nextSlot = SLOT_LV.find(x => x > S.lv), nextCard = COMP.find(cc => cc.lv > S.lv);
+  const s = S.prog + 1, Z = zoneAt(zoneOf(s)), c = winChance(s), done = false, fs = farmStage();
+  const next = HERO_AB.find(a => a.lv > S.lv), nextCard = COMP.find(cc => cc.lv > S.lv), nextForm = FORM_LV.find(x => x > S.lv);
   const todos = [], nb = buyable().length;
   if (nb) todos.push({ i:"★", b:`${S.sp} Sternenpunkte im Baum ausgeben`, s:`${nb} Upgrade${nb > 1 ? "s" : ""} kannst du dir gerade leisten.`, act:'data-act="tab" data-k="tree"' });
-  evolvable().forEach(id => { const c2 = S.cards[id], nf = form(id, c2.st + 1), cost = evoCost(id, c2.st + 1);
-    todos.push({ i:nf[1], b:`${form(id, c2.st)[0]} kann sich entwickeln`, s:S.co >= cost ? `Wird zu ${nf[0]} · kostet ${cost} Münzen` : `Dir fehlen noch ${cost - S.co} Münzen`, act:`data-act="card" data-id="${id}"`, hot:S.co >= cost }); });
-  if (freeSlots()) todos.push({ i:"＋", b:"Freier Platz im Team", s:"Setze eine weitere Karte ein.", act:'data-act="tab" data-k="team"' });
+  const rk = rankable();
+  if (!nb && rk.length) todos.push({ i:"⬆️", b:"Begleiter im Rang steigern", s:`${rk.length} Begleiter ${rk.length > 1 ? "können" : "kann"} mit Sternenpunkten aufsteigen.`, act:'data-act="tab" data-k="team"' });
   const eu = eqUpgradable();
   if (eu.length) todos.unshift({ i:eu[0].i, b:"Ausrüstung des Helden verbessern", s:`${eu.map(e => e.n).join(", ")} ${eu.length > 1 ? "können" : "kann"} eine Stufe höher`, act:'data-act="tab" data-k="hero"' });
 
   return `<button class="herocard" data-act="tab" data-k="hero" style="--hc:${t[2]}">
       ${heroSVG(S.lv, S.eq, 92)}
       <span class="hb"><span class="ht">${t[1]}</span><span class="hn">Mondkurier<br>Level ${S.lv}</span>
-        ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${h.hp} Leben · ${h.atk} Angriff</span>${eqDots()}</span>
+        ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${fmt(h.hp)} Leben · ${fmt(h.atk)} Angriff · ${unlocked().length} von 8 Begleitern</span>${eqDots()}</span>
       <span class="chev">›</span></button>
     ${done ? `<div class="nextfight" style="--zbg:${Z.bg}"><div class="nf-kicker">Geschafft</div>
         <div class="nf-title">Alle 50 Etappen bestanden!</div>
@@ -1199,7 +1175,7 @@ function screenHome() {
         <div class="nf-title">${Z.n} · Etappe ${stageNo(s)}</div></div>${chanceHTML(s)}</div>
       <div class="nf-foes">${waveIds(s).map(d => d[1]).join("")}</div>
       <button class="btn big" data-act="fight" data-s="${s}">Kämpfen</button>
-      ${c < .4 && fs ? `<div class="nf-hint">Dein Team ist hier noch zu schwach. Sammle erst EP in <b>Etappe ${stageNo(fs)}</b> von ${ZONES[zoneOf(fs)].n}, dort gewinnst du sicher.</div>
+      ${c < .4 && fs ? `<div class="nf-hint">Dein Team ist hier noch zu schwach. Sammle erst EP in <b>Etappe ${stageNo(fs)}</b> von ${zoneAt(zoneOf(fs)).n}, dort gewinnst du sicher.</div>
         <button class="btn ghost wide" data-act="fight" data-s="${fs}">EP sammeln in Etappe ${stageNo(fs)} · ${Math.round(winChance(fs) * 100)} %</button>` : ""}
       <button class="switchrow" data-act="auto"><span><b>Automatisch wiederholen</b><br>Nach jedem Sieg startet derselbe Kampf neu.</span><span class="sw ${S.auto ? "on" : ""}"></span></button>
     </div>`}
@@ -1207,19 +1183,19 @@ function screenHome() {
     <div class="todos">${todos.length ? todos.map(x => `<button class="todo ${x.hot !== false ? "hot" : ""}" ${x.act}>
         <span class="ti">${x.i}</span><span class="tt"><b>${x.b}</b><span>${x.s}</span></span><span class="chev">›</span></button>`).join("")
       : `<div class="todo" style="cursor:default"><span class="ti">✓</span><span class="tt"><b>Alles erledigt</b><span>Kämpfe weiter, um EP für das nächste Level zu sammeln.</span></span></div>`}</div>
-    ${next || nextSlot || nextCard ? `<div class="label">Nächste Belohnungen</div><div class="panel goal">
-      ${nextCard ? `<div>Level <b>${nextCard.lv}</b>: neue Karte <b>${nextCard.f[0][1]} ${nextCard.f[0][0]}</b></div>` : ""}
-      ${next ? `<div>Level <b>${next.lv}</b>: neue Fähigkeit der Hauptkarte <b>${next.n}</b></div>` : ""}
-      ${nextSlot ? `<div>Level <b>${nextSlot}</b>: neuer Platz im Team</div>` : ""}
-      <div>Jedes Level: <b>${ptsFor(S.lv + 1)} Sternenpunkte</b> für den Baum</div></div>` : ""}`;
+    <div class="label">Nächste Belohnungen</div><div class="panel goal">
+      ${nextCard ? `<div>Level <b>${nextCard.lv}</b>: neuer Begleiter <b>${nextCard.f[0][1]} ${nextCard.f[0][0]}</b></div>` : ""}
+      ${next ? `<div>Level <b>${next.lv}</b>: neue Fähigkeit des Helden <b>${next.n}</b></div>` : ""}
+      ${nextForm ? `<div>Level <b>${nextForm}</b>: alle Begleiter entwickeln sich weiter</div>` : ""}
+      <div>Jedes Level: alle Begleiter werden stärker, dazu <b>${ptsFor(S.lv + 1)} Sternenpunkte</b></div></div>`;
 }
 /* ---------- Etappen ---------- */
 function screenMap() {
-  const z = S.zone, Z = ZONES[z], zOpen = i => i === 0 || S.prog >= i * 10;
+  const z = S.zone, Z = zoneAt(z), zOpen = i => i === 0 || S.prog >= i * 10, nz = Math.max(5, zoneOf(S.prog + 1) + 2);
   const stages = Array.from({ length:10 }, (_, i) => z * 10 + i + 1);
-  return `<div class="screen-title"><h2>Etappen</h2><p>Die Prozentzahl ist deine Siegchance mit dem jetzigen Team. Erstmals besiegte Bosse geben ${BOSS_PTS} Sternenpunkte.</p></div>
-    <div class="zonetabs">${ZONES.map((x, i) => `<button class="ztab ${i === z ? "on" : ""} ${zOpen(i) ? "" : "lock"}" data-act="zone" data-z="${i}">
-      <b>${zOpen(i) ? "" : "🔒 "}Zone ${i + 1}</b><span>${x.n}</span></button>`).join("")}</div>
+  return `<div class="screen-title"><h2>Etappen</h2><p>Die Prozentzahl ist deine Siegchance mit dem jetzigen Team. Erstmals besiegte Bosse geben ${BOSS_PTS} Sternenpunkte. Nach Zone 5 geht es endlos weiter.</p></div>
+    <div class="zonetabs" id="zoneTabs">${Array.from({ length:nz }, (_, i) => `<button class="ztab ${i === z ? "on" : ""} ${zOpen(i) ? "" : "lock"}" data-act="zone" data-z="${i}">
+      <b>${zOpen(i) ? "" : "🔒 "}Zone ${i + 1}</b><span>${zoneAt(i).n}</span></button>`).join("")}</div>
     <div class="zonehead" style="--zbg:${Z.bg}"><h3>${Z.n}</h3><p>${Z.sub}</p></div>
     <div class="stages">${stages.map(s => {
       const open = s <= S.prog + 1, cleared = s <= S.prog, boss = isBoss(s);
@@ -1230,70 +1206,41 @@ function screenMap() {
     }).join("")}</div>`;
 }
 
-/* ---------- Team ---------- */
+/* ---------- Begleiter ---------- */
 function screenTeam() {
-  const n = slotsAt(S.lv);
-  const bench = Object.keys(S.cards).filter(id => !S.team.includes(id)).sort((a, b) => S.cards[b].l - S.cards[a].l || CC[b].lv - CC[a].lv);
-  const future = COMP.filter(c => !S.cards[c.id]);
-  const t = heroTitle(S.lv);
-  const slot = i => {
-    if (i >= n) return `<div class="slot locked">🔒<span>ab Level ${SLOT_LV[i]}</span></div>`;
-    const id = S.team[i];
-    if (!id) return `<button class="slot empty" data-act="pick"><span style="font-size:24px">＋</span><span>Karte einsetzen</span></button>`;
-    const c = S.cards[id], f = form(id, c.st), ev = c.st < 2 && c.l >= STAGE_CAP[c.st];
-    return `<button class="slot full r-${CC[id].r}" data-act="card" data-id="${id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span>
-      <span class="sl">Lv ${c.l}</span>${ev ? '<span class="flag">Entwickeln</span>' : ""}</button>`;
+  const t = heroTitle(S.lv), T = treeFx(), all = unlocked().length === COMP.length;
+  const tile = d => {
+    if (d.lv > S.lv) return `<div class="slot locked"><span class="se" style="filter:grayscale(1) brightness(.5)">${d.f[0][1]}</span><span class="sn">${d.f[0][0]}</span><span class="sl">ab Level ${d.lv}</span></div>`;
+    const r = S.rank[d.id] || 0, f = form(d.id, S.lv);
+    return `<button class="slot full r-${d.r}" data-act="card" data-id="${d.id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span>
+      <span class="sl">Lv ${S.lv}${r ? ` · Rang ${r}` : ""}</span>${S.sp >= rankCost(r) ? '<span class="flag">Rang +1</span>' : ""}</button>`;
   };
-  const row = id => {
-    const c = S.cards[id], d = CC[id], f = form(id, c.st), ev = c.st < 2 && c.l >= STAGE_CAP[c.st];
-    return `<button class="crow r-${d.r}" data-act="card" data-id="${id}"><span class="ce">${f[1]}</span>
-      <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${AB[d.ab].n}: ${AB[d.ab].d(abVal(d.ab, c.st, treeFx()))}</span>${ev ? '<span><span class="flag">Kann sich entwickeln</span></span>' : ""}</span>
-      <span class="clv">Lv ${c.l}</span></button>`;
-  };
-  return `<div class="screen-title"><h2>Team</h2><p>Die Hauptkarte kämpft immer. Dazu kommen bis zu 7 Karten. Tippe eine Karte an für Details.</p></div>
-    <div class="label">Im Kampf · ${S.team.length + 1} von ${n + 1}</div>
-    <div class="lineup">
-      <button class="slot hero" data-act="tab" data-k="hero" style="--hc:${t[2]}">${heroSVG(S.lv, S.eq, 44, false)}<span class="sn">Mondkurier</span><span class="sl">Lv ${S.lv}</span><span class="flag">Hauptkarte</span></button>
-      ${[0,1,2,3,4,5,6].map(slot).join("")}</div>
-    <div class="label">Auf der Bank · ${bench.length}</div>
-    ${bench.length ? `<div class="clist">${bench.map(row).join("")}</div>` : `<p class="muted" style="font-size:14px">Alle deine Karten sind im Team.</p>`}
-    ${future.length ? `<div class="label">Kommende Karten · ${future.length}</div>
-      <div class="clist">${future.slice(0, 4).map(d => `<div class="crow future r-${d.r}"><span class="ce">${d.f[0][1]}</span>
-        <span class="ci"><span class="cn">${d.f[0][0]}</span><span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}</span></span><span class="clv">ab Lv ${d.lv}</span></div>`).join("")}</div>
-      ${future.length > 4 ? `<p class="muted" style="font-size:14px">Und ${future.length - 4} weitere Karten bis Level ${future[future.length - 1].lv}.</p>` : ""}` : ""}`;
-}
-function pickModal() {
-  const bench = Object.keys(S.cards).filter(id => !S.team.includes(id)).sort((a, b) => S.cards[b].l - S.cards[a].l);
-  modal(`<h2>Karte einsetzen</h2>
-    ${bench.length ? `<div class="clist">${bench.map(id => { const c = S.cards[id], d = CC[id], f = form(id, c.st);
-      return `<button class="crow r-${d.r}" data-act="putIn" data-id="${id}"><span class="ce">${f[1]}</span>
-        <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}</span></span><span class="clv">Lv ${c.l}</span></button>`; }).join("")}</div>`
-    : `<p>Du hast gerade keine Karte auf der Bank. Neue Karten bekommst du mit höherem Heldenlevel.</p>`}
-    <button class="btn ghost" data-act="close">Schließen</button>`);
+  return `<div class="screen-title"><h2>Begleiter</h2><p>${all ? "Dein Team ist komplett. Ab jetzt werden alle 8 Begleiter mit jedem Level stärker, und mit Sternenpunkten steigerst du ihren Rang ohne Obergrenze."
+      : `Der Held hat 8 feste Begleiter. Sie kommen mit dem Heldenlevel dazu und leveln automatisch mit. ${unlocked().length} von 8 sind schon dabei.`}</p></div>
+    <div class="lineup" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      <button class="slot hero" data-act="tab" data-k="hero" style="--hc:${t[2]}">${heroSVG(S.lv, S.eq, 44, false)}<span class="sn">Mondkurier</span><span class="sl">Lv ${S.lv}</span><span class="flag">Held</span></button>
+      ${COMP.map(tile).join("")}</div>
+    <div class="label">Fähigkeiten</div>
+    <div class="clist">${COMP.map(d => { const on = d.lv <= S.lv, f = on ? form(d.id, S.lv) : d.f[0];
+      return `<button class="crow r-${d.r} ${on ? "" : "future"}" ${on ? `data-act="card" data-id="${d.id}"` : ""}><span class="ce">${f[1]}</span>
+        <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}: ${AB[d.ab].d(abVal(d.ab, formOf(S.lv), T))}</span></span>
+        <span class="clv">${on ? `Rang ${S.rank[d.id] || 0}` : `ab Lv ${d.lv}`}</span></button>`; }).join("")}</div>`;
 }
 function cardModal(id) {
-  const T = treeFx(), c = S.cards[id], d = CC[id], f = form(id, c.st), s = cardStats(id, c.l, c.st, T), cap = cardCap(c), inTeam = S.team.includes(id);
-  const need = cardNeed(c.l), atStageCap = c.l >= STAGE_CAP[c.st], canTrain = c.l < cap, tc = trainCost(c);
-  const evoOK = atStageCap && c.st < 2, ec = c.st < 2 ? evoCost(id, c.st + 1) : 0, nf = c.st < 2 ? form(id, c.st + 1) : null;
-  const teamFull = S.team.length >= slotsAt(S.lv);
-  let prog;
-  if (evoOK) prog = `<div class="bb">Diese Form ist voll ausgelevelt. <b>Entwickle die Karte</b>, damit sie weiter leveln kann.</div>`;
-  else if (c.l >= MAX_LV) prog = `<div class="bb">Maximales Level erreicht.</div>`;
-  else if (!canTrain) prog = `<div class="bb">Karten können nicht über dein Heldenlevel (${S.lv}) steigen. Level zuerst die Hauptkarte.</div>`;
-  else prog = `${bar(c.xp, need)}<div class="bb">${c.xp} / ${need} EP bis Level ${c.l + 1}. Karten im Team bekommen nach jedem Kampf EP.</div>`;
+  const T = treeFx(), d = CC[id], r = S.rank[id] || 0, f = form(id, S.lv), s = cardStats(id, S.lv, T, r), cost = rankCost(r);
+  const nf = FORM_LV.find(x => x > S.lv);
   modal(`<div class="mhead r-${d.r}"><span class="me">${f[1]}</span>
-      <div class="mt"><h2>${f[0]}</h2><p><span class="rar">${RAR[d.r].n}</span> · ${ROLES[d.role].n} · Level ${c.l}</p></div></div>
-    <div class="box"><div class="bt">Fähigkeit: ${AB[d.ab].n}</div><div class="bb">${AB[d.ab].d(abVal(d.ab, c.st, T))}</div></div>
-    <div class="stats3"><div><b>${s.hp}</b><span>Leben</span></div><div><b>${s.atk}</b><span>Angriff</span></div><div><b>${stars(c.st)}</b><span>Form</span></div></div>
-    <div class="box"><div class="bt">Fortschritt</div>${prog}</div>
-    <div class="row">
-      ${canTrain ? `<button class="btn ghost" data-act="train" data-id="${id}" ${S.co < tc ? "disabled" : ""}>+1 Level · <span class="coin">${tc}</span></button>` : ""}
-      <button class="btn ${inTeam ? "ghost" : "green"}" data-act="toggleTeam" data-id="${id}" ${!inTeam && teamFull ? "disabled" : ""}>${inTeam ? "Auf die Bank" : teamFull ? "Team ist voll" : "Ins Team"}</button>
-    </div>
+      <div class="mt"><h2>${f[0]}</h2><p><span class="rar">${RAR_N[d.r]}</span> · ${ROLES[d.role].n} · Level ${S.lv} · Rang ${r}</p></div></div>
+    <div class="box"><div class="bt">Fähigkeit: ${AB[d.ab].n}</div><div class="bb">${AB[d.ab].d(abVal(d.ab, formOf(S.lv), T))}</div></div>
+    <div class="stats3"><div><b>${fmt(s.hp)}</b><span>Leben</span></div><div><b>${fmt(s.atk)}</b><span>Angriff</span></div><div><b>${stars(formOf(S.lv))}</b><span>Form</span></div></div>
+    <div class="box"><div class="bt">Level</div><div class="bb">Begleiter haben immer dasselbe Level wie der Held. Jeder Level-Aufstieg macht sie stärker, ohne dass du etwas tun musst.</div></div>
+    <div class="box"><div class="bt">Rang · ohne Obergrenze</div>
+      <div class="bb">Jeder Rang gibt <b>+${Math.round(RANK_BONUS * 100)} %</b> Leben und Angriff. Jetzt: +${Math.round(r * RANK_BONUS * 100)} %.</div>
+      <button class="btn green wide" data-act="rankUp" data-id="${id}" ${S.sp < cost ? "disabled" : ""}>Rang ${r + 1} · ${cost} ★</button>
+      ${S.sp < cost ? `<div class="bb" style="font-size:13px;color:var(--dim)">Dir fehlen ${cost - S.sp} Sternenpunkte.</div>` : ""}</div>
     <div class="box"><div class="bt">Entwicklung</div>
-      <div class="evorow r-${d.r}">${d.f.map((x, i) => `<div class="${i === c.st ? "on" : ""}"><div class="ee">${x[1]}</div><div class="en">${x[0]}</div><div class="el">${i === 0 ? "Start" : "ab Level " + STAGE_CAP[i - 1]}</div></div>`).join("")}</div>
-      ${nf ? `<div class="bb" style="font-size:14px;color:var(--dim)">Als ${nf[0]}: ${AB[d.ab].d(abVal(d.ab, c.st + 1, T))}</div>` : ""}
-      ${evoOK ? `<button class="btn wide" data-act="evolve" data-id="${id}" ${S.co < ec ? "disabled" : ""}>Jetzt entwickeln · <span class="coin">${ec}</span></button>` : ""}
+      <div class="evorow r-${d.r}">${d.f.map((x, i) => `<div class="${i === formOf(S.lv) ? "on" : ""}"><div class="ee">${x[1]}</div><div class="en">${x[0]}</div><div class="el">ab Level ${FORM_LV[i]}</div></div>`).join("")}</div>
+      ${nf ? `<div class="bb" style="font-size:14px;color:var(--dim)">Auf Level ${nf} entwickelt sich ${f[0]} automatisch: ${AB[d.ab].d(abVal(d.ab, formOf(nf), T))}</div>` : ""}
     </div>
     <button class="btn ghost" data-act="close">Schließen</button>`);
 }
@@ -1347,9 +1294,9 @@ function helpModal() {
   modal(`<h2>So spielst du</h2>
     <div class="steps">
       <div><i>1</i><p>Kämpfen<span>Kämpfe laufen von allein. Tippe auf „Kämpfen“ und schau zu, oder spule vor.</span></p></div>
-      <div><i>2</i><p>Leveln<span>Jeder Kampf gibt EP. Neue Level stärken die Hauptkarte und schalten neue Karten frei.</span></p></div>
+      <div><i>2</i><p>Leveln<span>Jeder Kampf gibt EP. Jedes Level macht den Helden und alle Begleiter stärker. Bis Level 32 schließen sich 8 Begleiter an.</span></p></div>
       <div><i>3</i><p>Upgrade-Baum<span>Jedes Level gibt Sternenpunkte. Damit kaufst du Upgrades im Baum, Schritt für Schritt nach unten.</span></p></div>
-      <div><i>4</i><p>Karten entwickeln<span>Karten im Team leveln mit und entwickeln sich auf Level 20 und 40 in eine stärkere Form.</span></p></div>
+      <div><i>4</i><p>Ausrüsten und aufsteigen<span>Mit Münzen verbesserst du die Ausrüstung des Helden, mit Sternenpunkten den Rang der Begleiter. Beides geht endlos weiter.</span></p></div>
     </div>
     <p>Ist ein Kampf zu schwer, sammle erst EP in einer leichteren Etappe. Die Siegchance zeigt dir, wo du stehst.</p>
     <button class="btn" data-act="close">Los geht's</button>`);
@@ -1364,15 +1311,15 @@ function startBattle(s) {
   const res = simulate(P, E, treeFx());
   B = { s, res, units:Object.fromEntries(units.map(u => [u.uid, u])), i:0, timer:null, done:false };
   const heroTile = u => `<div class="unit hero herobig" id="u${u.uid}"><span class="ust" id="st${u.uid}"></span>${heroSVG(u.lv, u.eqs, 58, false)}
-      <span class="hbx"><span class="un">Mondkurier · Lv ${u.lv}</span><span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${u.hp}</span>
+      <span class="hbx"><span class="un">Mondkurier · Lv ${u.lv}</span><span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${fmt(u.hp)}</span>
       <span class="enlabel"><span>Kurier-Energie</span><span>${u.ult.n}</span></span><span class="uen" id="en${u.uid}"><i></i></span></span></div>`;
   const tile = u => u.hero ? heroTile(u) : `<div class="unit ${u.boss ? "boss" : ""}" id="u${u.uid}">
       <span class="ust" id="st${u.uid}"></span><span class="ue">${u.e}</span><span class="un">${u.n}</span>
       <span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${u.hp}</span></div>`;
   const bt = $("#battle");
-  bt.style.setProperty("--zbg", ZONES[zoneOf(s)].bg);
+  bt.style.setProperty("--zbg", zoneAt(zoneOf(s)).bg);
   bt.innerHTML = `<div class="bwrap">
-    <div class="b-top"><div><div class="bz">${ZONES[zoneOf(s)].n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Kampf beginnt</div></div>
+    <div class="b-top"><div><div class="bz">${zoneAt(zoneOf(s)).n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Kampf beginnt</div></div>
       <div class="speeds">${[1,2,4].map(x => `<button data-act="speed" data-x="${x}" class="${UI.speed === x ? "on" : ""}">${x}×</button>`).join("")}<button data-act="skip">Ergebnis</button></div></div>
     <div class="b-enemies"><div class="sidelabel foe">Gegner</div><div class="side">${units.filter(u => u.side === "e").map(tile).join("")}</div></div>
     <div class="b-log" id="bLog"><span>${S.auto ? "Automatisch wiederholen ist an" : "Dein Team kämpft von allein."}</span></div>
@@ -1386,7 +1333,7 @@ function setHP(uid, hp, sh) {
   const u = B.units[uid], el = $("#u" + uid); if (!el) return;
   el.querySelector(".uhp i").style.width = Math.max(0, hp / u.max * 100) + "%";
   el.querySelector(".ush").style.width = Math.min(100, sh / u.max * 100) + "%";
-  $("#hv" + uid).textContent = sh > 0 ? `${hp} +${sh}⛨` : hp;
+  $("#hv" + uid).textContent = sh > 0 ? `${fmt(hp)} +${fmt(sh)}⛨` : fmt(hp);
 }
 function centerOf(uid) {
   const layer = $("#fx"), el = $("#u" + uid); if (!layer || !el) return null;
@@ -1429,9 +1376,9 @@ function applyEv(e, quiet) {
     case "act": if (!quiet) { document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act")); const el = $("#u" + e.u); if (el) el.classList.add("act"); } return 40;
     case "hit": setHP(e.u, e.hp, e.sh); if (!quiet) {
         if (!e.aoe && !e.thorns && !e.guard) beam(e.a, e.u);
-        floatAt(e.u, (e.crit ? "Krit! " : "") + e.v, e.crit ? "crit" : "dmg"); flash(e.u, "hurt"); burst(e.u, e.crit ? "crit" : "");
+        floatAt(e.u, (e.crit ? "Krit! " : "") + fmt(e.v), e.crit ? "crit" : "dmg"); flash(e.u, "hurt"); burst(e.u, e.crit ? "crit" : "");
         if (e.guard) say(`${nm(e.u)} fängt ${e.v} Schaden ab`);
-        else if (!e.aoe) say(e.thorns ? `${nm(e.u)} sticht sich an ${nm(e.a)}: ${e.v} Schaden` : `${nm(e.a)} trifft ${nm(e.u)}: <b>${e.v}</b> Schaden${e.crit ? " (kritisch)" : ""}`); }
+        else if (!e.aoe) say(e.thorns ? `${nm(e.u)} sticht sich an ${nm(e.a)}: ${e.v} Schaden` : `${nm(e.a)} trifft ${nm(e.u)}: <b>${fmt(e.v)}</b> Schaden${e.crit ? " (kritisch)" : ""}`); }
       return e.aoe ? 110 : e.thorns || e.guard ? 150 : 340;
     case "miss": if (!quiet) { floatAt(e.u, "ausgewichen", "miss"); if (!e.aoe) say(`${nm(e.u)} weicht ${nm(e.a)} aus`); } return e.aoe ? 110 : 260;
     case "heal": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, "+" + e.v, "heal"); burst(e.u, "heal"); if (e.a && e.a !== e.u) say(`${nm(e.a)} heilt ${nm(e.u)} um ${e.v}`); } return 200;
@@ -1467,28 +1414,24 @@ function finishBattle() {
   setTimeout(() => { if (B) showResult(R); }, 500);
 }
 function showResult(R) {
-  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV, auto = S.auto && R.win && !R.hero.cards.length, lvUp = R.hero.lv.length;
-  const cardLines = R.cards.map(c => {
-    const st = S.cards[c.id], f = form(c.id, st.st), up = c.to > c.from;
-    return `<div class="cg"><span class="ge">${f[1]}</span><span class="gn">${f[0]}</span>
-      <span class="gl ${up ? "up" : ""}">${up ? `Level ${c.from} → ${c.to}` : `Level ${c.to}`}</span>${bar(st.xp, cardNeed(st.l), st.l >= cardCap(st) ? "gold" : "")}</div>`;
-  }).join("");
-  const newCards = R.hero.cards.map(id => { const d = CC[id];
-    return `<div class="drop r-${d.r}"><div class="dm">Neue Karte freigeschaltet!</div><div class="de">${d.f[0][1]}</div><div class="dn">${d.f[0][0]}</div>
-      <div class="dm"><span class="rar">${RAR[d.r].n}</span> · ${ROLES[d.role].n} · ${AB[d.ab].n} · startet auf Level ${S.cards[id].l}${S.team.includes(id) ? " · schon im Team" : ""}</div></div>`; }).join("");
-  const nextOpen = R.win && R.s < 50 && R.s === S.prog;
+  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV, auto = S.auto && R.win && !R.hero.comps.length, lvUp = R.hero.lv.length;
+  const comps = unlocked().map(d => form(d.id, S.lv)[1]).join(" ");
+  const newComps = R.hero.comps.map(id => { const d = CC[id];
+    return `<div class="drop r-${d.r}"><div class="dm">Neuer Begleiter schließt sich an!</div><div class="de">${form(id, S.lv)[1]}</div><div class="dn">${form(id, S.lv)[0]}</div>
+      <div class="dm"><span class="rar">${RAR_N[d.r]}</span> · ${ROLES[d.role].n} · ${AB[d.ab].n} · ${unlocked().length} von 8 Begleitern${unlocked().length === 8 ? " · Team komplett!" : ""}</div></div>`; }).join("");
+  const nextOpen = R.win && R.s === S.prog;
   const loseMsg = B.res.timeout ? "Nach 30 Runden ist die Zeit abgelaufen. Dein Team macht noch zu wenig Schaden." : "Dein Team ist gefallen.";
   modal(`<div class="result-head ${R.win ? "win" : "lose"}"><h2>${R.win ? "Sieg!" : "Niederlage"}</h2>
-      <p>${R.win ? (R.first ? "Neue Etappe geschafft! Dafür gibt es extra Münzen." : `Gewonnen in ${B.res.rounds} Runden.`) : `${loseMsg} Du bekommst trotzdem ein paar EP.`}</p></div>
-    <div class="gains"><span class="x">+${R.hx} EP</span>${R.co ? `<span class="coin">+${R.co}</span>` : ""}${R.bossPts ? `<span class="sp">+${R.bossPts}</span>` : ""}</div>
-    <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Hauptkarte Level ${S.lv} · ${mx ? "Maximum" : `${S.xp} / ${n} EP bis Level ${S.lv + 1}`}</div></div>
-    ${lvUp ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${R.hero.pts} Sternenpunkte für den Baum · mehr Leben und Angriff</span>
-      ${R.hero.abs.map(a => `<span>Neue Fähigkeit der Hauptkarte: ${a}</span>`).join("")}${R.hero.slots.length ? "<span>Ein neuer Platz im Team ist frei</span>" : ""}</div>` : ""}
-    ${newCards}
-    ${cardLines ? `<div class="label" style="margin:0">Deine Karten · je +${R.cx} EP</div>${cardLines}` : ""}
+      <p>${R.win ? (R.first ? "Neue Etappe geschafft! Dafür gibt es extra Münzen." : `Gewonnen in ${B.res.rounds} ${B.res.rounds === 1 ? "Runde" : "Runden"}.`) : `${loseMsg} Du bekommst trotzdem ein paar EP.`}</p></div>
+    <div class="gains"><span class="x">+${fmt(R.hx)} EP</span>${R.co ? `<span class="coin">+${fmt(R.co)}</span>` : ""}${R.bossPts ? `<span class="sp">+${R.bossPts}</span>` : ""}</div>
+    <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${mx ? "Maximum" : `${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}`}</div></div>
+    ${lvUp ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${R.hero.pts} Sternenpunkte · Held und alle Begleiter werden stärker</span>
+      <span style="font-size:22px;letter-spacing:4px;margin-top:6px">${comps}</span>
+      ${R.hero.abs.map(a => `<span>Neu: ${a}</span>`).join("")}${R.hero.forms.length ? "<span>Alle Begleiter haben sich weiterentwickelt!</span>" : ""}</div>` : ""}
+    ${newComps}
     ${auto ? `<div class="autoline" id="autoLine">Nächster Kampf startet gleich …</div>` : ""}
-    ${lvUp && !auto ? `<button class="btn green wide" data-act="toTree">Sternenpunkte im Baum ausgeben</button>` : ""}
-    ${nextOpen && !auto ? `<button class="btn big" data-act="again" data-s="${R.s + 1}">Weiter zu Etappe ${stageNo(R.s + 1)}</button>` : ""}
+    ${lvUp && !auto ? `<button class="btn green wide" data-act="toTree">Sternenpunkte ausgeben</button>` : ""}
+    ${nextOpen && !auto ? `<button class="btn big" data-act="again" data-s="${R.s + 1}">Weiter zu ${stageNo(R.s + 1) === 1 ? zoneAt(zoneOf(R.s + 1)).n : "Etappe " + stageNo(R.s + 1)}</button>` : ""}
     <div class="row">
       <button class="btn ghost" data-act="leave">Zum Start</button>
       <button class="btn ${nextOpen && !auto ? "ghost" : ""}" data-act="again" data-s="${R.s}">${auto ? "Sofort weiter" : R.win ? "Nochmal" : "Erneut versuchen"}</button>
@@ -1514,34 +1457,21 @@ function act(el, ev) {
     case "heroInfo": UI.tab = "hero"; modal(""); render(); break;
     case "eqUp": {
       const k = el.dataset.k, l = S.eq[k], cost = eqCost(l);
-      if (l >= S.lv || S.co < cost) return;
+      if (S.co < cost) return;
       S.co -= cost; S.eq[k] = l + 1; save();
       const e = EQUIP.find(x => x.k === k), sc = $("#main").scrollTop; render(); $("#main").scrollTop = sc;
       if (eqTier(l + 1) > eqTier(l)) toast(`Neues Aussehen: ${e.tiers[eqTier(l + 1)]}`);
       break;
     }
     case "card": cardModal(id); break;
-    case "pick": pickModal(); break;
-    case "putIn": if (S.team.length < slotsAt(S.lv) && !S.team.includes(id)) { S.team.push(id); save(); } modal(""); render(); break;
+    case "rankUp": {
+      const r = S.rank[id] || 0, cost = rankCost(r);
+      if (S.sp < cost) return;
+      S.sp -= cost; S.rank[id] = r + 1; save(); render(); cardModal(id);
+      toast(`${form(id, S.lv)[0]} ist jetzt Rang ${r + 1}`); break;
+    }
     case "close": modal(""); break;
     case "closeBg": if (ev.target === el && !B) modal(""); break;
-    case "toggleTeam": {
-      const i = S.team.indexOf(id);
-      if (i >= 0) S.team.splice(i, 1); else if (S.team.length < slotsAt(S.lv)) S.team.push(id);
-      save(); render(); cardModal(id); break;
-    }
-    case "train": {
-      const c = S.cards[id], cost = trainCost(c);
-      if (c.l >= cardCap(c) || S.co < cost) return;
-      S.co -= cost; addCardXP(id, cardNeed(c.l) - c.xp); save(); render(); cardModal(id);
-      toast(`${form(id, c.st)[0]} ist jetzt Level ${c.l}`); break;
-    }
-    case "evolve": {
-      const c = S.cards[id], cost = evoCost(id, c.st + 1);
-      if (c.st >= 2 || c.l < STAGE_CAP[c.st] || S.co < cost) return;
-      S.co -= cost; c.st++; addCardXP(id, 0); save(); render(); cardModal(id);
-      toast(`Entwickelt: ${form(id, c.st)[1]} ${form(id, c.st)[0]}`); break;
-    }
     case "zone": { const z = +el.dataset.z; if (z > 0 && S.prog < z * 10) { toast(`Besiege zuerst den Boss von Zone ${z}.`); return; } S.zone = z; save(); render(); break; }
     case "fight": startBattle(+el.dataset.s); break;
     case "noop": toast("Schaffe zuerst die Etappe davor."); break;
@@ -1551,7 +1481,7 @@ function act(el, ev) {
     case "again": { const s = +el.dataset.s; if (B) clearTimeout(B.autoT); modal(""); S.zone = zoneOf(s); startBattle(s); break; }
     case "autoOff": { S.auto = false; save(); if (B) clearTimeout(B.autoT); const l = $("#autoLine"); if (l) l.textContent = "Automatisch wiederholen ist aus."; el.hidden = true; break; }
     case "leave": UI.tab = "home"; leaveBattle(); break;
-    case "toTree": UI.tab = "tree"; UI.treeScroll = null; leaveBattle(); break;
+    case "toTree": UI.tab = buyable().length || !rankable().length ? "tree" : "team"; UI.treeScroll = null; leaveBattle(); break;
     case "node": nodeModal(id); break;
     case "buyNode": {
       const n = TN[id]; if (!nodeOpen(n) || S.sp < n.cost) return;
@@ -1589,7 +1519,7 @@ document.addEventListener("click", ev => { const el = ev.target.closest("[data-a
    START
    ========================================================= */
 function start(data) {
-  S = (data && data.S && data.S.v === 3) ? data.S : load();
+  S = (data && data.S && data.S.v === 4) ? data.S : load();
   render();
   if (!S.seen) { S.seen = true; save(); helpModal(); }
 }
