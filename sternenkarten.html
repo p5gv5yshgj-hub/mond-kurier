@@ -177,6 +177,52 @@ p { margin: 0; }
 .ultbox .uicon { width: 52px; height: 52px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 26px;
   background: radial-gradient(circle, color-mix(in srgb, var(--gold) 50%, transparent), var(--deck-2)); border: 2px solid var(--gold); }
 
+/* ---------- Spielmodi ---------- */
+.modes { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.mode { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 14px; border-radius: 18px; min-width: 0;
+  border: 2px solid var(--mc); background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--mc) 26%, transparent), transparent 60%), var(--deck); }
+.mode .mi { font-size: 34px; line-height: 1.1; }
+.mode .mn { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+.mode .md { font-size: 12.5px; color: var(--dim); line-height: 1.3; }
+.mode .mb { font-size: 12px; color: var(--moon); font-weight: 600; margin-top: auto; padding-top: 4px; }
+.mode .daily { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--good); color: var(--night); }
+.mode.locked { filter: grayscale(.8); opacity: .55; }
+.nextfight .daily { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--good); color: var(--night); margin-left: 6px; vertical-align: 2px; }
+.boost { font-size: 13px; color: var(--good); font-weight: 600; }
+/* Minispiele */
+.mg .b-top { align-items: center; }
+.mgscore { font-family: var(--f-display); font-weight: 700; font-size: 26px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.mgarea { position: relative; flex: 1; min-height: 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: color-mix(in srgb, var(--night) 70%, transparent); touch-action: manipulation; }
+.mgarea canvas { display: block; width: 100%; height: 100%; }
+.mghint { text-align: center; font-size: 14px; color: var(--dim); padding-block: 8px 14px; min-height: 40px; }
+.mgtime { height: 6px; background: var(--deck-2); border-radius: 3px; overflow: hidden; margin-top: 4px; width: 120px; }
+.mgtime i { display: block; height: 100%; background: var(--gold); transition: width .2s linear; }
+.memgrid { position: absolute; inset: 10px; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); grid-template-rows: repeat(4, minmax(0,1fr)); gap: 8px; }
+.mem { border: 0; border-radius: 14px; background: linear-gradient(150deg, var(--r-e), var(--r-r) 60%, var(--deck-2)); font-size: 34px; display: grid; place-items: center; transition: transform .25s; color: transparent; }
+.mem::after { content: "✦"; color: var(--moon); font-size: 22px; opacity: .8; }
+.mem.up { background: var(--deck); border: 2px solid var(--moon); color: inherit; transform: rotateY(180deg) scaleX(-1); }
+.mem.up::after, .mem.done::after { content: none; }
+.mem.done { background: color-mix(in srgb, var(--good) 22%, var(--deck)); border: 2px solid var(--good); color: inherit; opacity: .8; }
+.mem.bad { animation: shake .3s; }
+.met { position: absolute; left: 0; top: 0; width: 58px; height: 58px; margin: -29px 0 0 -29px; display: grid; place-items: center; font-size: 40px; border: 0; background: none; padding: 0; touch-action: manipulation; }
+.met.pop { animation: metpop .25s ease-out forwards; pointer-events: none; }
+@keyframes metpop { to { transform: scale(1.8); opacity: 0; } }
+.base { position: absolute; left: 0; right: 0; bottom: 0; height: 46px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 22px;
+  background: linear-gradient(0deg, #6f6a5b, #b9b39e); border-top: 3px solid var(--moon); }
+.base.hit { animation: shake .3s; }
+.lives { position: absolute; top: 8px; left: 10px; font-size: 18px; letter-spacing: 2px; }
+.combo { position: absolute; top: 8px; right: 12px; font-family: var(--f-display); font-weight: 700; color: var(--gold); font-size: 18px; }
+.bosszone { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; }
+.bossbtn { border: 0; background: none; font-size: 120px; line-height: 1; padding: 0; transition: transform .06s; filter: drop-shadow(0 10px 20px rgba(0,0,0,.6)); touch-action: manipulation; }
+.bossbtn:active { transform: scale(.93); }
+.bossbtn.hurt { animation: shake .2s; }
+.bosshp { width: 90%; height: 14px; background: var(--deck-2); border-radius: 7px; overflow: hidden; border: 1px solid var(--line); position: relative; }
+.bosshp i { display: block; height: 100%; background: linear-gradient(90deg, var(--hp), #ff9a7a); transition: width .15s; }
+.bosshp b { position: absolute; top: 0; height: 100%; width: 2px; background: var(--moon); opacity: .6; }
+.bossinfo { font-size: 13px; color: var(--dim); text-align: center; font-variant-numeric: tabular-nums; }
+.ultbtn { width: 90%; }
+.ultbtn.ready { animation: charged .6s ease-in-out infinite; }
+
 /* ---------- Etappen ---------- */
 .zonetabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
 .zonetabs::-webkit-scrollbar { display: none; }
@@ -681,6 +727,24 @@ const ZONES = [
     en:[["Leerenwandler","🌑","krieger","lifesteal",2],["Zeitverzerrer","⌛","support","shieldTeam",2],["Gravitonbestie","🐙","tank","taunt",2],["Schattenjäger","👤","schuetze","double",2]],
     boss:["Ereignishorizont","🕳️","magier","dragon",2] }
 ];
+// Spielmodi: alle geben EP und Münzen. Das erste Spiel je Modus und Tag zählt doppelt.
+const MODES = [
+  { k:"story",  n:"Kurierroute",   i:"🗺️", lv:1,  c:"var(--gold)",   d:"Die Story: kämpfe dich durch Etappen und Zonen." },
+  { k:"sprint", n:"Mondsprint",    i:"🏃", lv:1,  c:"var(--r-r)",    d:"Spring über Krater und Felsen und sammle Pakete.",
+    rules:"Tippe irgendwo auf das Spielfeld, um zu springen. Tippe in der Luft noch einmal für einen Doppelsprung. Sammle 📦 Pakete. Felsen und Krater kosten 3 Sekunden. Du hast 30 Sekunden." },
+  { k:"memory", n:"Sternen-Memory",i:"🃏", lv:4,  c:"var(--r-e)",    d:"Finde alle Paare deiner Begleiter gegen die Zeit.",
+    rules:"Decke zwei Karten auf. Sind sie gleich, bleiben sie offen. Finde alle 8 Paare in 60 Sekunden. Übrige Zeit gibt Bonus-EP." },
+  { k:"meteor", n:"Meteorabwehr",  i:"☄️", lv:8,  c:"var(--hp)",     d:"Tippe Meteore weg, bevor sie die Mondbasis treffen.",
+    rules:"Tippe ☄️ Meteore an, bevor sie unten ankommen. 🌟 Sterne geben 3 Punkte. Tippe keine 🛰️ Satelliten an! Jeder Treffer auf die Basis kostet ein Leben, du hast 3. Viele Treffer am Stück erhöhen die Kombo." },
+  { k:"boss",   n:"Bossjagd",      i:"👹", lv:12, c:"var(--r-l)",    d:"Tippe auf den Koloss, dein Team schlägt mit zu.",
+    rules:"Tippe so schnell du kannst auf den Koloss. Jeder Tipp ist ein Schlag des Helden und lädt die Kurier-Energie. Ist sie voll, löse den Spezialangriff aus. Dein Team greift automatisch mit an. Wie viel Schaden du in 30 Sekunden schaffst, bestimmt die Belohnung." }
+];
+const MM = Object.fromEntries(MODES.map(m => [m.k, m]));
+const today = () => new Date().toDateString();
+const dailyFree = k => !(S.daily && S.daily.d === today() && S.daily.used[k]);
+function useDaily(k) { if (!S.daily || S.daily.d !== today()) S.daily = { d:today(), used:{} }; S.daily.used[k] = 1; }
+const boostFor = s => s === S.prog + 1 ? Math.min(.25, ((S.fails || {})[s] || 0) * .05) : 0;
+
 const DEEP = ["Tiefer Raum", "Sternenwüste", "Nebelabgrund", "Kometenfriedhof", "Leerenrand"];
 function zoneAt(z) {
   if (z < ZONES.length) return ZONES[z];
@@ -704,7 +768,7 @@ function ek(s) {
    ========================================================= */
 const KEY = "sternenkarten-v4";
 function defSave() {
-  return { v:4, lv:1, xp:0, sp:0, tree:{}, co:50, eq:{ w:0, a:0, h:0, c:0 }, rank:{}, prog:0, zone:0, auto:false, stats:{ wins:0, losses:0 }, seen:false };
+  return { v:4, lv:1, xp:0, sp:0, tree:{}, co:50, eq:{ w:0, a:0, h:0, c:0 }, rank:{}, prog:0, zone:0, auto:false, stats:{ wins:0, losses:0 }, best:{}, fails:{}, daily:null, seen:false };
 }
 function load() {
   try {
@@ -996,25 +1060,34 @@ function grantRewards(win, s) {
   const E = recLv(s), boss = isBoss(s), T = treeFx(), wis = teamBonus("wisdom"), luck = teamBonus("luck");
   let base = 12 * Math.pow(1.1, E - 1) * (boss ? 3 * (1 + T.bossXp) : 1);
   if (!win) base *= .3 * (1 + T.lossXp);
+  const daily = win && dailyFree("story");
+  if (daily) { base *= 2; useDaily("story"); }
+  S.fails = S.fails || {};
+  if (s === S.prog + 1) { if (win) delete S.fails[s]; else S.fails[s] = (S.fails[s] || 0) + 1; }
   const hx = Math.round(base * (1 + T.xp + wis));
   const first = win && s > S.prog;
-  const co = win ? Math.round(9 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 * (1 + T.firstCo) : 1) * (1 + T.coins + luck)) : 0;
+  const co = win ? Math.round(9 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 * (1 + T.firstCo) : 1) * (daily ? 2 : 1) * (1 + T.coins + luck)) : 0;
   S.co += co;
   let bossPts = 0;
   if (win) { S.stats.wins++; if (first) { S.prog = s; if (boss) { bossPts = BOSS_PTS; S.sp += bossPts; } } } else S.stats.losses++;
   const fromLv = S.lv;
   const hero = addHeroXP(hx);
   save();
-  return { win, s, hx, co, first, hero, bossPts, fromLv };
+  return { win, s, hx, co, first, hero, bossPts, fromLv, daily };
 }
 
 // Siegchance per Probekämpfen schätzen (zwischengespeichert, solange sich das Team nicht ändert)
 const oddsCache = {};
+function teamFor(s) {
+  const P = buildTeam(), b = boostFor(s);
+  if (b) P.forEach(u => { u.atk = Math.round(u.atk * (1 + b)); u.hp = u.max = Math.round(u.max * (1 + b)); });
+  return P;
+}
 function winChance(s) {
-  const key = [s, S.lv, Object.keys(S.tree).sort().join(""), JSON.stringify(S.rank), JSON.stringify(S.eq)].join("|");
+  const key = [s, S.lv, Object.keys(S.tree).sort().join(""), JSON.stringify(S.rank), JSON.stringify(S.eq), boostFor(s)].join("|");
   if (oddsCache[key] == null) {
     let w = 0; const n = 30, T = treeFx();
-    for (let i = 0; i < n; i++) if (simulate(buildTeam(), makeWave(s), T).win) w++;
+    for (let i = 0; i < n; i++) if (simulate(teamFor(s), makeWave(s), T).win) w++;
     oddsCache[key] = w / n;
   }
   return oddsCache[key];
@@ -1049,7 +1122,7 @@ const stars = st => "★".repeat(st + 1) + "☆".repeat(2 - st);
 
 const ICONS = {
   hero: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M8.5 7.5h7"/><path d="M5 21c.8-4 3.6-6.5 7-6.5s6.2 2.5 7 6.5"/></svg>',
-  home: '<svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
+  home: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M10 8.2v7.6l6-3.8z" fill="currentColor"/></svg>',
   map: '<svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
   team: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="11" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
   tree: '<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="13" r="2"/><circle cx="12" cy="13" r="2"/><circle cx="19" cy="13" r="2"/><circle cx="12" cy="21" r="1.5"/><path d="M12 6v5M11 5 6 11M13 5l5 6M12 15v4"/></svg>'
@@ -1063,7 +1136,7 @@ function renderTop() {
     <div class="wallet"><span class="sp" title="Sternenpunkte">${fmt(S.sp)}</span><span class="coin" title="Münzen">${fmt(S.co)}</span></div>`;
 }
 function renderNav() {
-  const tabs = [["home","Start"],["hero","Held"],["map","Etappen"],["team","Begleiter"],["tree","Baum"]];
+  const tabs = [["home","Spielen"],["hero","Held"],["map","Etappen"],["team","Begleiter"],["tree","Baum"]];
   const badge = { tree:buyable().length, team:buyable().length ? 0 : rankable().length, hero:eqUpgradable().length };
   $("#nav").innerHTML = tabs.map(([k, n]) =>
     `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}"><span class="badge">${ICONS[k]}${badge[k] ? `<b>${badge[k]}</b>` : ""}</span>${n}</button>`).join("");
@@ -1084,7 +1157,7 @@ function heroSVG(L, eq, size = 120, anim = true) {
   const t = Math.min(5, titleIdx(L)), c = k => TIER_COL[eqTier(eq[k])], id = "hs" + (++SVGID);
   const suit = c("a"), helm = c("h"), wpn = c("w"), core = c("c"), aura = TIER_COL[t];
   const star = (x, y, r, col) => `<path d="M${x} ${y - r} L${x + r * .3} ${y - r * .3} L${x + r} ${y} L${x + r * .3} ${y + r * .3} L${x} ${y + r} L${x - r * .3} ${y + r * .3} L${x - r} ${y} L${x - r * .3} ${y - r * .3} Z" fill="${col}"/>`;
-  return `<svg class="hero-svg ${anim ? "idle" : ""}" width="${size}" height="${Math.round(size * 7 / 6)}" viewBox="0 0 120 140" role="img" aria-label="Der Mondkurier">
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="hero-svg ${anim ? "idle" : ""}" width="${size}" height="${Math.round(size * 7 / 6)}" viewBox="0 0 120 140" role="img" aria-label="Der Mondkurier">
     <defs>
       <radialGradient id="${id}a"><stop offset="0" stop-color="${aura}" stop-opacity=".6"/><stop offset="1" stop-color="${aura}" stop-opacity="0"/></radialGradient>
       <linearGradient id="${id}v" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#26346e"/><stop offset=".55" stop-color="#0c0f22"/><stop offset="1" stop-color="${helm}"/></linearGradient>
@@ -1149,46 +1222,310 @@ function screenHero() {
 }
 const eqDots = () => `<span class="eqdots">${EQUIP.map(e => `<span style="--tc:${TIER_COL[eqTier(S.eq[e.k])]}">${e.i} ${S.eq[e.k]}</span>`).join("")}</span>`;
 
-/* ---------- Start ---------- */
+/* ---------- Spielen ---------- */
 function screenHome() {
   const t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV, h = heroStats();
-  const s = S.prog + 1, Z = zoneAt(zoneOf(s)), c = winChance(s), done = false, fs = farmStage();
-  const next = HERO_AB.find(a => a.lv > S.lv), nextCard = COMP.find(cc => cc.lv > S.lv), nextForm = FORM_LV.find(x => x > S.lv);
+  const s = S.prog + 1, Z = zoneAt(zoneOf(s)), c = winChance(s), fs = farmStage(), bst = boostFor(s);
+  const next = HERO_AB.find(a => a.lv > S.lv), nextCard = COMP.find(cc => cc.lv > S.lv), nextForm = FORM_LV.find(x => x > S.lv), nextMode = MODES.find(m => m.lv > S.lv);
   const todos = [], nb = buyable().length;
   if (nb) todos.push({ i:"★", b:`${S.sp} Sternenpunkte im Baum ausgeben`, s:`${nb} Upgrade${nb > 1 ? "s" : ""} kannst du dir gerade leisten.`, act:'data-act="tab" data-k="tree"' });
   const rk = rankable();
   if (!nb && rk.length) todos.push({ i:"⬆️", b:"Begleiter im Rang steigern", s:`${rk.length} Begleiter ${rk.length > 1 ? "können" : "kann"} mit Sternenpunkten aufsteigen.`, act:'data-act="tab" data-k="team"' });
   const eu = eqUpgradable();
   if (eu.length) todos.unshift({ i:eu[0].i, b:"Ausrüstung des Helden verbessern", s:`${eu.map(e => e.n).join(", ")} ${eu.length > 1 ? "können" : "kann"} eine Stufe höher`, act:'data-act="tab" data-k="hero"' });
-
+  const modeCard = m => {
+    const lock = S.lv < m.lv, best = (S.best || {})[m.k];
+    return `<button class="mode ${lock ? "locked" : ""}" style="--mc:${m.c}" data-act="${lock ? "modeLocked" : "mode"}" data-k="${m.k}">
+      ${!lock && dailyFree(m.k) ? '<span class="daily">×2 heute</span>' : ""}
+      <span class="mi">${m.i}</span><span class="mn">${m.n}</span><span class="md">${m.d}</span>
+      <span class="mb">${lock ? `🔒 ab Level ${m.lv}` : best ? `Rekord: ${fmt(best)}` : "Noch nicht gespielt"}</span></button>`;
+  };
   return `<button class="herocard" data-act="tab" data-k="hero" style="--hc:${t[2]}">
-      ${heroSVG(S.lv, S.eq, 92)}
-      <span class="hb"><span class="ht">${t[1]}</span><span class="hn">Mondkurier<br>Level ${S.lv}</span>
-        ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${fmt(h.hp)} Leben · ${fmt(h.atk)} Angriff · ${unlocked().length} von 8 Begleitern</span>${eqDots()}</span>
+      ${heroSVG(S.lv, S.eq, 80)}
+      <span class="hb"><span class="ht">${t[1]}</span><span class="hn">Mondkurier · Level ${S.lv}</span>
+        ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${fmt(S.xp)} / ${fmt(n)} EP · ${unlocked().length} von 8 Begleitern</span>${eqDots()}</span>
       <span class="chev">›</span></button>
-    ${done ? `<div class="nextfight" style="--zbg:${Z.bg}"><div class="nf-kicker">Geschafft</div>
-        <div class="nf-title">Alle 50 Etappen bestanden!</div>
-        <p class="muted">Spiele Etappen erneut, um weiter zu leveln und den ganzen Baum freizuschalten.</p>
-        <button class="btn big" data-act="tab" data-k="map">Etappen ansehen</button></div>`
-    : `<div class="nextfight" style="--zbg:${Z.bg}">
-      <div class="nf-top"><div><div class="nf-kicker">${isBoss(s) ? "Bosskampf" : "Nächster Kampf"}</div>
+    <div class="screen-title"><h2>Was möchtest du spielen?</h2><p>Jeder Modus bringt EP und Münzen. Das erste Spiel je Modus am Tag zählt doppelt.</p></div>
+    <div class="nextfight" style="--zbg:${Z.bg}">
+      <div class="nf-top"><div><div class="nf-kicker">🗺️ Story · Kurierroute${dailyFree("story") ? '<span class="daily">×2 heute</span>' : ""}</div>
         <div class="nf-title">${Z.n} · Etappe ${stageNo(s)}</div></div>${chanceHTML(s)}</div>
       <div class="nf-foes">${waveIds(s).map(d => d[1]).join("")}</div>
-      <button class="btn big" data-act="fight" data-s="${s}">Kämpfen</button>
-      ${c < .4 && fs ? `<div class="nf-hint">Dein Team ist hier noch zu schwach. Sammle erst EP in <b>Etappe ${stageNo(fs)}</b> von ${zoneAt(zoneOf(fs)).n}, dort gewinnst du sicher.</div>
-        <button class="btn ghost wide" data-act="fight" data-s="${fs}">EP sammeln in Etappe ${stageNo(fs)} · ${Math.round(winChance(fs) * 100)} %</button>` : ""}
-      <button class="switchrow" data-act="auto"><span><b>Automatisch wiederholen</b><br>Nach jedem Sieg startet derselbe Kampf neu.</span><span class="sw ${S.auto ? "on" : ""}"></span></button>
-    </div>`}
+      ${bst ? `<div class="boost">Rückenwind: Dein Team ist hier ${Math.round(bst * 100)} % stärker.</div>` : ""}
+      <button class="btn big" data-act="fight" data-s="${s}">${isBoss(s) ? "Bosskampf starten" : "Kämpfen"}</button>
+      ${c < .4 && fs ? `<div class="nf-hint">Noch zu schwer? Hol dir EP in einem anderen Modus unten, oder wiederhole <b>Etappe ${stageNo(fs)}</b> von ${zoneAt(zoneOf(fs)).n}.</div>
+        <button class="btn ghost wide" data-act="fight" data-s="${fs}">Etappe ${stageNo(fs)} wiederholen · ${Math.round(winChance(fs) * 100)} %</button>` : ""}
+      <div style="display:flex;gap:8px;align-items:center"><button class="switchrow" data-act="auto" style="flex:1"><span><b>Automatisch wiederholen</b></span><span class="sw ${S.auto ? "on" : ""}"></span></button>
+        <button class="btn ghost sm" data-act="tab" data-k="map">Alle Etappen</button></div>
+    </div>
+    <div class="modes">${MODES.slice(1).map(modeCard).join("")}</div>
     <div class="label">Das kannst du jetzt tun</div>
     <div class="todos">${todos.length ? todos.map(x => `<button class="todo ${x.hot !== false ? "hot" : ""}" ${x.act}>
         <span class="ti">${x.i}</span><span class="tt"><b>${x.b}</b><span>${x.s}</span></span><span class="chev">›</span></button>`).join("")
-      : `<div class="todo" style="cursor:default"><span class="ti">✓</span><span class="tt"><b>Alles erledigt</b><span>Kämpfe weiter, um EP für das nächste Level zu sammeln.</span></span></div>`}</div>
+      : `<div class="todo" style="cursor:default"><span class="ti">✓</span><span class="tt"><b>Alles erledigt</b><span>Spiel einen Modus, um EP für das nächste Level zu sammeln.</span></span></div>`}</div>
     <div class="label">Nächste Belohnungen</div><div class="panel goal">
+      ${nextMode ? `<div>Level <b>${nextMode.lv}</b>: neuer Spielmodus <b>${nextMode.i} ${nextMode.n}</b></div>` : ""}
       ${nextCard ? `<div>Level <b>${nextCard.lv}</b>: neuer Begleiter <b>${nextCard.f[0][1]} ${nextCard.f[0][0]}</b></div>` : ""}
       ${next ? `<div>Level <b>${next.lv}</b>: neue Fähigkeit des Helden <b>${next.n}</b></div>` : ""}
       ${nextForm ? `<div>Level <b>${nextForm}</b>: alle Begleiter entwickeln sich weiter</div>` : ""}
       <div>Jedes Level: alle Begleiter werden stärker, dazu <b>${ptsFor(S.lv + 1)} Sternenpunkte</b></div></div>`;
 }
+
+/* =========================================================
+   MINISPIELE
+   ========================================================= */
+let MG = null;
+function modeIntro(k) {
+  if (k === "story") { const s = S.prog + 1; startBattle(s); return; }
+  const m = MM[k];
+  modal(`<div class="mhead" style="--rc:${m.c}"><span class="me" style="font-size:40px">${m.i}</span><div class="mt"><h2>${m.n}</h2><p>${dailyFree(k) ? "Heute noch doppelte EP" : "Belohnung wächst mit deinem Level"}</p></div></div>
+    <div class="box"><div class="bt">So geht's</div><div class="bb">${m.rules}</div></div>
+    ${(S.best || {})[k] ? `<p>Dein Rekord: <b style="color:var(--gold)">${fmt(S.best[k])}</b></p>` : ""}
+    <div class="row"><button class="btn ghost" data-act="close">Zurück</button><button class="btn" data-act="miniGo" data-k="${k}">Los geht's</button></div>`);
+}
+function miniShell(m, extra) {
+  const bt = $("#battle");
+  bt.style.setProperty("--zbg", `radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, ${m.c} 35%, transparent), transparent 65%)`);
+  bt.innerHTML = `<div class="bwrap mg">
+    <div class="b-top"><div><div class="bz">${m.i} ${m.n}</div><div class="round" id="mgTime">Bereit</div><div class="mgtime"><i id="mgBar" style="width:100%"></i></div></div>
+      <div class="mgscore" id="mgScore">0</div><button class="btn ghost sm" data-act="miniQuit">Beenden</button></div>
+    <div class="mgarea" id="mgArea">${extra || ""}</div>
+    <div class="mghint" id="mgHint"></div><div id="fx"></div></div>`;
+  bt.hidden = false;
+}
+const mgSet = (score, left, total) => {
+  const sc = $("#mgScore"), tm = $("#mgTime"), b = $("#mgBar");
+  if (sc) sc.textContent = fmt(score);
+  if (tm) tm.textContent = `${Math.max(0, Math.ceil(left))} s`;
+  if (b) b.style.width = Math.max(0, left / total * 100) + "%";
+};
+function mgFloat(x, y, text, cls) {
+  const a = $("#mgArea"); if (!a) return;
+  const f = document.createElement("div"); f.className = "float " + (cls || "info"); f.textContent = text;
+  f.style.left = x + "px"; f.style.top = y + "px"; a.appendChild(f); setTimeout(() => f.remove(), 900);
+}
+function stopMini() { if (MG) { MG.dead = true; cancelAnimationFrame(MG.raf); clearInterval(MG.iv); clearTimeout(MG.to); if (MG.cleanup) MG.cleanup(); } MG = null; }
+function closeMini() { stopMini(); modal(""); $("#battle").hidden = true; $("#battle").innerHTML = ""; render(); }
+// Belohnung: bis zum Dreifachen eines Story-Siegs auf deinem Level
+function finishMini(k, score, mult, lines) {
+  if (!MG || MG.done) return;
+  MG.done = true; stopMini();
+  const T = treeFx(), daily = dailyFree(k), x2 = daily ? 2 : 1;
+  mult = Math.max(.1, Math.min(3, mult));
+  const hx = Math.round(12 * Math.pow(1.1, S.lv - 1) * mult * x2 * (1 + T.xp));
+  const co = Math.round(9 * Math.pow(1.09, S.lv - 1) * mult * .8 * x2 * (1 + T.coins));
+  useDaily(k); S.co += co;
+  S.best = S.best || {}; const rec = score > (S.best[k] || 0); if (rec) S.best[k] = score;
+  const hero = addHeroXP(hx); save();
+  const n = heroNeed(S.lv), m = MM[k], stars = mult >= 2.5 ? 3 : mult >= 1.5 ? 2 : mult >= .7 ? 1 : 0;
+  setTimeout(() => modal(`<div class="result-head win"><h2>${m.i} ${["Geschafft", "Gut", "Sehr gut", "Spitze"][stars]}!</h2>
+      <p style="font-size:26px;color:var(--gold);letter-spacing:4px">${"★".repeat(stars)}${"☆".repeat(3 - stars)}</p>
+      <p>${lines}${rec ? " <b style='color:var(--gold)'>Neuer Rekord!</b>" : ""}${daily ? " Tagesbonus: doppelte EP!" : ""}</p></div>
+    <div class="gains"><span class="x">+${fmt(hx)} EP</span><span class="coin">+${fmt(co)}</span></div>
+    <div>${bar(S.xp, n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}</div></div>
+    ${hero.lv.length ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${hero.pts} Sternenpunkte · Held und alle Begleiter werden stärker</span>
+      ${hero.abs.map(a => `<span>Neu: ${a}</span>`).join("")}${hero.comps.map(id => `<span>Neuer Begleiter: ${CC[id].f[0][1]} ${CC[id].f[0][0]}</span>`).join("")}
+      ${MODES.filter(mm => hero.lv.includes(mm.lv)).map(mm => `<span>Neuer Spielmodus: ${mm.i} ${mm.n}</span>`).join("")}</div>` : ""}
+    <div class="row"><button class="btn ghost" data-act="miniBack">Zur Auswahl</button><button class="btn" data-act="miniGo" data-k="${k}">Nochmal</button></div>`), 300);
+}
+
+/* ---------- Mondsprint ---------- */
+function startSprint() {
+  const m = MM.sprint; miniShell(m);
+  const area = $("#mgArea"), cv = document.createElement("canvas"); area.appendChild(cv);
+  const W = area.clientWidth, H = area.clientHeight, dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr; const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+  const img = new Image(); img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(heroSVG(S.lv, S.eq, 60, false));
+  const GY = H - 60, TOTAL = 30, stars = Array.from({ length:50 }, () => [Math.random() * W, Math.random() * (GY - 20), Math.random() * 1.5 + .4]);
+  const st = { t:TOTAL, score:0, speed:240, dist:0, nextSpawn:300, y:GY, vy:0, jumps:0, obs:[], pk:[], hurt:0, started:false };
+  MG = { k:"sprint" };
+  $("#mgHint").textContent = "Tippe zum Springen. Zweimal tippen = Doppelsprung.";
+  const jump = () => { if (!st.started) st.started = true; if (st.jumps < 2) { st.vy = st.jumps ? -560 : -640; st.jumps++; } };
+  const onDown = e => { e.preventDefault(); jump(); };
+  const onKey = e => { if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); jump(); } };
+  area.addEventListener("pointerdown", onDown); document.addEventListener("keydown", onKey);
+  MG.cleanup = () => { area.removeEventListener("pointerdown", onDown); document.removeEventListener("keydown", onKey); };
+  const PX = W * .2, PW = 38, PH = 46;
+  let last = performance.now();
+  function spawn() {
+    const r = Math.random(), x = W + 40;
+    if (r < .38) st.obs.push({ k:"rock", x, w:28, h:26 + Math.random() * 14 });
+    else if (r < .66) st.obs.push({ k:"gap", x, w:70 + Math.random() * 50 });
+    const n = 1 + Math.floor(Math.random() * 3), hy = GY - 40 - Math.random() * 120;
+    for (let i = 0; i < n; i++) st.pk.push({ x:x + 60 + i * 36, y:hy - Math.sin(i / 2) * 20 });
+    st.nextSpawn = 260 + Math.random() * 220;
+  }
+  function penalty(text) { st.t -= 3; st.hurt = .8; mgFloat(PX + 10, st.y - 70, text, "dmg"); }
+  function frame(now) {
+    if (MG.dead) return;
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    if (st.started) {
+      st.t -= dt; st.speed += 7 * dt; const dx = st.speed * dt; st.dist += dx; st.nextSpawn -= dx;
+      if (st.nextSpawn <= 0) spawn();
+      st.obs.forEach(o => o.x -= dx); st.pk.forEach(p => p.x -= dx);
+      st.obs = st.obs.filter(o => o.x + o.w > -20); st.pk = st.pk.filter(p => p.x > -20 && !p.got);
+      st.vy += 1900 * dt; st.y += st.vy * dt;
+      const overGap = st.obs.find(o => o.k === "gap" && PX + 8 > o.x && PX + PW - 8 < o.x + o.w);
+      if (st.y >= GY && !overGap) { st.y = GY; st.vy = 0; st.jumps = 0; }
+      if (overGap && st.y > GY + 40) { penalty("Krater! −3 s"); st.y = GY - 120; st.vy = 0; st.jumps = 1; overGap.w = 0; }
+      st.obs.forEach(o => { if (o.k === "rock" && !o.hit && PX + PW - 6 > o.x && PX + 6 < o.x + o.w && st.y > GY - o.h + 4) { o.hit = true; penalty("Felsen! −3 s"); } });
+      st.pk.forEach(p => { if (!p.got && Math.abs(p.x - (PX + PW / 2)) < 26 && Math.abs(p.y - (st.y - PH / 2)) < 30) { p.got = true; st.score++; mgFloat(p.x, p.y - 20, "+1", "heal"); } });
+      st.hurt = Math.max(0, st.hurt - dt);
+      mgSet(st.score, st.t, TOTAL);
+      if (st.t <= 0) return finishMini("sprint", st.score, .3 + st.score * .07, `Du hast <b>${st.score} Pakete</b> eingesammelt und ${fmt(st.dist / 10)} Meter geschafft.`);
+    }
+    // Zeichnen
+    ctx.clearRect(0, 0, W, H);
+    stars.forEach(([x, y, r]) => { ctx.fillStyle = "rgba(236,232,217,.6)"; ctx.beginPath(); ctx.arc((x - st.dist * .1 % W + W) % W, y, r, 0, 7); ctx.fill(); });
+    ctx.fillStyle = "#8e8977"; ctx.fillRect(0, GY, W, H - GY);
+    ctx.fillStyle = "#b9b39e"; ctx.fillRect(0, GY, W, 6);
+    st.obs.forEach(o => {
+      if (o.k === "gap") { ctx.fillStyle = "#0c0f22"; ctx.fillRect(o.x, GY, o.w, H - GY); }
+      else { ctx.fillStyle = o.hit ? "#5b5748" : "#6f6a5b"; ctx.beginPath(); ctx.moveTo(o.x, GY); ctx.lineTo(o.x + 5, GY - o.h); ctx.lineTo(o.x + o.w - 4, GY - o.h + 6); ctx.lineTo(o.x + o.w, GY); ctx.fill(); }
+    });
+    ctx.font = "26px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    st.pk.forEach(p => ctx.fillText("📦", p.x, p.y));
+    if (!(st.hurt > 0 && Math.floor(st.hurt * 10) % 2)) ctx.drawImage(img, PX - 6, st.y - PH - 8, 50, 58);
+    if (!st.started) { ctx.fillStyle = "#ece8d9"; ctx.font = "bold 20px system-ui, sans-serif"; ctx.fillText("Tippe zum Starten", W / 2, H * .35); }
+    MG.raf = requestAnimationFrame(frame);
+  }
+  mgSet(0, TOTAL, TOTAL);
+  MG.raf = requestAnimationFrame(frame);
+}
+
+/* ---------- Sternen-Memory ---------- */
+function startMemory() {
+  const m = MM.memory; miniShell(m, '<div class="memgrid" id="memGrid"></div>');
+  const icons = COMP.map(c => c.f[formOf(Math.max(S.lv, 1))][1]);
+  const deck = icons.concat(icons).map((e, i) => ({ e, i })).sort(() => Math.random() - .5);
+  const TOTAL = 60;
+  const st = { t:TOTAL, open:[], found:0, moves:0, lock:false };
+  MG = { k:"memory" };
+  $("#memGrid").innerHTML = deck.map((c, i) => `<button class="mem" data-mem="${i}" aria-label="Karte ${i + 1}">${c.e}</button>`).join("");
+  $("#mgHint").textContent = "Finde alle 8 Paare.";
+  const onClick = e => {
+    const b = e.target.closest("[data-mem]"); if (!b || st.lock || b.classList.contains("up") || b.classList.contains("done")) return;
+    b.classList.add("up"); st.open.push(b);
+    if (st.open.length === 2) {
+      st.moves++; const [a, c] = st.open;
+      if (deck[+a.dataset.mem].e === deck[+c.dataset.mem].e) {
+        a.classList.add("done"); c.classList.add("done"); st.open = []; st.found++;
+        mgSet(st.found, st.t, TOTAL);
+        if (st.found === 8) end();
+      } else {
+        st.lock = true; a.classList.add("bad"); c.classList.add("bad");
+        MG.to = setTimeout(() => { a.classList.remove("up", "bad"); c.classList.remove("up", "bad"); st.open = []; st.lock = false; }, 650);
+      }
+    }
+  };
+  $("#memGrid").addEventListener("click", onClick);
+  function end() {
+    const left = Math.max(0, st.t);
+    finishMini("memory", st.found * 100 + Math.round(left) * 5, st.found / 8 * 2 + (st.found === 8 ? left / TOTAL * 1.5 : 0),
+      st.found === 8 ? `Alle Paare gefunden, mit <b>${Math.round(left)} Sekunden</b> übrig und ${st.moves} Zügen.` : `Du hast <b>${st.found} von 8 Paaren</b> gefunden.`);
+  }
+  MG.iv = setInterval(() => { st.t -= .2; mgSet(st.found, st.t, TOTAL); if (st.t <= 0) end(); }, 200);
+  mgSet(0, TOTAL, TOTAL);
+}
+
+/* ---------- Meteorabwehr ---------- */
+function startMeteor() {
+  const m = MM.meteor; miniShell(m, '<div class="lives" id="lives">❤️❤️❤️</div><div class="combo" id="combo"></div><div class="base" id="base">🏠 🛰️ 🌕 📡 🏠</div>');
+  const area = $("#mgArea"), W = area.clientWidth, H = area.clientHeight, BASE = H - 46, TOTAL = 40;
+  const st = { t:TOTAL, score:0, lives:3, combo:0, list:[], next:.4, speed:90 };
+  MG = { k:"meteor" };
+  $("#mgHint").textContent = "Tippe ☄️ und 🌟 an. Finger weg von 🛰️!";
+  const lifeTxt = () => { $("#lives").textContent = "❤️".repeat(st.lives) + "🖤".repeat(3 - st.lives); };
+  function spawn() {
+    const r = Math.random(), k = r < .12 ? "star" : r < .27 ? "sat" : "met";
+    const el = document.createElement("button"); el.className = "met"; el.textContent = k === "star" ? "🌟" : k === "sat" ? "🛰️" : "☄️";
+    const o = { el, k, x:30 + Math.random() * (W - 60), y:-30, v:st.speed * (.8 + Math.random() * .5) * (k === "sat" ? .8 : 1) };
+    el.addEventListener("pointerdown", ev => { ev.preventDefault(); tap(o); });
+    area.appendChild(el); st.list.push(o);
+  }
+  function tap(o) {
+    if (o.gone || MG.dead) return;
+    o.gone = true; o.el.classList.add("pop"); setTimeout(() => o.el.remove(), 260);
+    if (o.k === "sat") { st.lives--; st.combo = 0; lifeTxt(); mgFloat(o.x, o.y, "Satellit! −1 ❤️", "dmg"); }
+    else { st.combo++; const pts = (o.k === "star" ? 3 : 1) * (1 + Math.floor(st.combo / 10)); st.score += pts; mgFloat(o.x, o.y - 20, "+" + pts, o.k === "star" ? "crit" : "heal"); }
+    $("#combo").textContent = st.combo >= 10 ? `Kombo ×${1 + Math.floor(st.combo / 10)}` : "";
+  }
+  let last = performance.now();
+  function frame(now) {
+    if (MG.dead) return;
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    st.t -= dt; st.speed += 4 * dt; st.next -= dt;
+    if (st.next <= 0) { spawn(); st.next = Math.max(.28, .85 - (TOTAL - st.t) * .014) * (.6 + Math.random() * .8); }
+    st.list.forEach(o => {
+      if (o.gone) return;
+      o.y += o.v * dt; o.el.style.transform = `translate(${o.x}px, ${o.y}px)`;
+      if (o.y > BASE - 10) {
+        o.gone = true; o.el.remove();
+        if (o.k === "met") { st.lives--; st.combo = 0; lifeTxt(); const b = $("#base"); b.classList.remove("hit"); void b.offsetWidth; b.classList.add("hit"); $("#combo").textContent = ""; }
+      }
+    });
+    st.list = st.list.filter(o => !o.gone);
+    mgSet(st.score, st.t, TOTAL);
+    if (st.t <= 0 || st.lives <= 0) return finishMini("meteor", st.score, .3 + st.score * .015 * (st.lives > 0 ? 1 : .8),
+      st.lives > 0 ? `Die Mondbasis hat gehalten! <b>${st.score} Punkte</b>.` : `Die Basis ist gefallen, aber du hast <b>${st.score} Punkte</b> geholt.`);
+    MG.raf = requestAnimationFrame(frame);
+  }
+  lifeTxt(); mgSet(0, TOTAL, TOTAL);
+  MG.raf = requestAnimationFrame(frame);
+}
+
+/* ---------- Bossjagd ---------- */
+function startBossHunt() {
+  const m = MM.boss, P = buildTeam(), hero = P[0], team = P.slice(1), U = hero.ult;
+  const tap = hero.atk * .5, auto = team.reduce((a, u) => a + u.atk, 0) * .6, ult = hero.atk * U.mult * hero.ultMul * 4;
+  const HP = Math.round(30 * (auto + hero.atk * 2.2) + 3 * ult), TOTAL = 30;
+  const boss = rnd([["Weltraumkoloss", "👹"], ["Sternenkrake", "🐙"], ["Kometenwal", "🐋"], ["Mondtitan", "🗿"]]);
+  miniShell(m, `<div class="bosszone"><div class="bossinfo" id="bossName">${boss[0]}</div>
+    <div class="bosshp"><i id="bossHp" style="width:100%"></i><b style="left:33%"></b><b style="left:66%"></b></div>
+    <div class="bossinfo" id="bossTxt">${fmt(HP)} Leben</div>
+    <button class="bossbtn" id="bossBtn" aria-label="Boss angreifen">${boss[1]}</button>
+    <div class="bossinfo">Kurier-Energie</div><div class="uen" style="width:90%;height:12px"><i id="bossEn"></i></div>
+    <button class="btn ultbtn" id="ultBtn" disabled>${U.n}</button></div>`);
+  const st = { t:TOTAL, dmg:0, en:0, taps:0, started:false };
+  MG = { k:"boss" };
+  $("#mgHint").textContent = "Tippe so schnell du kannst auf den Koloss!";
+  const btn = $("#bossBtn"), ub = $("#ultBtn");
+  function deal(v, x, y, cls) {
+    st.dmg += v; const left = Math.max(0, HP - st.dmg);
+    $("#bossHp").style.width = (left / HP * 100) + "%"; $("#bossTxt").textContent = `${fmt(left)} Leben übrig`;
+    mgFloat(x, y, fmt(v), cls); mgSet(Math.round(st.dmg), st.t, TOTAL);
+    if (left <= 0) end();
+  }
+  function rel(e) { const r = $("#mgArea").getBoundingClientRect(); return [e.clientX - r.left + (Math.random() * 30 - 15), e.clientY - r.top - 30]; }
+  const onTap = e => {
+    e.preventDefault(); if (MG.dead) return; st.started = true; st.taps++;
+    const crit = Math.random() < hero.crit, v = Math.round(tap * (.9 + Math.random() * .2) * (crit ? hero.critDmg : 1));
+    const [x, y] = rel(e); deal(v, x, y, crit ? "crit" : "dmg");
+    btn.classList.remove("hurt"); void btn.offsetWidth; btn.classList.add("hurt");
+    st.en = Math.min(100, st.en + 4 * hero.charge); $("#bossEn").style.width = st.en + "%";
+    if (st.en >= 100) { ub.disabled = false; ub.classList.add("ready"); }
+  };
+  const onUlt = () => {
+    if (st.en < 100 || MG.dead) return; st.en = 0; $("#bossEn").style.width = "0%"; ub.disabled = true; ub.classList.remove("ready");
+    const bw = $(".bwrap"); bw.classList.remove("ultflash"); void bw.offsetWidth; bw.classList.add("ultflash");
+    const r = $("#mgArea").getBoundingClientRect(); deal(Math.round(ult), r.width / 2, r.height * .3, "crit");
+  };
+  btn.addEventListener("pointerdown", onTap); ub.addEventListener("click", onUlt);
+  MG.cleanup = () => { btn.removeEventListener("pointerdown", onTap); ub.removeEventListener("click", onUlt); };
+  function end() {
+    const ratio = Math.min(1, st.dmg / HP), win = ratio >= 1;
+    finishMini("boss", Math.round(st.dmg), ratio * 3 + (win ? Math.max(0, st.t) / TOTAL : 0),
+      win ? `Der ${boss[0]} ist besiegt, mit <b>${Math.ceil(Math.max(0, st.t))} Sekunden</b> übrig!` : `Du hast <b>${Math.round(ratio * 100)} %</b> seiner Leben geschafft (${fmt(st.dmg)} Schaden, ${st.taps} Schläge).`);
+  }
+  MG.iv = setInterval(() => {
+    if (!st.started || MG.dead) return;
+    st.t -= .5; const r = $("#mgArea").getBoundingClientRect();
+    deal(Math.round(auto * .5), r.width * (.25 + Math.random() * .5), r.height * .45, "dot");
+    if (st.t <= 0) end();
+  }, 500);
+  mgSet(0, TOTAL, TOTAL);
+}
+const MINI = { sprint:startSprint, memory:startMemory, meteor:startMeteor, boss:startBossHunt };
+
 /* ---------- Etappen ---------- */
 function screenMap() {
   const z = S.zone, Z = zoneAt(z), zOpen = i => i === 0 || S.prog >= i * 10, nz = Math.max(5, zoneOf(S.prog + 1) + 2);
@@ -1293,7 +1630,7 @@ function nodeModal(id) {
 function helpModal() {
   modal(`<h2>So spielst du</h2>
     <div class="steps">
-      <div><i>1</i><p>Kämpfen<span>Kämpfe laufen von allein. Tippe auf „Kämpfen“ und schau zu, oder spule vor.</span></p></div>
+      <div><i>1</i><p>Spielen<span>Wähle unter „Spielen“ einen von 5 Modi: die Story mit automatischen Kämpfen oder eines der Minispiele. Alle geben EP.</span></p></div>
       <div><i>2</i><p>Leveln<span>Jeder Kampf gibt EP. Jedes Level macht den Helden und alle Begleiter stärker. Bis Level 32 schließen sich 8 Begleiter an.</span></p></div>
       <div><i>3</i><p>Upgrade-Baum<span>Jedes Level gibt Sternenpunkte. Damit kaufst du Upgrades im Baum, Schritt für Schritt nach unten.</span></p></div>
       <div><i>4</i><p>Ausrüsten und aufsteigen<span>Mit Münzen verbesserst du die Ausrüstung des Helden, mit Sternenpunkten den Rang der Begleiter. Beides geht endlos weiter.</span></p></div>
@@ -1307,7 +1644,7 @@ function helpModal() {
    ========================================================= */
 function startBattle(s) {
   UID = 1;
-  const P = buildTeam(), E = makeWave(s), units = P.concat(E).map(u => ({ ...u }));
+  const P = teamFor(s), E = makeWave(s), units = P.concat(E).map(u => ({ ...u }));
   const res = simulate(P, E, treeFx());
   B = { s, res, units:Object.fromEntries(units.map(u => [u.uid, u])), i:0, timer:null, done:false };
   const heroTile = u => `<div class="unit hero herobig" id="u${u.uid}"><span class="ust" id="st${u.uid}"></span>${heroSVG(u.lv, u.eqs, 58, false)}
@@ -1422,7 +1759,7 @@ function showResult(R) {
   const nextOpen = R.win && R.s === S.prog;
   const loseMsg = B.res.timeout ? "Nach 30 Runden ist die Zeit abgelaufen. Dein Team macht noch zu wenig Schaden." : "Dein Team ist gefallen.";
   modal(`<div class="result-head ${R.win ? "win" : "lose"}"><h2>${R.win ? "Sieg!" : "Niederlage"}</h2>
-      <p>${R.win ? (R.first ? "Neue Etappe geschafft! Dafür gibt es extra Münzen." : `Gewonnen in ${B.res.rounds} ${B.res.rounds === 1 ? "Runde" : "Runden"}.`) : `${loseMsg} Du bekommst trotzdem ein paar EP.`}</p></div>
+      <p>${R.win ? (R.first ? "Neue Etappe geschafft! Dafür gibt es extra Münzen." : `Gewonnen in ${B.res.rounds} ${B.res.rounds === 1 ? "Runde" : "Runden"}.`) : `${loseMsg} Du bekommst trotzdem ein paar EP, und beim nächsten Versuch hat dein Team ${Math.round(boostFor(R.s) * 100)} % Rückenwind.`}${R.daily ? " Tagesbonus: doppelte EP und Münzen!" : ""}</p></div>
     <div class="gains"><span class="x">+${fmt(R.hx)} EP</span>${R.co ? `<span class="coin">+${fmt(R.co)}</span>` : ""}${R.bossPts ? `<span class="sp">+${R.bossPts}</span>` : ""}</div>
     <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${mx ? "Maximum" : `${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}`}</div></div>
     ${lvUp ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${R.hero.pts} Sternenpunkte · Held und alle Begleiter werden stärker</span>
@@ -1471,9 +1808,15 @@ function act(el, ev) {
       toast(`${form(id, S.lv)[0]} ist jetzt Rang ${r + 1}`); break;
     }
     case "close": modal(""); break;
-    case "closeBg": if (ev.target === el && !B) modal(""); break;
+    case "closeBg": if (ev.target === el && !B && !MG && $("#battle").hidden) modal(""); break;
     case "zone": { const z = +el.dataset.z; if (z > 0 && S.prog < z * 10) { toast(`Besiege zuerst den Boss von Zone ${z}.`); return; } S.zone = z; save(); render(); break; }
     case "fight": startBattle(+el.dataset.s); break;
+    case "mode": modeIntro(el.dataset.k); break;
+    case "modeLocked": toast(`${MM[el.dataset.k].n} wird auf Level ${MM[el.dataset.k].lv} freigeschaltet.`); break;
+    case "miniGo": modal(""); stopMini(); MINI[el.dataset.k](); break;
+    case "miniQuit": modal(`<h2>Spiel beenden?</h2><p>Wenn du jetzt aufhörst, bekommst du für diese Runde nichts.</p>
+      <div class="row"><button class="btn ghost" data-act="close">Weiterspielen</button><button class="btn danger" data-act="miniBack">Beenden</button></div>`); break;
+    case "miniBack": UI.tab = "home"; closeMini(); break;
     case "noop": toast("Schaffe zuerst die Etappe davor."); break;
     case "auto": S.auto = !S.auto; save(); render(); break;
     case "speed": UI.speed = +el.dataset.x; document.querySelectorAll(".speeds [data-x]").forEach(b => b.classList.toggle("on", +b.dataset.x === UI.speed)); break;
