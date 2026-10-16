@@ -415,6 +415,29 @@ p { margin: 0; }
 .beam { position: absolute; height: 3px; transform-origin: 0 50%; background: linear-gradient(90deg, transparent, var(--gold)); border-radius: 2px; animation: beam .28s ease-out forwards; z-index: 1; }
 .beam.foe { background: linear-gradient(90deg, transparent, var(--hp)); }
 @keyframes beam { from { opacity: 1; } to { opacity: 0; } }
+.techbar { display: flex; gap: 6px; }
+.tech { flex: 1; min-width: 0; border: 2px solid var(--line); border-radius: 12px; background: var(--deck); padding: 6px 2px; display: flex; flex-direction: column; align-items: center; gap: 1px; color: var(--moon); transition: transform .1s; }
+.tech .ti { font-size: 22px; line-height: 1.1; }
+.tech .tn { font-size: 11px; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tech .tc { font-size: 10.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.tech.ready { border-color: var(--good); background: color-mix(in srgb, var(--good) 14%, var(--deck)); }
+.tech.ready .tc { color: var(--good); font-weight: 700; }
+.tech.ultb.ready { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 20%, var(--deck)); animation: charged .6s ease-in-out infinite; }
+.tech.ultb.ready .tc { color: var(--gold); }
+.tech:active { transform: scale(.95); }
+.tech[disabled] { opacity: .55; }
+.tech.ready[disabled] { opacity: 1; }
+.autobtn { border: 1px solid var(--line); background: var(--deck-2); color: var(--dim); border-radius: 9px; padding: 7px 12px; font-weight: 700; font-size: 13px; }
+.autobtn.on { background: var(--good); color: var(--night); border-color: var(--good); }
+.autobtn[disabled] { opacity: .7; }
+.b-enemies .unit { cursor: pointer; }
+.unit.focused { box-shadow: 0 0 0 3px var(--gold); }
+.unit.focused::before { content: "🎯"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); font-size: 18px; }
+.unit.elite { border-color: var(--r-e); }
+.unit.elite .un { color: var(--r-e); }
+.unit.charging { animation: chargewarn .5s ease-in-out infinite; border-color: var(--hp); }
+@keyframes chargewarn { 50% { box-shadow: 0 0 0 4px var(--hp), 0 0 24px var(--hp); } }
+.techflash::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 80%, color-mix(in srgb, var(--good) 35%, transparent), transparent 70%); animation: ult .6s ease-out forwards; pointer-events: none; z-index: 4; }
 .legend { display: flex; justify-content: center; gap: 12px; font-size: 11px; color: var(--dim); flex-wrap: wrap; }
 .legend i { display: inline-block; width: 10px; height: 6px; border-radius: 3px; margin-right: 4px; vertical-align: 1px; }
 
@@ -577,6 +600,15 @@ const HERO_TITLES = [[1,"Kurierlehrling","var(--r-c)"],[10,"Mondkurier","var(--r
 const heroTitle = L => HERO_TITLES.filter(t => t[0] <= L).pop();
 const titleIdx = L => HERO_TITLES.filter(t => t[0] <= L).length - 1;
 
+// Heldentechniken: im Story-Kampf per Knopf, im Auto-Modus setzt der Held sie selbst ein
+const TECH = [
+  { k:"ult",   n:"Spezialangriff", i:"☄️", lv:1,  d:"Wenn die Kurier-Energie voll ist." },
+  { k:"focus", n:"Fokus",          i:"🎯", lv:3,  d:"Tippe einen Gegner an: Alle Begleiter greifen ihn an, und er nimmt 15 % mehr Schaden." },
+  { k:"wall",  n:"Schildwall",     i:"🛡️", lv:5,  cd:5, d:"Das ganze Team bekommt einen Schild von 25 % seiner Leben." },
+  { k:"heal",  n:"Heilwelle",      i:"💚", lv:8,  cd:6, d:"Heilt das ganze Team um 25 % seiner Leben." },
+  { k:"stop",  n:"Zeitstopp",      i:"⏳", lv:15, cd:8, d:"Alle Gegner setzen eine Runde aus. Bricht aufgeladene Großangriffe ab." }
+];
+const TK = Object.fromEntries(TECH.map(t => [t.k, t]));
 // Spezialangriff des Helden: wird durch Kurier-Energie ausgelöst
 const ULTS = [
   { lv:1,  n:"Mondsalve",      mult:2,   d:"Trifft alle Gegner mit 200 % Angriff." },
@@ -775,7 +807,7 @@ function ek(s) {
    ========================================================= */
 const KEY = "sternenkarten-v4";
 function defSave() {
-  return { v:4, lv:1, xp:0, sp:0, tree:{}, co:50, eq:{ w:0, a:0, h:0, c:0 }, rank:{}, prog:0, zone:0, auto:false, stats:{ wins:0, losses:0 }, best:{}, fails:{}, daily:null, seen:false };
+  return { v:4, lv:1, xp:0, sp:0, tree:{}, co:50, eq:{ w:0, a:0, h:0, c:0 }, rank:{}, prog:0, zone:0, auto:false, autoTech:false, stats:{ wins:0, losses:0 }, best:{}, fails:{}, daily:null, seen:false };
 }
 function load() {
   try {
@@ -868,14 +900,27 @@ function makeWave(s) {
       crit:.05 + (ab && ab.k === "crit" ? ab.v : 0), dodge:ab && ab.k === "dodge" ? ab.v : 0,
       dr:ab && ab.k === "taunt" ? ab.v : 0, thorns:ab && ab.k === "thorns" ? ab.v : 0 });
   });
+  W.forEach(u => { if (u.boss) u.tele = 2.2; });
+  if (!isBoss(s) && stageNo(s) >= 5 && W.length) {
+    const el = W[W.length - 1];
+    Object.assign(el, { elite:true, tele:1.6, n:"Elite-" + el.n, hp:Math.round(el.hp * 1.6), max:Math.round(el.max * 1.6), atk:Math.round(el.atk * 1.15) });
+  }
   const aura = W.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
   W.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
   return W;
 }
 const sidePower = U => Math.round(U.reduce((a, u) => a + unitPower(u), 0));
 
-function simulate(P, E, T) {
-  const ev = [], all = P.concat(E);
+// Kampf läuft Schritt für Schritt: nach jeder Aktion gibt der Generator die neuen Ereignisse heraus.
+// ctl.cmds nimmt Befehle des Spielers entgegen (Spezialangriff, Techniken, Fokus), ctl.ai lässt den Helden selbst entscheiden.
+function newCtl(ai) { return { cmds:[], ai, cd:{ wall:0, heal:0, stop:0 }, focus:null, hero:null }; }
+function simulate(P, E, T, ai = true) {
+  const g = battle(P, E, T, newCtl(ai)), ev = []; let r;
+  while (!(r = g.next()).done) ev.push(...r.value);
+  return { ...r.value, ev };
+}
+function* battle(P, E, T, ctl) {
+  const ev = [], all = P.concat(E), flush = () => ev.splice(0);
   const foes = u => (u.side === "p" ? E : P).filter(x => x.alive);
   const mates = u => (u.side === "p" ? P : E).filter(x => x.alive);
   const snap = u => ({ u:u.uid, hp:Math.max(0, Math.round(u.hp)), sh:Math.round(u.shield) });
@@ -939,6 +984,7 @@ function simulate(P, E, T) {
     if (k === "execute" && t.hp / t.max < .35) d *= 1 + v;
     if (k === "berserk") d *= 1 + v * (1 - a.hp / a.max);
     d *= 1 + t.mark;
+    if (isP(a) && t.uid === ctl.focus) d *= 1.15;
     const crit = Math.random() < a.crit; if (crit) d *= a.critDmg;
     const dr = isP(a) ? t.dr * (1 - T.pierce) : t.dr;
     d *= (1 + t.shred) * (1 - dr);
@@ -964,6 +1010,7 @@ function simulate(P, E, T) {
   }
   function target(u) {
     const fs = foes(u); if (!fs.length) return null;
+    if (isP(u) && ctl.focus) { const f = fs.find(x => x.uid === ctl.focus); if (f) return f; }
     if (u.ab && u.ab.k === "snipe") return fs.reduce((m, f) => f.hp < m.hp ? f : m);
     const tz = fs.filter(f => f.ab && f.ab.k === "taunt");
     if (tz.length && Math.random() < .75) return rnd(tz);
@@ -975,15 +1022,11 @@ function simulate(P, E, T) {
 
   function act(u) {
     const k = u.ab && u.ab.k, v = u.ab && u.ab.v;
+    if (u.tele) {
+      if (u.charging) { u.charging = false; ev.push({ t:"skill", a:u.uid, msg:"Großangriff" }); ev.push({ t:"charge", u:u.uid, on:false }); foes(u).forEach(f => hit(u, f, u.tele, true)); return; }
+      if (round % 4 === 3) { u.charging = true; ev.push({ t:"warn", u:u.uid, msg:`⚠️ ${u.n} lädt einen Großangriff auf!` }); ev.push({ t:"charge", u:u.uid, on:true }); return; }
+    }
     if (u.hero) {
-      if (u.en >= 100) {
-        const U = u.ult; u.en = 0;
-        ev.push({ t:"ult", a:u.uid, msg:U.n }); ev.push({ t:"en", u:u.uid, v:0 });
-        foes(u).forEach(f => hit(u, f, U.mult * u.ultMul, true));
-        if (U.burn) foes(u).forEach(f => f.dots.push({ d:u.atk * U.burn * (1 + T.dot), r:3 }));
-        if (U.heal) mates(u).forEach(f => heal(f, f.max * U.heal, u));
-        return;
-      }
       gainEn(u, 25);
       if (u.habs.includes("hNova") && round % 6 === 0) return aoeAll(u, 3, "Supernova");
       if (T.fall && round % 3 === 0) return aoeAll(u, 1, "Sternenfall");
@@ -1003,6 +1046,46 @@ function simulate(P, E, T) {
     if (isP(u) && !u.hero && T.multi && u.alive && Math.random() < T.multi) hit(u, target(u), 1);
   }
 
+  const hero = P.find(u => u.hero); ctl.hero = hero;
+  const has = k => hero && TK[k].lv <= hero.lv;
+  const ready = k => hero && hero.alive && has(k) && (k === "ult" ? hero.en >= 100 : !(ctl.cd[k] > 0));
+  function useTech(k) {
+    if (!ready(k)) return;
+    if (k === "ult") {
+      const U = hero.ult; hero.en = 0;
+      ev.push({ t:"ult", a:hero.uid, msg:U.n }); ev.push({ t:"en", u:hero.uid, v:0 });
+      foes(hero).forEach(f => hit(hero, f, U.mult * hero.ultMul, true));
+      if (U.burn) foes(hero).forEach(f => f.dots.push({ d:hero.atk * U.burn * (1 + T.dot), r:3 }));
+      if (U.heal) mates(hero).forEach(f => heal(f, f.max * U.heal, hero));
+      return;
+    }
+    ctl.cd[k] = TK[k].cd;
+    ev.push({ t:"tech", k, msg:TK[k].n });
+    if (k === "wall") mates(hero).forEach(f => addShield(f, f.max * .25));
+    if (k === "heal") mates(hero).forEach(f => heal(f, f.max * .25, hero));
+    if (k === "stop") foes(hero).forEach(f => { f.stun = 1; ev.push({ t:"stun", u:f.uid }); });
+  }
+  function think() {
+    if (!ctl.ai || !hero || !hero.alive) return;
+    const team = mates(hero), avg = team.reduce((a, u) => a + u.hp / u.max, 0) / team.length, low = team.some(u => u.hp / u.max < .35);
+    const charging = E.some(e => e.alive && e.charging);
+    if (ready("ult")) ctl.cmds.push("ult");
+    if (charging && ready("stop")) ctl.cmds.push("stop");
+    else if (charging && ready("wall")) ctl.cmds.push("wall");
+    if ((avg < .55 || low) && ready("heal")) ctl.cmds.push("heal");
+    else if (avg < .6 && ready("wall") && !charging) ctl.cmds.push("wall");
+    if (has("focus")) { const fs = foes(hero); if (fs.length && !fs.some(f => f.uid === ctl.focus)) ctl.focus = fs.reduce((m, f) => f.hp < m.hp ? f : m).uid; }
+  }
+  function commands() {
+    think();
+    while (ctl.cmds.length) {
+      const c = ctl.cmds.shift();
+      if (typeof c === "object" && c.k === "focus") { if (has("focus")) { ctl.focus = c.uid; ev.push({ t:"focus", u:c.uid }); } }
+      else useTech(c);
+      if (over()) return;
+    }
+  }
+
   // Kampfbeginn
   for (const u of all) {
     const k = u.ab && u.ab.k;
@@ -1011,16 +1094,25 @@ function simulate(P, E, T) {
     if (u.hero && u.habs.includes("hShield")) P.forEach(f => addShield(f, u.max * .12));
   }
   if (T.shield) P.forEach(f => addShield(f, f.max * T.shield));
+  yield flush();
 
   while (round < MAX_ROUNDS && !over()) {
     round++;
+    Object.keys(ctl.cd).forEach(k => ctl.cd[k] = Math.max(0, ctl.cd[k] - 1));
     ev.push({ t:"round", n:round });
+    commands(); yield flush();
     const order = all.filter(u => u.alive).sort((a, b) => b.spd - a.spd || Math.random() - .5);
     for (const u of order) {
-      if (!u.alive || over()) continue;
-      if (u.stun > 0) { u.stun--; ev.push({ t:"frozen", u:u.uid }); continue; }
+      commands();
+      if (!u.alive || over()) { yield flush(); continue; }
+      if (u.stun > 0) {
+        u.stun--; ev.push({ t:"frozen", u:u.uid });
+        if (u.charging) { u.charging = false; ev.push({ t:"charge", u:u.uid, on:false }); ev.push({ t:"banner", msg:`${u.n}s Großangriff wurde abgebrochen!` }); }
+        yield flush(); continue;
+      }
       ev.push({ t:"act", u:u.uid });
       act(u);
+      yield flush();
     }
     if (over()) break;
     for (const u of all) {
@@ -1036,8 +1128,9 @@ function simulate(P, E, T) {
     }
     if (over()) break;
   }
+  yield flush();
   const win = !E.some(x => x.alive) && P.some(x => x.alive);
-  return { ev, win, rounds:round, timeout:!over() };
+  return { win, rounds:round, timeout:!over() };
 }
 
 /* =========================================================
@@ -1775,25 +1868,26 @@ function helpModal() {
 function startBattle(s) {
   UID = 1;
   const P = teamFor(s), E = makeWave(s), units = P.concat(E).map(u => ({ ...u }));
-  const res = simulate(P, E, treeFx());
-  B = { s, res, units:Object.fromEntries(units.map(u => [u.uid, u])), i:0, timer:null, done:false };
+  const ctl = newCtl(S.auto || !!S.autoTech);
+  B = { s, ctl, gen:battle(P, E, treeFx(), ctl), q:[], res:null, units:Object.fromEntries(units.map(u => [u.uid, u])), timer:null, done:false, lv:P[0].lv };
   const heroTile = u => `<div class="unit hero herobig" id="u${u.uid}"><span class="ust" id="st${u.uid}"></span>${heroSVG(u.lv, u.eqs, 58, false)}
       <span class="hbx"><span class="un">Mondkurier · Lv ${u.lv}</span><span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${fmt(u.hp)}</span>
       <span class="enlabel"><span>Kurier-Energie</span><span>${u.ult.n}</span></span><span class="uen" id="en${u.uid}"><i></i></span></span></div>`;
-  const tile = u => u.hero ? heroTile(u) : `<div class="unit ${u.boss ? "boss" : ""}" id="u${u.uid}">
+  const tile = u => u.hero ? heroTile(u) : `<div class="unit ${u.boss ? "boss" : ""} ${u.elite ? "elite" : ""}" id="u${u.uid}" ${u.side === "e" ? `data-act="focus" data-u="${u.uid}"` : ""}>
       <span class="ust" id="st${u.uid}"></span><span class="ue">${u.e}</span><span class="un">${u.n}</span>
       <span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${u.hp}</span></div>`;
   const bt = $("#battle");
   bt.style.setProperty("--zbg", zoneAt(zoneOf(s)).bg);
   bt.innerHTML = `<div class="bwrap">
     <div class="b-top"><div><div class="bz">${zoneAt(zoneOf(s)).n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Kampf beginnt</div></div>
-</div>
+      <button class="autobtn ${ctl.ai ? "on" : ""}" data-act="autoTech" ${S.auto ? "disabled" : ""}>Auto ${ctl.ai ? "an" : "aus"}</button></div>
     <div class="b-enemies"><div class="sidelabel foe">Gegner</div><div class="side">${units.filter(u => u.side === "e").map(tile).join("")}</div></div>
-    <div class="b-log" id="bLog"><span>${S.auto ? "Automatisch wiederholen ist an" : "Dein Team kämpft von allein."}</span></div>
+    <div class="b-log" id="bLog"><span>${ctl.ai ? "Der Held setzt seine Techniken selbst ein." : P[0].lv >= TK.focus.lv ? "Tippe einen Gegner für 🎯 Fokus. Unten sind deine Techniken." : "Ist die Energie voll, tippe auf ☄️ Spezialangriff."}</span></div>
     <div class="b-team"><div class="sidelabel own">Dein Team</div>${tile(units.find(u => u.hero))}<div class="side">${units.filter(u => u.side === "p" && !u.hero).map(tile).join("")}</div>
-      <div class="legend"><span><i style="background:var(--hp)"></i>Leben</span><span><i style="background:var(--shield)"></i>Schild</span><span>❄ eingefroren</span></div></div>
+      <div class="techbar" id="techBar"></div></div>
     <div id="fx"></div></div>`;
   bt.hidden = false;
+  techBar();
   B.timer = setTimeout(step, 600);
 }
 function setHP(uid, hp, sh) {
@@ -1835,6 +1929,11 @@ function applyEv(e, quiet) {
   const U = B.units, nm = id => U[id] ? U[id].n : "";
   switch (e.t) {
     case "round": $("#bRound").textContent = `Runde ${e.n}`; return 150;
+    case "warn": { const el = $("#u" + e.u); if (el) el.classList.add("charging"); if (!quiet) { say(`<b style="color:var(--hp)">${e.msg}</b>`); floatAt(e.u, "⚠️ lädt auf", "dmg"); } return 900; }
+    case "charge": { const el = $("#u" + e.u); if (el) el.classList.toggle("charging", e.on); return 0; }
+    case "tech": if (quiet) return 0; { const bw = $(".bwrap"); bw.classList.remove("techflash"); void bw.offsetWidth; bw.classList.add("techflash"); }
+      say(`<b>Mondkurier</b> setzt <b>${e.msg}</b> ein!`); return 650;
+    case "focus": say(`🎯 Fokus auf <b>${U[e.u] ? U[e.u].n : ""}</b>`); return 120;
     case "en": { const b = $("#en" + e.u); if (b) { b.querySelector("i").style.width = e.v + "%"; b.classList.toggle("full", e.v >= 100); } return 0; }
     case "ult": if (quiet) return 0; {
         const bw = $(".bwrap"); bw.classList.remove("ultflash"); void bw.offsetWidth; bw.classList.add("ultflash");
@@ -1862,9 +1961,28 @@ function applyEv(e, quiet) {
 }
 function step() {
   if (!B || B.done) return;
-  if (B.i >= B.res.ev.length) return finishBattle();
-  const d = applyEv(B.res.ev[B.i++], false);
+  if (!B.q.length) {
+    const r = B.gen.next();
+    if (r.done) { B.res = r.value; return finishBattle(); }
+    B.q = r.value;
+    if (!B.q.length) { techBar(); B.timer = setTimeout(step, 0); return; }
+  }
+  const d = applyEv(B.q.shift(), false);
+  techBar();
   B.timer = setTimeout(step, d);
+}
+// Leiste mit Heldentechniken im Kampf
+function techBar() {
+  const el = $("#techBar"); if (!el || !B) return;
+  const c = B.ctl, h = c.hero || Object.values(B.units).find(u => u.hero), lv = B.lv;
+  const btns = TECH.filter(t => t.k !== "focus" && t.lv <= lv).map(t => {
+    const isU = t.k === "ult", en = h ? Math.round(h.en) : 0, cd = c.cd[t.k] || 0;
+    const rdy = h && h.alive && !B.done && (isU ? en >= 100 : cd <= 0), queued = c.cmds.includes(t.k);
+    return `<button class="tech ${rdy ? "ready" : ""} ${isU ? "ultb" : ""}" data-act="tech" data-k="${t.k}" ${rdy && !queued ? "" : "disabled"}>
+      <span class="ti">${t.i}</span><span class="tn">${isU ? h.ult.n : t.n}</span><span class="tc">${queued ? "gleich …" : isU ? (en >= 100 ? "bereit!" : en + " %") : cd > 0 ? `noch ${cd} Rd.` : "bereit"}</span></button>`;
+  }).join("");
+  if (el.dataset.html !== btns) { el.innerHTML = btns; el.dataset.html = btns; }
+  document.querySelectorAll(".b-enemies .unit").forEach(u => u.classList.toggle("focused", +u.id.slice(1) === c.focus));
 }
 function finishBattle() {
   if (B.done) return;
@@ -1935,6 +2053,17 @@ function act(el, ev) {
     case "closeBg": if (ev.target === el && !B && !MG && $("#battle").hidden) modal(""); break;
     case "zone": { const z = +el.dataset.z; if (z > 0 && S.prog < z * 10) { toast(`Besiege zuerst den Boss von Zone ${z}.`); return; } S.zone = z; save(); render(); break; }
     case "fight": startBattle(+el.dataset.s); break;
+    case "tech": if (B && !B.done && !B.ctl.cmds.includes(el.dataset.k)) { B.ctl.cmds.push(el.dataset.k); techBar(); } break;
+    case "focus": {
+      if (!B || B.done) return;
+      if (B.lv < TK.focus.lv) { toast(`🎯 Fokus lernt der Held auf Level ${TK.focus.lv}.`); return; }
+      B.ctl.cmds.push({ k:"focus", uid:+el.dataset.u }); B.ctl.focus = +el.dataset.u; techBar(); break;
+    }
+    case "autoTech": {
+      if (!B || S.auto) return;
+      S.autoTech = !S.autoTech; B.ctl.ai = S.autoTech; save();
+      el.classList.toggle("on", S.autoTech); el.textContent = `Auto ${S.autoTech ? "an" : "aus"}`; techBar(); break;
+    }
     case "mode": modeIntro(el.dataset.k); break;
     case "modeLocked": toast(`${MM[el.dataset.k].n} wird auf Level ${MM[el.dataset.k].lv} freigeschaltet.`); break;
     case "miniGo": modal(""); stopMini(); MINI[el.dataset.k](); break;
