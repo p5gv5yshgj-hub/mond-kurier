@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Sternenkarten</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0c0f22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sternenkarten">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
@@ -59,7 +67,7 @@ p { margin: 0; }
 #app { position: relative; z-index: 1; max-width: 560px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; }
 
 /* ---------- Statusleiste ---------- */
-#top { display: flex; align-items: center; gap: 12px; padding-block: 12px 10px; border-bottom: 1px solid var(--line); }
+#top { display: flex; align-items: center; gap: 12px; padding-block: calc(12px + env(safe-area-inset-top, 0px)) 10px; border-bottom: 1px solid var(--line); }
 .lvl-badge { font-family: var(--f-display); font-weight: 700; font-size: 14px; background: var(--gold); color: var(--gold-ink); padding: 4px 9px; border-radius: 7px; white-space: nowrap; }
 .xpwrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .bar { height: 8px; background: var(--deck-2); border-radius: 4px; overflow: hidden; }
@@ -78,7 +86,7 @@ p { margin: 0; }
 .screen-title p { color: var(--dim); font-size: 14px; margin-top: 2px; }
 .label { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .12em; font-size: 12px; color: var(--dim); margin-top: 6px; }
 
-#nav { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); padding-block: 6px 8px; }
+#nav { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); padding-block: 6px calc(8px + env(safe-area-inset-bottom, 0px)); }
 #nav button { background: none; border: 0; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--dim); font-size: 12px; font-weight: 600; }
 #nav button svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #nav button.on { color: var(--gold); }
@@ -317,6 +325,7 @@ p { margin: 0; }
 .steps div { display: flex; gap: 12px; align-items: flex-start; }
 .steps i { font-style: normal; font-family: var(--f-display); font-weight: 700; width: 28px; height: 28px; border-radius: 50%; background: var(--gold); color: var(--gold-ink); display: grid; place-items: center; flex: none; }
 .steps p { color: var(--moon); }
+.codebox { width: 100%; resize: none; background: var(--night); color: var(--moon); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font: 12px/1.3 ui-monospace, Menlo, monospace; word-break: break-all; user-select: text; -webkit-user-select: text; }
 .steps span { color: var(--dim); font-size: 14px; display: block; }
 
 /* ---------- Upgrade-Baum ---------- */
@@ -823,6 +832,15 @@ function load() {
   return defSave();
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+// Spielstand als Code: damit lässt er sich vom Browser in die installierte App mitnehmen
+const saveToCode = () => btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+function codeToSave(code) {
+  try {
+    const o = JSON.parse(decodeURIComponent(escape(atob(code.replace(/\s+/g, "")))));
+    if (!o || o.v !== 4 || typeof o.lv !== "number") return null;
+    const d = defSave(); return { ...d, ...o, stats:{ ...d.stats, ...o.stats }, seen:true };
+  } catch (e) { return null; }
+}
 let S = null;
 const UI = { tab:"home", zoom:1 };
 let B = null;
@@ -1318,7 +1336,8 @@ function screenHero() {
       ${ULTS.slice(1).map(u => `<div class="abrow ${u.lv > S.lv ? "locked" : ""}"><span class="lvtag">${u.lv > S.lv ? "LV " + u.lv : "✓ LV " + u.lv}</span>
       <div><div class="an">Spezialangriff: ${u.n}</div><div class="ad">${u.d}</div></div></div>`).join("")}</div>
     <p class="muted" style="font-size:14px">Bisher: ${S.stats.wins} Siege, ${S.stats.losses} Niederlagen, ${S.prog} von 50 Etappen.</p>
-    <div style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" data-act="help">Spielregeln</button><button class="btn ghost" style="flex:1;color:var(--hp)" data-act="resetAsk">Neu starten</button></div>`;
+    <div style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" data-act="help">Spielregeln</button><button class="btn ghost" style="flex:1;color:var(--hp)" data-act="resetAsk">Neu starten</button></div>
+    <div style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" data-act="installHelp">${IS_APP ? "✓ Läuft als App" : "Als App installieren"}</button><button class="btn ghost" style="flex:1" data-act="saveCode">Spielstand übertragen</button></div>`;
 }
 const eqDots = () => `<span class="eqdots">${EQUIP.map(e => `<span style="--tc:${TIER_COL[eqTier(S.eq[e.k])]}">${e.i} ${S.eq[e.k]}</span>`).join("")}</span>`;
 
@@ -2101,6 +2120,24 @@ function act(el, ev) {
       S.co -= p; Object.keys(S.tree).forEach(k => { S.sp += TN[k] ? TN[k].cost : 0; }); S.tree = {}; save(); modal(""); render(); break;
     }
     case "help": helpModal(); break;
+    case "installHelp": installModal(); break;
+    case "saveCode":
+      modal(`<h2>Spielstand übertragen</h2>
+        <p class="muted">Kopiere diesen Code und füge ihn auf dem anderen Gerät oder in der installierten App hier wieder ein.</p>
+        <textarea id="codeOut" class="codebox" readonly rows="4">${saveToCode()}</textarea>
+        <button class="btn wide" data-act="codeCopy">Code kopieren</button>
+        <textarea id="codeIn" class="codebox" rows="3" placeholder="Code hier einfügen"></textarea>
+        <div class="row"><button class="btn ghost" data-act="close">Schließen</button><button class="btn green" data-act="codeLoad">Code laden</button></div>`); break;
+    case "codeCopy": {
+      const t = $("#codeOut"); t.select();
+      (navigator.clipboard?.writeText(t.value) ?? Promise.reject()).then(() => toast("Code kopiert"), () => { document.execCommand("copy"); toast("Code kopiert"); });
+      break;
+    }
+    case "codeLoad": {
+      const n = codeToSave($("#codeIn").value || "");
+      if (!n) { toast("Der Code passt nicht."); return; }
+      S = n; save(); modal(""); render(); toast(`Spielstand geladen: Level ${S.lv}`); break;
+    }
     case "resetAsk":
       modal(`<h2>Neu starten?</h2><p>Level, Karten, Baum und Münzen gehen verloren. Das lässt sich nicht rückgängig machen.</p>
         <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn danger" data-act="reset">Alles löschen</button></div>`); break;
@@ -2110,13 +2147,39 @@ function act(el, ev) {
 document.addEventListener("click", ev => { const el = ev.target.closest("[data-act]"); if (el) act(el, ev); });
 
 /* =========================================================
+   ALS APP
+   ========================================================= */
+const IS_APP = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+function installModal() {
+  if (IS_APP) { modal(`<h2>Läuft als App</h2><p>Sternenkarten ist auf deinem Home-Bildschirm installiert und läuft auch ohne Internet.</p><button class="btn" data-act="close">Gut</button>`); return; }
+  modal(`<h2>Als App installieren</h2>
+    <div class="steps">
+      ${IS_IOS ? "" : `<div><i>!</i><p>iPhone und iPad<span>Öffne diese Seite dort in Safari. Auf anderen Geräten nutze im Browser-Menü „App installieren“.</span></p></div>`}
+      <div><i>1</i><p>Teilen antippen<span>Das Symbol mit dem Pfeil nach oben, in Safari unten in der Leiste.</span></p></div>
+      <div><i>2</i><p>„Zum Home-Bildschirm“<span>Etwas nach unten scrollen, falls du es nicht gleich siehst.</span></p></div>
+      <div><i>3</i><p>„Hinzufügen“<span>Danach startest du Sternenkarten über das Icon, im Vollbild und auch offline.</span></p></div>
+    </div>
+    <p class="muted" style="font-size:14px">Die App hat einen eigenen Spielstand. Nimm deinen bisherigen mit „Spielstand übertragen“ mit.</p>
+    <button class="btn" data-act="close">Verstanden</button>`);
+}
+// Offline-Speicher; schlägt im Artifact-Vorschaurahmen still fehl
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && window.top === window) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+  navigator.storage?.persist?.().catch(() => {});
+}
+
+/* =========================================================
    START
    ========================================================= */
 function start(data) {
   S = (data && data.S && data.S.v === 4) ? data.S : load();
   render();
   if (!S.seen) { S.seen = true; save(); helpModal(); }
+  else if (IS_IOS && !IS_APP && window.top === window && !sessionStorageGet("installHint")) { sessionStorageSet("installHint"); installModal(); }
 }
+function sessionStorageGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return "1"; } }
+function sessionStorageSet(k) { try { sessionStorage.setItem(k, "1"); } catch (e) {} }
 window.claude?.hot?.snapshot?.(() => ({ S }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
 </script>
