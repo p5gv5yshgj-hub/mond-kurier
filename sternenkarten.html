@@ -9,24 +9,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one phone-sized column — status bar, scrolling screen, tab bar; battle takes over the whole column. */
+/* Layout: one phone-sized column — status bar, scrolling screen, tab bar; the auto-battle takes over the whole column. */
 :root {
   --night: #0c0f22;      /* deep lunar night, page ground */
   --deck: #161a35;       /* raised panels */
-  --deck-2: #20254a;     /* inputs, chips */
+  --deck-2: #20254a;     /* chips, empty bars */
   --line: #2f3566;       /* hairlines */
   --moon: #ece8d9;       /* moon-silver text */
   --dim: #9a9cba;        /* secondary text */
-  --gold: #f2c14e;       /* lunar gold accent (coins, buttons) */
+  --gold: #f2c14e;       /* lunar gold accent */
   --gold-ink: #1b1606;
   --hp: #ff5d6c;
   --shield: #6ecbff;
   --venom: #7bd88f;
-  --power: #c99bff;
-  --r-c: #9aa3b8;  /* Gewöhnlich */
-  --r-r: #4fb3ff;  /* Selten */
-  --r-e: #b77bff;  /* Episch */
-  --r-l: #ffb347;  /* Legendär */
+  --xp: #8f7bff;
+  --t-a: #ff7a59;  /* Talentzweig Angriff */
+  --t-d: #59b8ff;  /* Talentzweig Abwehr */
+  --t-k: #f2c14e;  /* Talentzweig Kurier */
+  --r-c: #9aa3b8; --r-r: #4fb3ff; --r-e: #b77bff; --r-l: #ffb347;
   --f-display: "Chakra Petch", "Trebuchet MS", system-ui, sans-serif;
   --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
@@ -35,20 +35,14 @@
 [hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
-  margin: 0;
-  background: var(--night);
-  color: var(--moon);
-  font-family: var(--f-body);
-  font-size: 15px;
+  margin: 0; background: var(--night); color: var(--moon);
+  font-family: var(--f-body); font-size: 15px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  -webkit-user-select: none;
+  overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
 }
 body::after {
-  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .5;
   background-image:
     radial-gradient(1px 1px at 12% 18%, var(--moon) 50%, transparent 51%),
     radial-gradient(1px 1px at 72% 9%, var(--moon) 50%, transparent 51%),
@@ -58,68 +52,45 @@ body::after {
     radial-gradient(1.5px 1.5px at 63% 92%, var(--moon) 50%, transparent 51%),
     radial-gradient(1px 1px at 5% 52%, var(--moon) 50%, transparent 51%),
     radial-gradient(1px 1px at 95% 75%, var(--dim) 50%, transparent 51%);
-  opacity: .5;
 }
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible, [data-act]:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; letter-spacing: .02em; }
+.num { font-variant-numeric: tabular-nums; }
 
-#app {
-  position: relative; z-index: 1;
-  max-width: 520px; height: 100%; margin: 0 auto;
-  display: flex; flex-direction: column;
-}
+#app { position: relative; z-index: 1; max-width: 520px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; }
 
-/* ---------- top status bar ---------- */
-#top {
-  display: flex; align-items: center; gap: 10px;
-  padding-block: 10px 8px;
-}
-.lvl-badge {
-  font-family: var(--f-display); font-weight: 700; font-size: 13px;
-  background: var(--gold); color: var(--gold-ink);
-  padding: 3px 8px; border-radius: 6px; white-space: nowrap;
-}
+/* ---------- Statusleiste ---------- */
+#top { display: flex; align-items: center; gap: 10px; padding-block: 10px 8px; }
+.lvl-badge { font-family: var(--f-display); font-weight: 700; font-size: 13px; background: var(--gold); color: var(--gold-ink); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
 .xpwrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.xpbar { height: 7px; background: var(--deck-2); border-radius: 4px; overflow: hidden; }
-.xpbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--r-r), var(--power)); border-radius: 4px; transition: width .6s ease; }
+.bar { height: 7px; background: var(--deck-2); border-radius: 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--xp); border-radius: 4px; transition: width .5s ease; }
+.bar.full i { background: var(--gold); }
 .xptext { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
 .res { display: flex; gap: 10px; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; }
 .coin::before { content: ""; display: inline-block; width: .8em; height: .8em; border-radius: 50%; background: var(--gold); box-shadow: inset -2px -2px 0 rgba(0,0,0,.25); margin-right: 4px; vertical-align: -1px; }
-.pts { color: var(--power); }
-.pts::before { content: "✦"; margin-right: 3px; }
+.dust { color: var(--shield); }
+.dust::before { content: "✧"; margin-right: 3px; }
+.tp { color: var(--venom); }
 
-/* ---------- main scroller ---------- */
-#main { flex: 1; overflow-y: auto; overflow-x: hidden; padding-block: 4px 16px; -webkit-overflow-scrolling: touch; }
-.screen-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 6px 0 12px; }
+#main { flex: 1; overflow-y: auto; overflow-x: hidden; padding-block: 4px 20px; -webkit-overflow-scrolling: touch; }
+.screen-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 6px 0 12px; flex-wrap: wrap; }
 .screen-title h2 { font-size: 22px; }
 .screen-title small { color: var(--dim); font-size: 13px; }
 .section-label { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .12em; font-size: 11px; color: var(--dim); margin: 18px 0 8px; }
 
-/* ---------- bottom nav ---------- */
-#nav {
-  display: grid; grid-template-columns: repeat(5, 1fr);
-  border-top: 1px solid var(--line);
-  padding-block: 6px 6px;
-}
-#nav button {
-  background: none; border: 0; padding: 4px 0;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  color: var(--dim); font-size: 11px; font-weight: 600;
-}
+#nav { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); padding-block: 6px; }
+#nav button { background: none; border: 0; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--dim); font-size: 11px; font-weight: 600; }
 #nav button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #nav button.on { color: var(--gold); }
 #nav .dot { position: relative; }
-#nav .dot::after { content: ""; position: absolute; top: -1px; right: -4px; width: 7px; height: 7px; border-radius: 50%; background: var(--hp); }
+#nav .dot::after { content: ""; position: absolute; top: -1px; right: -4px; width: 7px; height: 7px; border-radius: 50%; background: var(--venom); }
 
-/* ---------- generic ---------- */
-.btn {
-  border: 0; border-radius: 10px; padding: 11px 16px; font-weight: 700;
-  background: var(--gold); color: var(--gold-ink); font-family: var(--f-display); letter-spacing: .03em;
-  transition: transform .12s ease, opacity .2s;
-}
+.btn { border: 0; border-radius: 10px; padding: 11px 16px; font-weight: 700; background: var(--gold); color: var(--gold-ink); font-family: var(--f-display); letter-spacing: .03em; transition: transform .12s ease, opacity .2s; }
 .btn:active { transform: scale(.96); }
 .btn.ghost { background: var(--deck-2); color: var(--moon); }
+.btn.green { background: var(--venom); color: var(--night); }
 .btn.danger { background: var(--hp); color: var(--night); }
 .btn[disabled] { opacity: .4; pointer-events: none; }
 .btn.sm { padding: 7px 11px; font-size: 13px; border-radius: 8px; }
@@ -127,217 +98,206 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; lette
 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .chip { background: var(--deck-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--dim); }
 .chip.on { background: var(--moon); color: var(--night); border-color: var(--moon); }
+.chip.lock { opacity: .45; }
+.r-c { --rc: var(--r-c); } .r-r { --rc: var(--r-r); } .r-e { --rc: var(--r-e); } .r-l { --rc: var(--r-l); }
+.stars { color: var(--gold); letter-spacing: 1px; font-size: 12px; }
+.stars s { color: var(--line); text-decoration: none; }
 
-/* ---------- zones ---------- */
-.zones { display: flex; flex-direction: column; gap: 12px; }
-.zone { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--line); padding: 14px; background: var(--deck); }
-.zone::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .55; pointer-events: none; }
-.zone > * { position: relative; }
-.zone-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.zone h3 { font-size: 19px; }
-.zone .zsub { color: var(--dim); font-size: 13px; margin-top: 2px; }
-.zone .ztag { font-family: var(--f-display); font-size: 12px; padding: 3px 8px; border-radius: 6px; background: var(--deck-2); white-space: nowrap; }
-.zone.locked { filter: saturate(.3); }
-.zone.locked .zlock { margin-top: 10px; color: var(--dim); font-size: 13px; }
-.foes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
-.foe {
-  background: color-mix(in srgb, var(--night) 70%, transparent); border: 1px solid var(--line); border-radius: 12px;
-  padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center;
+/* ---------- Heldenkarte ---------- */
+.herocard {
+  position: relative; border-radius: 20px; padding: 16px; overflow: hidden;
+  background: linear-gradient(160deg, var(--deck-2), var(--deck) 55%);
+  border: 2px solid var(--hc, var(--r-c));
+  box-shadow: 0 0 28px color-mix(in srgb, var(--hc, var(--r-c)) 25%, transparent);
 }
-.foe .fe { font-size: 30px; line-height: 1.1; }
-.foe .fn { font-size: 12px; font-weight: 600; line-height: 1.15; }
-.foe .fs { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.bossrow { margin-top: 8px; display: flex; align-items: center; gap: 10px; background: color-mix(in srgb, var(--night) 70%, transparent); border: 1px solid var(--r-l); border-radius: 12px; padding: 8px 10px; }
-.bossrow.closed { border-color: var(--line); }
-.bossrow .fe { font-size: 34px; }
-.bossrow .bi { flex: 1; min-width: 0; }
-.bossrow .bn { font-weight: 700; font-family: var(--f-display); }
-.bossrow .bs { font-size: 12px; color: var(--dim); }
-.progress-pips { display: flex; gap: 4px; margin-top: 4px; }
-.progress-pips i { width: 18px; height: 5px; border-radius: 3px; background: var(--deck-2); }
-.progress-pips i.on { background: var(--gold); }
+.herocard::before { content: ""; position: absolute; width: 220px; height: 220px; right: -70px; top: -80px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--moon), #b9b39e 55%, #6f6a5b); opacity: .12; }
+.hc-head { position: relative; display: flex; gap: 14px; align-items: center; }
+.hc-portrait { width: 76px; height: 76px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 42px;
+  background: radial-gradient(circle at 35% 30%, var(--moon), #b9b39e 55%, #6f6a5b); box-shadow: 0 0 0 3px var(--hc, var(--r-c)); }
+.hc-title { font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--hc, var(--dim)); font-weight: 700; }
+.hc-name { font-family: var(--f-display); font-size: 22px; font-weight: 700; }
+.hc-lv { font-family: var(--f-display); font-size: 15px; color: var(--dim); }
+.hc-xp { position: relative; margin-top: 14px; }
+.hc-xp .bar { height: 10px; }
+.hc-xp .xptext { margin-top: 4px; display: flex; justify-content: space-between; }
+.statrow { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-top: 14px; }
+.statrow div { background: color-mix(in srgb, var(--night) 60%, transparent); border-radius: 10px; padding: 8px 4px; text-align: center; }
+.statrow b { display: block; font-family: var(--f-display); font-size: 18px; font-variant-numeric: tabular-nums; }
+.statrow span { font-size: 10.5px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+.ablist { display: flex; flex-direction: column; gap: 8px; }
+.abrow { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; background: var(--deck); border: 1px solid var(--line); border-radius: 12px; }
+.abrow .lvtag { font-family: var(--f-display); font-weight: 700; font-size: 12px; min-width: 46px; text-align: center; padding: 3px 0; border-radius: 6px; background: var(--gold); color: var(--gold-ink); }
+.abrow.locked { opacity: .55; }
+.abrow.locked .lvtag { background: var(--deck-2); color: var(--dim); }
+.abrow .an { font-weight: 700; }
+.abrow .ad { font-size: 13px; color: var(--dim); line-height: 1.35; }
+.milestone { margin-top: 10px; font-size: 13px; color: var(--dim); }
+.milestone b { color: var(--moon); }
 
-/* ---------- cards ---------- */
-.card {
-  --rc: var(--r-c);
-  position: relative; display: flex; flex-direction: column; align-items: stretch;
-  background: linear-gradient(170deg, var(--deck-2), var(--deck) 60%);
-  border: 2px solid var(--rc); border-radius: 12px; padding: 6px 6px 7px;
-  text-align: center; color: var(--moon); font-family: var(--f-body);
-}
-.card.r-r { --rc: var(--r-r); } .card.r-e { --rc: var(--r-e); } .card.r-l { --rc: var(--r-l); }
-.card.r-l { box-shadow: 0 0 14px color-mix(in srgb, var(--r-l) 35%, transparent); }
-.card .cost {
-  position: absolute; top: -8px; left: -8px; width: 26px; height: 26px; border-radius: 50%;
-  background: var(--gold); color: var(--gold-ink); font-family: var(--f-display); font-weight: 700; font-size: 15px;
-  display: grid; place-items: center; border: 2px solid var(--night);
-}
-.card .art { font-size: 30px; line-height: 1.2; margin-top: 2px; }
-.card .cname { font-family: var(--f-display); font-weight: 700; font-size: 12.5px; line-height: 1.1; margin-top: 2px; }
-.card .lv { color: var(--venom); margin-left: 2px; }
-.card .ctype { font-size: 9.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--rc); margin: 3px 0 4px; font-weight: 700; }
-.card .cdesc { font-size: 11px; line-height: 1.25; color: var(--moon); opacity: .9; }
-.card.t-K .art { filter: drop-shadow(0 0 6px var(--power)); }
-.card.locked { --rc: var(--line); background: var(--deck); }
-.card.locked .art { filter: grayscale(1) brightness(.4); }
-.card.locked .cname, .card.locked .cdesc { color: var(--dim); }
-.card .indeck { position: absolute; top: 4px; right: 5px; font-size: 10px; font-weight: 700; color: var(--venom); }
-.card .junk-x { color: var(--dim); }
+/* ---------- Team ---------- */
+.slots { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.slot { min-height: 92px; border-radius: 12px; border: 1px dashed var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; padding: 6px; font-size: 12px; color: var(--dim); background: none; }
+.slot.full { border: 2px solid var(--rc); background: var(--deck); color: var(--moon); }
+.slot .se { font-size: 30px; line-height: 1.1; }
+.slot .sn { font-weight: 700; font-size: 12px; line-height: 1.15; }
+.slot .sl { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.slot.locked { opacity: .5; }
+.powerline { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; color: var(--dim); }
+.powerline b { color: var(--moon); font-family: var(--f-display); font-size: 16px; }
+.clist { display: flex; flex-direction: column; gap: 8px; }
+.crow { display: flex; gap: 12px; align-items: center; padding: 10px 12px; background: var(--deck); border: 1px solid var(--line); border-left: 4px solid var(--rc); border-radius: 12px; text-align: left; width: 100%; }
+.crow.inteam { background: color-mix(in srgb, var(--deck-2) 70%, var(--deck)); }
+.crow .ce { font-size: 32px; width: 42px; text-align: center; flex: none; }
+.crow .ci { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.crow .cn { font-weight: 700; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.crow .cm { font-size: 12px; color: var(--dim); }
+.crow .ctag { font-size: 10px; font-weight: 700; color: var(--venom); text-transform: uppercase; letter-spacing: .08em; }
+.crow .clv { font-family: var(--f-display); font-weight: 700; font-size: 15px; text-align: right; white-space: nowrap; }
+.crow .ready { color: var(--gold); font-size: 10px; display: block; text-transform: uppercase; letter-spacing: .06em; }
+.crow.unknown .ce { filter: grayscale(1) brightness(.4); }
+.crow.unknown .cn { color: var(--dim); }
 
-.cardgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 10px; padding-top: 8px; }
-.cardgrid .card { min-height: 150px; }
-
-/* ---------- modal ---------- */
-.modal-bg {
-  position: fixed; inset: 0; z-index: 50; background: color-mix(in srgb, var(--night) 82%, transparent);
-  display: flex; align-items: center; justify-content: center;
-  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
-  animation: fade .2s ease;
-}
+/* ---------- Modal ---------- */
+.modal-bg { position: fixed; inset: 0; z-index: 50; background: color-mix(in srgb, var(--night) 84%, transparent); display: flex; align-items: center; justify-content: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); animation: fade .2s ease; }
 .modal { width: 100%; max-width: 420px; max-height: 100%; overflow-y: auto; background: var(--deck); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .modal h2 { font-size: 21px; }
 .modal p { margin: 0; color: var(--dim); line-height: 1.45; }
 .modal .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .modal .row .btn { flex: 1; }
-.bigcard { width: 160px; margin: 6px auto 0; }
-.bigcard .art { font-size: 52px; }
-.bigcard .cname { font-size: 16px; }
-.bigcard .cdesc { font-size: 13px; }
-.lvdots { display: flex; justify-content: center; gap: 6px; }
-.lvdots i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--venom); }
-.lvdots i.on { background: var(--venom); }
-.next { background: var(--deck-2); border-radius: 10px; padding: 10px; font-size: 13px; line-height: 1.4; }
-.next b { color: var(--venom); }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.bigc { border: 2px solid var(--rc); border-radius: 16px; padding: 14px; text-align: center; background: linear-gradient(170deg, var(--deck-2), var(--deck) 70%); display: flex; flex-direction: column; gap: 6px; }
+.bigc .be { font-size: 60px; line-height: 1.1; }
+.bigc .bn { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
+.bigc .bm { font-size: 12px; color: var(--rc); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+.bigc .statrow { margin-top: 4px; grid-template-columns: repeat(3, minmax(0,1fr)); }
+.abbox { background: var(--deck-2); border-radius: 12px; padding: 10px 12px; text-align: left; font-size: 13px; line-height: 1.4; }
+.abbox b { color: var(--moon); }
+.abbox .nx { color: var(--venom); }
+.evo { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 26px; }
+.evo span { opacity: .35; } .evo span.on { opacity: 1; }
+.evo i { font-style: normal; font-size: 14px; color: var(--dim); }
 
-/* ---------- shop ---------- */
-.shopgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; padding-top: 8px; }
-.offer { display: flex; flex-direction: column; gap: 8px; }
-.offer .card { min-height: 150px; }
-.price { width: 100%; }
-.pack { display: flex; align-items: center; gap: 14px; }
-.pack .packart {
-  width: 64px; height: 86px; border-radius: 10px; flex: none;
-  background: linear-gradient(150deg, var(--r-e), var(--r-r) 60%, var(--night));
-  display: grid; place-items: center; font-size: 28px; border: 2px solid var(--moon);
-}
-.pack .pi { flex: 1; min-width: 0; }
-.pack .pi h3 { font-size: 16px; }
-.pack .pi p { margin: 2px 0 8px; color: var(--dim); font-size: 13px; }
-.relic { display: flex; align-items: center; gap: 12px; padding-block: 10px; border-bottom: 1px solid var(--line); }
-.relic:last-child { border-bottom: 0; }
-.relic .re { font-size: 28px; width: 40px; text-align: center; flex: none; }
-.relic .ri { flex: 1; min-width: 0; }
-.relic .rn { font-weight: 700; }
-.relic .rd { font-size: 13px; color: var(--dim); }
-.relic.missing .re { filter: grayscale(1) brightness(.5); }
+/* ---------- Kampf-Auswahl ---------- */
+.zonehead { position: relative; border-radius: 16px; padding: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--deck); margin-top: 10px; }
+.zonehead::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .6; }
+.zonehead > * { position: relative; }
+.zonehead h3 { font-size: 20px; }
+.zonehead p { margin: 4px 0 0; color: var(--dim); font-size: 13px; }
+.stages { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.stage { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--deck); border: 1px solid var(--line); border-radius: 12px; text-align: left; width: 100%; }
+.stage .sn { font-family: var(--f-display); font-weight: 700; width: 30px; text-align: center; font-size: 17px; flex: none; }
+.stage .si { flex: 1; min-width: 0; }
+.stage .sfoes { font-size: 20px; letter-spacing: 2px; }
+.stage .sm { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.stage .ss { font-size: 12px; font-weight: 700; text-align: right; white-space: nowrap; }
+.stage.boss { border-color: var(--r-l); }
+.stage.cleared .ss { color: var(--venom); }
+.stage.locked { opacity: .4; }
+.stage.next { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+.odds { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-top: 3px; }
+.odds.easy { background: color-mix(in srgb, var(--venom) 22%, transparent); color: var(--venom); }
+.odds.even { background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold); }
+.odds.hard { background: color-mix(in srgb, var(--hp) 22%, transparent); color: var(--hp); }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; background: var(--deck); border: 1px solid var(--line); border-radius: 12px; width: 100%; text-align: left; }
+.toggle .tt { font-weight: 700; } .toggle .td { font-size: 12px; color: var(--dim); }
+.sw { width: 44px; height: 26px; border-radius: 999px; background: var(--deck-2); position: relative; flex: none; transition: background .2s; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--dim); transition: transform .2s, background .2s; }
+.sw.on { background: color-mix(in srgb, var(--venom) 45%, var(--deck-2)); }
+.sw.on::after { transform: translateX(18px); background: var(--venom); }
 
-/* ---------- achievements ---------- */
-.achs { display: flex; flex-direction: column; gap: 8px; }
-.ach { display: flex; gap: 12px; align-items: center; background: var(--deck); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
-.ach .am { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--deck-2); color: var(--dim); font-size: 16px; flex: none; }
-.ach.done { border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); }
-.ach.done .am { background: var(--gold); color: var(--gold-ink); }
-.ach .ai { flex: 1; min-width: 0; }
-.ach .an { font-weight: 700; }
-.ach .ad { font-size: 13px; color: var(--dim); }
-.ach .ar { font-size: 12px; font-weight: 700; text-align: right; white-space: nowrap; }
+/* ---------- Talente ---------- */
+.tree { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.branch { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.branch h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--bc); text-align: center; padding-bottom: 4px; border-bottom: 2px solid var(--bc); }
+.branch .bp { font-size: 11px; color: var(--dim); text-align: center; font-variant-numeric: tabular-nums; }
+.tier-lbl { font-size: 10px; color: var(--dim); text-align: center; text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+.tnode { border: 1px solid var(--line); background: var(--deck); border-radius: 10px; padding: 8px 6px; text-align: center; display: flex; flex-direction: column; gap: 3px; min-height: 62px; justify-content: center; }
+.tnode .tn { font-size: 12px; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
+.tnode .tr { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.tnode.some { border-color: var(--bc); }
+.tnode.max { background: color-mix(in srgb, var(--bc) 18%, var(--deck)); border-color: var(--bc); }
+.tnode.max .tr { color: var(--bc); }
+.tnode.locked { opacity: .4; }
+.tnode.cap { border-width: 2px; border-style: dashed; }
+.tnode.can { box-shadow: 0 0 0 1px var(--venom); }
 
-/* ---------- hero ---------- */
-.hero { display: flex; flex-direction: column; align-items: center; gap: 6px; padding-block: 8px 4px; text-align: center; }
-.moonface {
-  width: 120px; height: 120px; border-radius: 50%; position: relative;
-  background: radial-gradient(circle at 35% 30%, var(--moon), #b9b39e 55%, #6f6a5b);
-  box-shadow: 0 0 40px color-mix(in srgb, var(--moon) 30%, transparent);
-  display: grid; place-items: center; font-size: 56px;
-}
-.moonface::before, .moonface::after { content: ""; position: absolute; border-radius: 50%; background: rgba(0,0,0,.12); }
-.moonface::before { width: 22px; height: 22px; top: 18px; right: 22px; }
-.moonface::after { width: 14px; height: 14px; bottom: 20px; left: 24px; }
-.hero h2 { font-size: 24px; margin-top: 6px; }
-.hero .hl { color: var(--dim); font-size: 14px; }
-.statgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
-.stat { background: var(--deck); border: 1px solid var(--line); border-radius: 12px; padding: 10px 6px; text-align: center; }
-.stat b { display: block; font-family: var(--f-display); font-size: 20px; font-variant-numeric: tabular-nums; }
-.stat span { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+/* ---------- Shop ---------- */
+.offer { display: flex; align-items: center; gap: 14px; }
+.offer + .offer { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.packart { width: 60px; height: 80px; border-radius: 10px; flex: none; display: grid; place-items: center; font-size: 22px; color: var(--moon); border: 2px solid var(--moon); background: linear-gradient(150deg, var(--r-e), var(--r-r) 60%, var(--night)); }
+.packart.big { background: linear-gradient(150deg, var(--r-l), var(--r-e) 55%, var(--night)); }
+.packart.dustart { background: linear-gradient(150deg, var(--shield), var(--deck-2) 70%); }
+.offer .oi { flex: 1; min-width: 0; }
+.offer h3 { font-size: 16px; }
+.offer p { margin: 2px 0 8px; color: var(--dim); font-size: 13px; line-height: 1.35; }
 
-/* ---------- battle ---------- */
+/* ---------- Kampf ---------- */
 #battle { position: fixed; inset: 0; z-index: 20; background: var(--night); display: flex; justify-content: center;
   padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
-#battle::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .5; pointer-events: none; }
+#battle::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .45; pointer-events: none; }
 .bwrap { position: relative; width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; }
-.b-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-block: 8px; font-size: 12px; color: var(--dim); }
-.b-top .bz { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .1em; }
-.b-enemy { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-.intent {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-weight: 700; font-size: 14px;
-  background: var(--deck); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px;
-}
-.i-atk { color: var(--hp); } .i-blk { color: var(--shield); } .i-buf { color: var(--gold); } .i-deb { color: var(--power); } .i-heal { color: var(--venom); } .i-junk { color: var(--dim); }
-.sprite { font-size: 92px; line-height: 1; filter: drop-shadow(0 8px 18px rgba(0,0,0,.5)); transition: transform .15s; }
-.sprite.boss { font-size: 112px; }
-.sprite.hit { animation: shake .35s; }
-.sprite.lunge { animation: lunge .35s; }
-.sprite.dead { animation: die .7s forwards; }
-@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-10px) rotate(-4deg); } 40% { transform: translateX(9px) rotate(3deg); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
-@keyframes lunge { 50% { transform: translateY(26px) scale(1.12); } }
-@keyframes die { to { transform: scale(.2) rotate(40deg); opacity: 0; } }
-.ename { font-family: var(--f-display); font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-.ename .bosstag { font-size: 10px; background: var(--r-l); color: var(--night); padding: 2px 6px; border-radius: 4px; letter-spacing: .1em; }
-.hpline { width: min(260px, 80%); display: flex; align-items: center; gap: 8px; }
-.hpbar { flex: 1; height: 12px; background: var(--deck-2); border-radius: 6px; overflow: hidden; position: relative; }
-.hpbar i { display: block; height: 100%; background: var(--hp); transition: width .3s ease; }
-.hpnum { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
-.blk { display: inline-flex; align-items: center; gap: 3px; color: var(--shield); font-weight: 700; font-size: 13px; }
-.blk::before { content: "⛨"; }
-.statuses { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 20px; }
-.st { font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--deck-2); }
-.st.str { color: var(--gold); } .st.weak, .st.vuln { color: var(--power); } .st.poison { color: var(--venom); } .st.regen { color: var(--venom); } .st.thorns { color: var(--r-l); } .st.pw { color: var(--power); }
-.b-log { text-align: center; font-size: 13px; color: var(--dim); min-height: 20px; padding-block: 2px; }
-.b-player { background: var(--deck); border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
-.b-player .prow { display: flex; align-items: center; gap: 10px; }
-.b-player .pname { font-family: var(--f-display); font-weight: 700; font-size: 14px; white-space: nowrap; }
-.b-player .hpbar i { background: linear-gradient(90deg, var(--hp), #ff8a7a); }
-.b-player.hit { animation: shake .35s; }
-.b-hand { display: flex; gap: 8px; overflow-x: auto; overflow-y: visible; padding: 14px 4px 8px; min-height: 172px; align-items: flex-end; scrollbar-width: none; }
-.b-hand::-webkit-scrollbar { display: none; }
-.b-hand .card { flex: 0 0 96px; min-height: 148px; transition: transform .15s ease, opacity .2s; animation: deal .25s ease backwards; }
-.b-hand .card:active { transform: translateY(-8px) scale(1.03); }
-.b-hand .card.off { opacity: .45; }
-.b-hand .card.off .cost { background: var(--deck-2); color: var(--dim); }
-@keyframes deal { from { transform: translateY(40px); opacity: 0; } }
-.b-ctrl { display: flex; align-items: center; gap: 10px; padding-block: 4px 10px; }
-.energy {
-  width: 52px; height: 52px; border-radius: 50%; flex: none;
-  background: radial-gradient(circle at 35% 30%, #fff3c4, var(--gold) 55%, #a87c16);
-  color: var(--gold-ink); display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 18px;
-  box-shadow: 0 0 18px color-mix(in srgb, var(--gold) 40%, transparent);
-}
-.energy.empty { filter: grayscale(.8) brightness(.6); }
-.piles { flex: 1; font-size: 12px; color: var(--dim); line-height: 1.4; font-variant-numeric: tabular-nums; }
+.b-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-block: 10px 4px; }
+.b-top .bz { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .1em; font-size: 12px; color: var(--dim); }
+.b-top .round { font-family: var(--f-display); font-weight: 700; font-size: 15px; }
+.speeds { display: flex; gap: 4px; }
+.speeds button { background: var(--deck-2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px; font-weight: 700; font-size: 12px; color: var(--dim); }
+.speeds button.on { background: var(--moon); color: var(--night); }
+.side { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.b-enemies { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.b-mid { text-align: center; font-size: 13px; color: var(--dim); min-height: 22px; padding-block: 6px; }
+.b-team { padding-bottom: 12px; }
+.b-team .side { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); }
+.unit { position: relative; border-radius: 12px; background: var(--deck); border: 1px solid var(--line); padding: 6px 5px 7px; text-align: center; display: flex; flex-direction: column; gap: 3px; transition: transform .15s ease, opacity .3s, filter .3s; min-width: 0; }
+.b-enemies .unit { width: 100px; padding: 8px 6px; }
+.unit .ue { font-size: 30px; line-height: 1.15; }
+.b-enemies .unit .ue { font-size: 46px; }
+.b-enemies .unit.boss { width: 132px; border-color: var(--r-l); }
+.b-enemies .unit.boss .ue { font-size: 64px; }
+.unit.hero { border: 2px solid var(--gold); }
+.unit .un { font-size: 10.5px; font-weight: 600; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unit .uhp { height: 6px; background: var(--deck-2); border-radius: 3px; overflow: hidden; position: relative; }
+.unit .uhp i { display: block; height: 100%; background: var(--hp); transition: width .25s ease; }
+.unit .ush { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--shield) 75%, transparent); transition: width .25s; width: 0; }
+.unit .uv { font-size: 10px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.unit .ust { position: absolute; top: 2px; right: 4px; font-size: 11px; }
+.unit.act { transform: translateY(-6px) scale(1.06); border-color: var(--moon); }
+.b-enemies .unit.act { transform: translateY(6px) scale(1.06); }
+.unit.hurt { animation: shake .3s; }
+.unit.dead { opacity: .25; filter: grayscale(1); }
+.unit.revive { animation: pop .5s; }
+@keyframes shake { 0%,100% { translate: 0; } 25% { translate: -6px 0; } 50% { translate: 5px 0; } 75% { translate: -3px 0; } }
+@keyframes pop { 0% { transform: scale(.6); } 70% { transform: scale(1.15); } }
 #fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.float { position: absolute; font-family: var(--f-display); font-weight: 700; font-size: 26px; text-shadow: 0 2px 6px rgba(0,0,0,.8); animation: floatup 1s ease-out forwards; transform: translateX(-50%); }
-.float.dmg { color: var(--hp); } .float.blk { color: var(--shield); } .float.heal { color: var(--venom); } .float.info { color: var(--gold); font-size: 16px; }
-@keyframes floatup { from { opacity: 1; margin-top: 0; } to { opacity: 0; margin-top: -60px; } }
-.phase-flash { animation: flash .6s; }
-@keyframes flash { 50% { background: color-mix(in srgb, var(--hp) 30%, var(--night)); } }
+.float { position: absolute; font-family: var(--f-display); font-weight: 700; font-size: 18px; text-shadow: 0 2px 5px rgba(0,0,0,.85); animation: floatup .9s ease-out forwards; transform: translateX(-50%); white-space: nowrap; }
+.float.dmg { color: var(--moon); } .float.crit { color: var(--gold); font-size: 24px; } .float.heal { color: var(--venom); } .float.sh { color: var(--shield); } .float.miss { color: var(--dim); font-size: 14px; } .float.dot { color: var(--venom); font-size: 15px; } .float.info { color: var(--gold); font-size: 14px; }
+@keyframes floatup { from { opacity: 1; margin-top: 0; } to { opacity: 0; margin-top: -46px; } }
+.banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%); font-family: var(--f-display); font-weight: 700; font-size: 18px; color: var(--gold); text-shadow: 0 2px 10px rgba(0,0,0,.9); animation: bannerin 1.1s ease forwards; white-space: nowrap; pointer-events: none; }
+@keyframes bannerin { 0% { opacity: 0; scale: .7; } 20% { opacity: 1; scale: 1.05; } 80% { opacity: 1; } 100% { opacity: 0; } }
 
-/* reward */
-.reward-xp { display: flex; flex-direction: column; gap: 6px; }
-.reward-xp .xpbar { height: 10px; }
-.gains { display: flex; gap: 14px; justify-content: center; font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
-.gains .x { color: var(--r-r); }
-.lvup { text-align: center; font-family: var(--f-display); font-weight: 700; color: var(--gold); font-size: 18px; animation: pop .5s ease; }
-@keyframes pop { 0% { transform: scale(.5); opacity: 0; } 70% { transform: scale(1.15); } }
-.choice { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding-top: 10px; }
-.choice .card { min-height: 150px; animation: flip .5s ease backwards; }
-.choice .card:nth-child(2) { animation-delay: .1s; } .choice .card:nth-child(3) { animation-delay: .2s; }
-.choice .card.picked { outline: 3px solid var(--gold); outline-offset: 2px; }
-@keyframes flip { from { transform: rotateY(90deg); opacity: 0; } }
-.dup { font-size: 11px; color: var(--gold); font-weight: 700; margin-top: 4px; }
+/* Ergebnis */
+.result-head { text-align: center; display: flex; flex-direction: column; gap: 6px; }
+.result-head h2 { font-size: 28px; }
+.result-head.win h2 { color: var(--gold); } .result-head.lose h2 { color: var(--hp); }
+.gains { display: flex; gap: 14px; justify-content: center; font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.gains .x { color: var(--xp); }
+.lvup { text-align: center; background: color-mix(in srgb, var(--gold) 14%, var(--deck)); border: 1px solid var(--gold); border-radius: 12px; padding: 10px; animation: pop .5s ease; }
+.lvup b { font-family: var(--f-display); font-size: 19px; color: var(--gold); display: block; }
+.lvup span { font-size: 13px; color: var(--moon); display: block; margin-top: 2px; }
+.cgain { display: flex; flex-direction: column; gap: 6px; }
+.cg { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.cg .ge { font-size: 22px; width: 28px; text-align: center; }
+.cg .gb { flex: 1; min-width: 0; }
+.cg .gl { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cg .gl.up { color: var(--venom); }
+.drop { text-align: center; border: 2px solid var(--rc); border-radius: 14px; padding: 12px; animation: pop .5s ease; }
+.drop .de { font-size: 46px; }
+.drop .dn { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+.drop .dm { font-size: 12px; color: var(--dim); }
+.autoline { text-align: center; font-size: 13px; color: var(--venom); }
 
-/* toast */
 #toasts { position: fixed; z-index: 80; left: 0; right: 0; top: calc(env(safe-area-inset-top, 0px) + 10px); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; padding: 0 16px; }
 .toast { background: var(--moon); color: var(--night); font-weight: 700; font-size: 14px; padding: 9px 14px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.4); animation: tin .3s ease, tout .3s ease 2.4s forwards; max-width: 420px; text-align: center; }
 @keyframes tin { from { transform: translateY(-20px); opacity: 0; } }
@@ -347,8 +307,9 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; lette
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
 }
 @media (max-width: 360px) {
-  .cardgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .b-hand .card { flex-basis: 88px; }
+  .b-enemies .unit { width: 86px; }
+  .tree { gap: 5px; }
+  .tnode .tn { font-size: 11px; }
 }
 </style>
 </head>
@@ -365,780 +326,776 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; lette
 <script>
 "use strict";
 /* =========================================================
-   DATEN
+   GRUNDWERTE
    ========================================================= */
-const RAR = {
-  c: { n: "Gewöhnlich", price: 45,  dup: 10 },
-  r: { n: "Selten",     price: 95,  dup: 20 },
-  e: { n: "Episch",     price: 180, dup: 40 },
-  l: { n: "Legendär",   price: 340, dup: 80 }
-};
-const TYPE = { A: "Angriff", F: "Fertigkeit", K: "Kraft" };
-const MAX_CARD_LV = 3, DECK_MIN = 8, DECK_MAX = 20, MAX_LV = 30, BOSS_WINS = 3;
+const G = 1.07;                 // Wachstum der Kampfwerte pro Level
+const MAX_LV = 60;
+const MAX_ROUNDS = 30;
+const STAGE_CAP = [20, 40, 60]; // Max-Level je Entwicklungsstufe
+const SLOT_LV = [1, 1, 4, 8, 12, 18]; // ab welchem Heldenlevel ein Teamplatz frei wird
+const WAVE = [1, 1, 2, 2, 2, 3, 3, 3, 3];
+const recLv = s => Math.round(1 + (s - 1) * 1.2);       // empfohlenes Level je Etappe (1–50)
+const isBoss = s => s % 10 === 0;
+const zoneOf = s => Math.floor((s - 1) / 10);
+const stageNo = s => (s - 1) % 10 + 1;
+const slotsAt = L => SLOT_LV.filter(x => x <= L).length;
+const heroNeed = L => Math.round(12 * Math.pow(1.1, L - 1) * (3 + .35 * L)); // ca. 3 Siege für Level 2, ca. 24 Siege am Ende
+const cardNeed = l => Math.round(heroNeed(l) * .8);
+const pct = v => Math.round(v * 100) + " %";
 
-// Felder: dmg, hits, block, draw, energy, heal, str, vuln, weak, poison, regen, thorns, pv (Kraftwert)
-// up: Zuwachs pro Aufwertungsstufe · upc: ab dieser Stufe kostet die Karte 1 Energie weniger
-const CARDS = [
-  // --- Startkarten ---
-  { id:"schlag",  n:"Mondschlag",      e:"👊", r:"c", t:"A", c:1, dmg:6, up:{dmg:3} },
-  { id:"schild",  n:"Kraterschild",    e:"🛡️", r:"c", t:"F", c:1, block:5, up:{block:3} },
-  { id:"tritt",   n:"Raketentritt",    e:"🚀", r:"c", t:"A", c:2, dmg:11, up:{dmg:4} },
-  { id:"staub",   n:"Mondstaub",       e:"🌫️", r:"c", t:"F", c:1, block:3, weak:2, up:{block:2} },
-  { id:"paket",   n:"Expresspaket",    e:"📦", r:"c", t:"F", c:1, draw:2, up:{draw:1}, upc:3 },
-  { id:"sprint",  n:"Kurier-Sprint",   e:"🏃", r:"c", t:"F", c:0, block:3, draw:1, up:{block:2} },
-  { id:"doppel",  n:"Doppelstoß",      e:"✌️", r:"c", t:"A", c:1, dmg:4, hits:2, up:{dmg:2} },
-  { id:"funke",   n:"Sternenfunke",    e:"✨", r:"c", t:"A", c:0, dmg:3, up:{dmg:2} },
-  // --- Gewöhnlich ---
-  { id:"wurf",    n:"Kraterwurf",      e:"🪨", r:"c", t:"A", c:1, dmg:8, up:{dmg:3} },
-  { id:"rueck",   n:"Rückstoß",        e:"🔙", r:"c", t:"A", c:1, dmg:5, block:5, up:{dmg:2, block:2} },
-  { id:"sporen",  n:"Mondsporen",      e:"🍄", r:"c", t:"F", c:1, poison:4, up:{poison:2} },
-  { id:"hilfe",   n:"Erste Hilfe",     e:"🩹", r:"c", t:"F", c:1, heal:6, ex:1, up:{heal:3} },
-  { id:"panzer",  n:"Regolithpanzer",  e:"🧱", r:"c", t:"F", c:2, block:12, up:{block:4} },
-  { id:"blitz",   n:"Lichtblitz",      e:"⚡", r:"c", t:"A", c:1, dmg:5, weak:1, up:{dmg:3} },
-  { id:"ortung",  n:"Ortung",          e:"📡", r:"c", t:"F", c:1, vuln:2, draw:1, up:{vuln:1} },
-  { id:"fokus",   n:"Fokus",           e:"🎯", r:"c", t:"F", c:1, str:1, up:{str:1}, upc:3 },
-  // --- Selten ---
-  { id:"meteor",  n:"Meteoritenhagel", e:"🌠", r:"r", t:"A", c:2, dmg:3, hits:4, up:{hits:1} },
-  { id:"ramme",   n:"Schildramme",     e:"🛸", r:"r", t:"A", c:1, block:4, sp:"blockdmg", up:{block:3} },
-  { id:"stachel", n:"Stachelanzug",    e:"🌵", r:"r", t:"K", c:1, thorns:3, up:{thorns:2} },
-  { id:"falle",   n:"Gravitationsfalle",e:"🌀",r:"r", t:"F", c:2, weak:2, vuln:2, up:{weak:1, vuln:1}, upc:3 },
-  { id:"adrena",  n:"Adrenalin",       e:"💉", r:"r", t:"F", c:0, energy:2, ex:1, up:{draw:1} },
-  { id:"wolke",   n:"Sporenwolke",     e:"☁️", r:"r", t:"F", c:2, poison:8, up:{poison:3} },
-  { id:"spiegel", n:"Spiegelschild",   e:"🪞", r:"r", t:"F", c:1, block:2, sp:"doubleblock", up:{block:2} },
-  { id:"nano",    n:"Nanobots",        e:"🤖", r:"r", t:"F", c:1, regen:4, up:{regen:2} },
-  { id:"orbit",   n:"Orbitalschlag",   e:"🛰️", r:"r", t:"A", c:2, dmg:14, up:{dmg:5} },
-  { id:"wirbel",  n:"Sternenwirbel",   e:"💫", r:"r", t:"A", c:1, dmg:3, hits:3, up:{dmg:1} },
-  { id:"schwer",  n:"Schwerelos",      e:"🪶", r:"r", t:"F", c:1, block:7, draw:1, up:{block:3} },
-  { id:"geist",   n:"Kampfgeist",      e:"🔥", r:"r", t:"K", c:2, pw:"pStr", pv:1, up:{block:4}, upc:3 },
-  { id:"licht",   n:"Mondlicht",       e:"🌙", r:"r", t:"F", c:1, heal:4, block:4, up:{heal:2, block:2} },
-  { id:"final",   n:"Finale Zustellung",e:"📬",r:"r", t:"A", c:2, dmg:10, sp:"execute", up:{dmg:3} },
-  // --- Episch ---
-  { id:"nova",    n:"Supernova",       e:"💥", r:"e", t:"A", c:3, dmg:30, ex:1, up:{dmg:8} },
-  { id:"pulsar",  n:"Pulsar",          e:"🔆", r:"e", t:"K", c:2, pw:"pBlock", pv:4, up:{pv:2} },
-  { id:"reaktor", n:"Fusionsreaktor",  e:"⚛️", r:"e", t:"K", c:3, pw:"pEnergy", pv:1, up:{draw:1}, upc:3 },
-  { id:"seuche",  n:"Weltraumseuche",  e:"☣️", r:"e", t:"F", c:1, poison:2, sp:"doublepoison", up:{poison:2} },
-  { id:"zorn",    n:"Mondzorn",        e:"😤", r:"e", t:"A", c:1, dmg:8, sp:"lowhp", up:{dmg:3} },
-  { id:"vorhang", n:"Nebelvorhang",    e:"🌁", r:"e", t:"F", c:2, block:15, weak:1, up:{block:5} },
-  { id:"schweif", n:"Kometenschweif",  e:"☄️", r:"e", t:"A", c:2, dmg:6, hits:2, poison:3, up:{dmg:2, poison:1} },
-  { id:"sternk",  n:"Sternkarte",      e:"🗺️", r:"e", t:"K", c:1, pw:"pDraw", pv:1, up:{block:3}, upc:3 },
-  { id:"biss",    n:"Lunarer Biss",    e:"🦇", r:"e", t:"A", c:2, dmg:10, sp:"lifesteal", up:{dmg:3} },
-  { id:"wind",    n:"Sonnenwind",      e:"🌬️", r:"e", t:"F", c:1, block:6, draw:1, sp:"cleanse", up:{block:3} },
-  // --- Legendär ---
-  { id:"urknall", n:"Urknall",         e:"🌌", r:"l", t:"A", c:4, dmg:12, hits:3, ex:1, up:{dmg:4}, upc:3 },
-  { id:"ewig",    n:"Ewiges Mondlicht",e:"🌕", r:"l", t:"K", c:2, pw:"pRegen", pv:3, up:{pv:1} },
-  { id:"singu",   n:"Singularität",    e:"⚫", r:"l", t:"A", c:3, dmg:20, vuln:3, weak:3, up:{dmg:6} },
-  { id:"seele",   n:"Sternenseele",    e:"🌟", r:"l", t:"K", c:2, pw:"pPoison", pv:3, up:{pv:2} },
-  { id:"schleife",n:"Zeitschleife",    e:"⏳", r:"l", t:"F", c:1, energy:2, draw:3, ex:1, up:{draw:1}, upc:3 },
-  { id:"krone",   n:"Krone des Mondes",e:"👑", r:"l", t:"K", c:3, pw:"pStr", pv:2, up:{block:5}, upc:3 }
+const RAR = { c:{ n:"Gewöhnlich", m:1, cost:1 }, r:{ n:"Selten", m:1.12, cost:1.5 }, e:{ n:"Episch", m:1.25, cost:2.2 }, l:{ n:"Legendär", m:1.4, cost:3 } };
+const STAGE_MUL = [1, 1.3, 1.7];
+const EVO_COST = [0, 400, 4000];
+const ROLES = {
+  tank:     { n:"Tank",        hp:110, atk:6,  spd:3 },
+  krieger:  { n:"Krieger",     hp:78,  atk:10, spd:5 },
+  schuetze: { n:"Schütze",     hp:52,  atk:13, spd:7 },
+  magier:   { n:"Magier",      hp:55,  atk:11, spd:4 },
+  heiler:   { n:"Heiler",      hp:62,  atk:7,  spd:6 },
+  support:  { n:"Unterstützer",hp:66,  atk:8,  spd:5 }
+};
+
+// Fähigkeiten: v = Wert je Entwicklungsstufe
+const AB = {
+  taunt:     { n:"Spott",        v:[.15,.25,.35], d:v => `Zieht die meisten Angriffe auf sich und erleidet ${pct(v)} weniger Schaden.` },
+  shieldTeam:{ n:"Schutzfeld",   v:[.2,.32,.45],  d:v => `Kampfbeginn: Alle Verbündeten erhalten einen Schild von ${pct(v)} ihrer Max-HP.` },
+  heal:      { n:"Reparatur",    v:[1.6,2.2,3],   d:v => `Heilt den schwächsten Verbündeten um ${pct(v)} ATK, sobald jemand unter 75 % HP fällt.` },
+  aoe:       { n:"Kettenblitz",  v:[.9,1.2,1.6],  d:v => `Jede 3. Runde: ${pct(v)} ATK Schaden an allen Gegnern.` },
+  poison:    { n:"Sporengift",   v:[.3,.45,.6],   d:v => `Treffer vergiften: ${pct(v)} ATK Schaden pro Runde, 3 Runden lang.` },
+  crit:      { n:"Funkeln",      v:[.25,.35,.5],  d:v => `${pct(v)} Chance auf kritische Treffer.` },
+  lifesteal: { n:"Blutdurst",    v:[.35,.5,.7],   d:v => `Heilt sich um ${pct(v)} des verursachten Schadens.` },
+  stun:      { n:"Frost",        v:[.18,.25,.33], d:v => `${pct(v)} Chance, das Ziel eine Runde einzufrieren.` },
+  aura:      { n:"Schlachtruf",  v:[.08,.13,.2],  d:v => `Alle Verbündeten erhalten +${pct(v)} ATK.` },
+  revive:    { n:"Wiedergeburt", v:[.3,.5,.75],   d:v => `Belebt den ersten gefallenen Verbündeten mit ${pct(v)} HP wieder.` },
+  execute:   { n:"Hinrichtung",  v:[.6,1,1.5],    d:v => `+${pct(v)} Schaden gegen Gegner unter 35 % HP.` },
+  double:    { n:"Schattenhieb", v:[.3,.45,.6],   d:v => `${pct(v)} Chance, zweimal anzugreifen.` },
+  thorns:    { n:"Stacheln",     v:[.25,.4,.6],   d:v => `Wirft ${pct(v)} des erlittenen Schadens auf den Angreifer zurück.` },
+  dodge:     { n:"Ausweichen",   v:[.18,.26,.35], d:v => `${pct(v)} Chance, Angriffen auszuweichen.` },
+  rage:      { n:"Wut",          v:[.07,.1,.14],  d:v => `Jeder eigene Angriff erhöht die ATK um ${pct(v)}.` },
+  burn:      { n:"Plasmabrand",  v:[.35,.5,.7],   d:v => `Kampfbeginn: Alle Gegner brennen 4 Runden lang für ${pct(v)} ATK pro Runde.` },
+  luck:      { n:"Goldnase",     v:[.15,.25,.4],  d:v => `Nach Siegen +${pct(v)} Münzen und Sternenstaub.` },
+  wisdom:    { n:"Weisheit",     v:[.1,.16,.25],  d:v => `Nach jedem Kampf +${pct(v)} EP für Held und Team.` },
+  martyr:    { n:"Explosion",    v:[2,3,4.5],     d:v => `Beim Fallen: ${pct(v)} ATK Schaden an allen Gegnern.` },
+  snipe:     { n:"Zielfernrohr", v:[.25,.4,.6],   d:v => `Greift immer den schwächsten Gegner an, mit +${pct(v)} Schaden.` },
+  barrier:   { n:"Bollwerk",     v:[1.8,2.6,3.6], d:v => `Jede 2. Runde: Schild von ${pct(v)} ATK für den schwächsten Verbündeten.` },
+  shred:     { n:"Säure",        v:[.06,.09,.13], d:v => `Jeder Treffer lässt das Ziel dauerhaft ${pct(v)} mehr Schaden nehmen (stapelbar).` },
+  dragon:    { n:"Drachenatem",  v:[1,1.4,1.9],   d:v => `Jede 3. Runde: ${pct(v)} ATK an allen Gegnern, die danach 3 Runden brennen.` },
+  divine:    { n:"Segen",        v:[.7,1,1.4],    d:v => `Heilt jede Runde alle Verbündeten um ${pct(v)} ATK, statt anzugreifen.` }
+};
+
+// Begleiter mit drei Entwicklungsstufen
+const COMP = [
+  { id:"kiesel",  r:"c", role:"tank",     ab:"taunt",     f:[["Kieselgolem","🪨"],["Felsgolem","🗿"],["Monolith","🏛️"]] },
+  { id:"funkel",  r:"c", role:"schuetze", ab:"crit",      f:[["Funkelkäfer","🐞"],["Leuchtkäfer","🪲"],["Sternkäfer","🌟"]] },
+  { id:"sani",    r:"c", role:"heiler",   ab:"heal",      f:[["Sanibot","🤖"],["Medibot","🩺"],["Lebensbaum","🌳"]] },
+  { id:"spore",   r:"c", role:"magier",   ab:"poison",    f:[["Mondspore","🍄"],["Sporennebel","🌫️"],["Seuchenkönig","☣️"]] },
+  { id:"drohne",  r:"c", role:"support",  ab:"shieldTeam",f:[["Postdrohne","🛸"],["Schilddrohne","🛰️"],["Orbitalwächter","🌐"]] },
+  { id:"krabbe",  r:"c", role:"tank",     ab:"thorns",    f:[["Kraterkrabbe","🦀"],["Stachelkrabbe","🦞"],["Kristallkrabbe","💎"]] },
+  { id:"fuchs",   r:"c", role:"krieger",  ab:"dodge",     f:[["Mondfuchs","🦊"],["Schattenwolf","🐺"],["Sternenwolf","🌙"]] },
+  { id:"wurm",    r:"c", role:"krieger",  ab:"rage",      f:[["Wutwurm","🐛"],["Echsenkrieger","🦎"],["Mondrache","🐉"]] },
+  { id:"falke",   r:"c", role:"schuetze", ab:"snipe",     f:[["Sternfalke","🐦"],["Kometenfalke","🦅"],["Himmelsjäger","🏹"]] },
+  { id:"eule",    r:"c", role:"support",  ab:"wisdom",    f:[["Mondeule","🦉"],["Bücherwurm","📚"],["Orakel","🔮"]] },
+  { id:"blitz",   r:"r", role:"magier",   ab:"aoe",       f:[["Funkenzauberer","🧙"],["Blitzmagier","⚡"],["Sturmrufer","🌩️"]] },
+  { id:"fleder",  r:"r", role:"krieger",  ab:"lifesteal", f:[["Mondfledermaus","🦇"],["Nachtjäger","🧛"],["Blutmond","🌑"]] },
+  { id:"ninja",   r:"r", role:"schuetze", ab:"double",    f:[["Kurierninja","🥷"],["Schattenklinge","🗡️"],["Phantom","👤"]] },
+  { id:"waechter",r:"r", role:"tank",     ab:"barrier",   f:[["Schildwächterin","🛡️"],["Bastion","🏰"],["Zitadelle","🏯"]] },
+  { id:"kobold",  r:"r", role:"support",  ab:"luck",      f:[["Goldkobold","🪙"],["Schatzkobold","💰"],["Midas","👑"]] },
+  { id:"frost",   r:"r", role:"magier",   ab:"stun",      f:[["Frostgeist","❄️"],["Eiswächter","🥶"],["Polarstern","🧊"]] },
+  { id:"henker",  r:"r", role:"krieger",  ab:"execute",   f:[["Meteorjäger","☄️"],["Kometenhenker","🪓"],["Weltenrichter","⚖️"]] },
+  { id:"phoenix", r:"e", role:"heiler",   ab:"revive",    f:[["Sonnenküken","🐣"],["Feuervogel","🦜"],["Phönix","🔥"]] },
+  { id:"hexe",    r:"e", role:"magier",   ab:"burn",      f:[["Nebelhexe","🧙‍♀️"],["Plasmahexe","🔮"],["Sternenhexe","✨"]] },
+  { id:"bombe",   r:"e", role:"krieger",  ab:"martyr",    f:[["Knallkomet","💣"],["Sprengkomet","💥"],["Sonnenkern","☀️"]] },
+  { id:"banner",  r:"e", role:"support",  ab:"aura",      f:[["Fahnenträger","🚩"],["Kommandant","🎖️"],["Sternenmarschall","⭐"]] },
+  { id:"spinne",  r:"e", role:"schuetze", ab:"shred",     f:[["Säurespinne","🕷️"],["Ätzspinne","🕸️"],["Leerenweberin","🌀"]] },
+  { id:"drache",  r:"l", role:"magier",   ab:"dragon",    f:[["Sternendrache","🐲"],["Galaxiendrache","🐉"],["Urdrache","🌌"]] },
+  { id:"engel",   r:"l", role:"heiler",   ab:"divine",    f:[["Lichtgeist","👼"],["Seraph","😇"],["Mondgöttin","🌕"]] }
 ];
-const JUNK = { id:"schrott", n:"Weltraumschrott", e:"🗑️", r:"c", t:"F", c:null, junk:1 };
-const CM = Object.fromEntries(CARDS.map(c => [c.id, c]));
-CM.schrott = JUNK;
-const STARTER = ["schlag","schild","tritt","staub","paket","sprint","doppel","funke"];
+const CC = Object.fromEntries(COMP.map(c => [c.id, c]));
+const STARTER = ["kiesel", "funkel", "sani"];
 
-const PW = {
-  pStr:    v => `Zu Beginn jedes Zuges: +${v} Stärke`,
-  pBlock:  v => `Zu Beginn jedes Zuges: ${v} Schild`,
-  pEnergy: v => `Zu Beginn jedes Zuges: +${v} Energie`,
-  pDraw:   v => `Ziehe jeden Zug ${v} Karte mehr`,
-  pPoison: v => `Deine Treffer verursachen +${v} Gift`,
-  pRegen:  v => `Am Ende jedes Zuges: heile ${v}`
-};
-const PW_SHORT = { pStr:"Kampfgeist", pBlock:"Pulsar", pEnergy:"Reaktor", pDraw:"Sternkarte", pPoison:"Sternenseele", pRegen:"Mondlicht" };
+// Heldenfähigkeiten, die mit dem Level automatisch dazukommen
+const HERO_AB = [
+  { lv:1,  n:"Kurierschlag",      d:"Normaler Angriff auf einen Gegner." },
+  { lv:5,  k:"hShield", n:"Mondschild",       d:"Kampfbeginn: Alle Verbündeten erhalten 12 % der Helden-HP als Schild." },
+  { lv:10, k:"hRain",   n:"Sternenregen",     d:"Jede 4. Runde: 130 % ATK Schaden an allen Gegnern." },
+  { lv:15, k:"hRegen",  n:"Ausdauer",         d:"Der Held heilt sich jede Runde um 4 % seiner Max-HP." },
+  { lv:20, k:"hRevive", n:"Zweiter Atem",     d:"Einmal pro Kampf: Steht nach dem Fallen mit 40 % HP wieder auf." },
+  { lv:25, k:"hStun",   n:"Gravitationswelle",d:"Jede 5. Runde: Alle Gegner setzen eine Runde aus." },
+  { lv:30, k:"hAura",   n:"Vollmond",         d:"Alle Verbündeten erhalten +15 % ATK." },
+  { lv:40, k:"hCrit",   n:"Kometenkern",      d:"+25 % Krit-Chance, kritische Treffer machen 2,5-fachen Schaden." },
+  { lv:50, k:"hNova",   n:"Supernova",        d:"Jede 6. Runde: 300 % ATK Schaden an allen Gegnern." }
+];
+const HERO_TITLES = [[1,"Kurierlehrling","var(--r-c)"],[10,"Mondkurier","var(--r-r)"],[20,"Sternenbote","var(--venom)"],[30,"Kometenmeister","var(--r-e)"],[40,"Hüter der Umlaufbahn","var(--shield)"],[50,"Legende des Mondes","var(--r-l)"]];
+const heroTitle = L => HERO_TITLES.filter(t => t[0] <= L).pop();
 
-// Gegner. Absichten: a=Angriff, n=Treffer, b=Schild, s=Stärke, h=Heilung, weak/vuln/poison=Schwächung, junk=Schrottkarten
-const EN = {
-  kriecher: { n:"Kraterkriecher", e:"🦂", hp:32, xp:14, co:12, p:[{a:6},{b:6},{a:8}] },
-  staubg:   { n:"Staubgeist",     e:"👻", hp:28, xp:14, co:12, p:[{weak:2},{a:7},{a:4,n:2}] },
-  milbe:    { n:"Mondmilbe",      e:"🕷️", hp:36, xp:16, co:14, p:[{a:4,n:2},{poison:3},{a:7}] },
-  golem:    { n:"Regolith-Golem", e:"🗿", hp:95, xp:70, co:90, boss:1,
-              p:[{b:10},{a:12},{a:5,n:2},{s:2}], p2:[{a:14},{b:12,a:6},{s:3},{a:6,n:2}] },
+// Talentbaum: Stufe t braucht 5·t Punkte im selben Zweig
+const TALENTS = [
+  { b:"a", id:"a1", t:0, max:5, n:"Scharfe Klingen", d:r => `Team +${r*4} % ATK` },
+  { b:"a", id:"a2", t:0, max:5, n:"Präzision",       d:r => `Team +${r*3} % Krit-Chance` },
+  { b:"a", id:"a3", t:1, max:5, n:"Wucht",           d:r => `Kritische Treffer +${r*15} % Schaden` },
+  { b:"a", id:"a4", t:1, max:5, n:"Erstschlag",      d:r => `+${r*10} % Schaden in den Runden 1 und 2` },
+  { b:"a", id:"a5", t:2, max:5, n:"Kurierzorn",      d:r => `Held +${r*8} % ATK` },
+  { b:"a", id:"a6", t:2, max:5, n:"Bossjäger",       d:r => `+${r*6} % Schaden gegen Bosse` },
+  { b:"a", id:"a7", t:3, max:1, n:"Sternenfall",     d:r => `Der Held trifft jede 3. Runde alle Gegner mit 100 % ATK`, cap:1 },
+  { b:"d", id:"d1", t:0, max:5, n:"Panzerung",       d:r => `Team +${r*5} % HP` },
+  { b:"d", id:"d2", t:0, max:5, n:"Schildgenerator", d:r => `Kampfbeginn: Schild von ${r*4} % Max-HP für alle` },
+  { b:"d", id:"d3", t:1, max:5, n:"Nanoheilung",     d:r => `Team heilt ${(r*1.5).toLocaleString("de-DE")} % Max-HP pro Runde` },
+  { b:"d", id:"d4", t:1, max:5, n:"Ausweichmanöver", d:r => `Team +${r*2} % Ausweichen` },
+  { b:"d", id:"d5", t:2, max:5, n:"Heldenrüstung",   d:r => `Held erleidet ${r*5} % weniger Schaden` },
+  { b:"d", id:"d6", t:2, max:5, n:"Dornenhülle",     d:r => `Team wirft ${r*5} % des Schadens zurück` },
+  { b:"d", id:"d7", t:3, max:1, n:"Unbeugsam",       d:r => `Der Held überlebt einen tödlichen Treffer mit 1 HP und erhält 30 % Schild`, cap:1 },
+  { b:"k", id:"k1", t:0, max:5, n:"Schnelllerner",   d:r => `+${r*6} % Helden-EP` },
+  { b:"k", id:"k2", t:0, max:5, n:"Kartentrainer",   d:r => `+${r*8} % Karten-EP` },
+  { b:"k", id:"k3", t:1, max:5, n:"Goldader",        d:r => `+${r*10} % Münzen` },
+  { b:"k", id:"k4", t:1, max:5, n:"Staubsammler",    d:r => `+${r*10} % Sternenstaub` },
+  { b:"k", id:"k5", t:2, max:5, n:"Glückspilz",      d:r => `+${r*2} % Chance auf Kartenfunde` },
+  { b:"k", id:"k6", t:2, max:5, n:"Mentor",          d:r => `Karten außerhalb des Teams erhalten ${r*10} % der Kampf-EP` },
+  { b:"k", id:"k7", t:3, max:1, n:"Sternenstunde",   d:r => `+25 % EP für Held und alle Karten`, cap:1 }
+];
+const TM = Object.fromEntries(TALENTS.map(t => [t.id, t]));
+const BRANCHES = [ { k:"a", n:"Angriff", c:"var(--t-a)" }, { k:"d", n:"Abwehr", c:"var(--t-d)" }, { k:"k", n:"Kurier", c:"var(--t-k)" } ];
 
-  drohne:   { n:"Felsdrohne",     e:"🤖", hp:55, xp:30, co:22, p:[{a:9},{b:10,a:5},{a:4,n:3}] },
-  pirat:    { n:"Weltraumpirat",  e:"🏴‍☠️", hp:60, xp:32, co:26, p:[{a:11},{vuln:2},{a:7,n:2},{s:2}] },
-  schnecke: { n:"Meteorschnecke", e:"🐌", hp:70, xp:34, co:24, p:[{b:14},{a:13},{poison:4}] },
-  nova:     { n:"Kapitänin Nova", e:"🦹", hp:175, xp:150, co:180, boss:1,
-              p:[{a:8,n:2},{junk:2,b:12},{a:16},{s:3}], p2:[{a:6,n:4},{weak:2,vuln:2},{a:18}] },
-
-  qualle:   { n:"Nebelqualle",    e:"🪼", hp:85, xp:60, co:36, p:[{poison:6},{a:12},{b:15,poison:3}] },
-  fresser:  { n:"Sternenfresser", e:"👾", hp:95, xp:64, co:38, p:[{a:15},{a:8,n:2},{s:3},{h:12}] },
-  wurm:     { n:"Plasmawurm",     e:"🐛", hp:90, xp:62, co:36, p:[{a:6,n:3},{vuln:2,a:8},{b:18}] },
-  lyra:     { n:"Nebelhexe Lyra", e:"🧙‍♀️", hp:270, xp:280, co:300, boss:1,
-              p:[{weak:3,poison:5},{a:18},{junk:2,b:20},{a:7,n:3}], p2:[{a:10,n:3},{h:25,s:3},{a:25}] },
-
-  eisg:     { n:"Eisgeist",       e:"🥶", hp:120, xp:110, co:52, p:[{weak:2,a:12},{b:20},{a:20}] },
-  reiter:   { n:"Kometenreiter",  e:"🏇", hp:130, xp:115, co:55, p:[{a:8,n:3},{s:3},{a:22}] },
-  kristall: { n:"Frostkristall",  e:"💎", hp:140, xp:120, co:58, p:[{b:25},{a:9,n:2},{vuln:3},{a:18}] },
-  koenig:   { n:"Kometenkönig",   e:"🤴", hp:390, xp:450, co:450, boss:1,
-              p:[{a:20},{b:25,s:3},{a:9,n:4},{junk:3,vuln:2}], p2:[{a:12,n:4},{h:30},{a:35}] },
-
-  leere:    { n:"Leerenwandler",  e:"🌑", hp:160, xp:170, co:72, p:[{a:22},{weak:3,vuln:3},{a:12,n:2}] },
-  zeit:     { n:"Zeitverzerrer",  e:"⌛", hp:170, xp:175, co:75, p:[{junk:2,a:14},{b:30},{a:10,n:3}] },
-  graviton: { n:"Gravitonbestie", e:"🐙", hp:190, xp:185, co:80, p:[{a:28},{s:4},{poison:8,b:15}] },
-  horizont: { n:"Der Ereignishorizont", e:"🕳️", hp:560, xp:800, co:800, boss:1,
-              p:[{a:25},{weak:3,vuln:3,poison:6},{a:12,n:4},{b:35,s:4}], p2:[{a:15,n:4},{h:40,junk:3},{a:45}] }
-};
-
+// Gegner je Zone: [Name, Emoji, Rolle, Fähigkeit, Fähigkeitsstufe]
 const ZONES = [
-  { n:"Mondkrater",       lv:1,  sub:"Graue Staubebenen, kaum Schwerkraft. Hier beginnt jede Kurierroute.",
-    bg:"radial-gradient(120% 90% at 80% 0%, #5b6280, transparent 60%)", en:["kriecher","staubg","milbe"], boss:"golem",
-    w:{c:80,r:18,e:2,l:0}, bossR:"r" },
-  { n:"Asteroidengürtel", lv:4,  sub:"Treibende Felsen, Piratennester und Funkstille.",
-    bg:"radial-gradient(120% 90% at 80% 0%, #7a4e2c, transparent 60%)", en:["drohne","pirat","schnecke"], boss:"nova",
-    w:{c:50,r:40,e:9,l:1}, bossR:"e" },
-  { n:"Orionnebel",       lv:8,  sub:"Leuchtende Gaswolken, in denen etwas Hungriges treibt.",
-    bg:"radial-gradient(120% 90% at 80% 0%, #6a2f7a, transparent 60%)", en:["qualle","fresser","wurm"], boss:"lyra",
-    w:{c:25,r:45,e:25,l:5}, bossR:"e" },
-  { n:"Kometenschweif",   lv:12, sub:"Eis, Geschwindigkeit und das Reich eines gefrorenen Königs.",
-    bg:"radial-gradient(120% 90% at 80% 0%, #2d6a8a, transparent 60%)", en:["eisg","reiter","kristall"], boss:"koenig",
-    w:{c:10,r:35,e:40,l:15}, bossR:"l" },
-  { n:"Schwarzes Loch",   lv:16, sub:"Die letzte Zustellung. Hinter dem Horizont kehrt nichts zurück.",
-    bg:"radial-gradient(120% 90% at 80% 0%, #3a1030, transparent 60%)", en:["leere","zeit","graviton"], boss:"horizont",
-    w:{c:5,r:25,e:45,l:25}, bossR:"l" }
+  { n:"Mondkrater", sub:"Graue Staubebenen. Hier beginnt jede Kurierroute.", bg:"radial-gradient(120% 90% at 80% 0%, #5b6280, transparent 60%)",
+    en:[["Kraterkriecher","🦂","krieger"],["Staubgeist","👻","magier","poison",0],["Mondmilbe","🕷️","schuetze"],["Kraterkäfer","🪲","tank","taunt",0]],
+    boss:["Regolith-Golem","🗿","tank","thorns",0], w:{c:80,r:18,e:2,l:0} },
+  { n:"Asteroidengürtel", sub:"Treibende Felsen, Piratennester und Funkstille.", bg:"radial-gradient(120% 90% at 80% 0%, #7a4e2c, transparent 60%)",
+    en:[["Felsdrohne","🤖","schuetze","crit",0],["Weltraumpirat","🏴‍☠️","krieger","lifesteal",0],["Meteorschnecke","🐌","tank","taunt",1],["Schrottmechaniker","🔧","heiler","heal",0]],
+    boss:["Kapitänin Nova","🦹","krieger","double",1], w:{c:55,r:35,e:9,l:1} },
+  { n:"Orionnebel", sub:"Leuchtende Gaswolken, in denen etwas Hungriges treibt.", bg:"radial-gradient(120% 90% at 80% 0%, #6a2f7a, transparent 60%)",
+    en:[["Nebelqualle","🪼","magier","poison",1],["Sternenfresser","👾","krieger","rage",1],["Plasmawurm","🐛","schuetze","stun",0],["Nebelgeist","🌫️","heiler","heal",1]],
+    boss:["Nebelhexe Lyra","🧙‍♀️","magier","aoe",2], w:{c:35,r:40,e:20,l:5} },
+  { n:"Kometenschweif", sub:"Eis, Geschwindigkeit und das Reich eines gefrorenen Königs.", bg:"radial-gradient(120% 90% at 80% 0%, #2d6a8a, transparent 60%)",
+    en:[["Eisgeist","🥶","magier","stun",1],["Kometenreiter","🏇","krieger","execute",1],["Frostkristall","💎","tank","thorns",1],["Schneefee","❄️","support","aura",1]],
+    boss:["Kometenkönig","🤴","tank","taunt",2], w:{c:20,r:40,e:30,l:10} },
+  { n:"Schwarzes Loch", sub:"Die letzte Zustellung. Hinter dem Horizont kehrt nichts zurück.", bg:"radial-gradient(120% 90% at 80% 0%, #3a1030, transparent 60%)",
+    en:[["Leerenwandler","🌑","krieger","lifesteal",2],["Zeitverzerrer","⌛","support","shieldTeam",2],["Gravitonbestie","🐙","tank","taunt",2],["Schattenjäger","👤","schuetze","double",2]],
+    boss:["Ereignishorizont","🕳️","magier","dragon",2], w:{c:10,r:35,e:38,l:17} }
 ];
-
-const RELICS = [
-  { id:"helm",     n:"Raumhelm",            e:"🪖", d:"+10 maximale HP",                       price:150 },
-  { id:"amulett",  n:"Mondsteinamulett",    e:"📿", d:"Starte jeden Kampf mit 8 Schild",       price:180 },
-  { id:"uhr",      n:"Taschenuhr",          e:"⏱️", d:"Ziehe im ersten Zug 2 Karten mehr",     price:160 },
-  { id:"phiole",   n:"Giftphiole",          e:"🧪", d:"Gegner starten mit 5 Gift",             price:200 },
-  { id:"ring",     n:"Dornenring",          e:"💍", d:"Starte jeden Kampf mit 2 Dornen",       price:220 },
-  { id:"anzug",    n:"Druckanzug",          e:"🧥", d:"+15 maximale HP",                       price:260 },
-  { id:"karte",    n:"Kurierlizenz",        e:"🪪", d:"+25 % Münzen aus Kämpfen",              price:250 },
-  { id:"linse",    n:"Fernrohr",            e:"🔭", d:"+25 % EP aus Kämpfen",                  price:300 },
-  { id:"handsch",  n:"Gravitationshandschuh",e:"🧤",d:"Starte jeden Kampf mit 1 Stärke",       price:320 },
-  { id:"kristall", n:"Heilkristall",        e:"💠", d:"Heile am Ende jedes Zuges 2 HP",        price:350 },
-  { id:"herz",     n:"Sternenherz",         e:"❤️‍🔥", d:"+25 maximale HP",                       price:420 },
-  { id:"kompass",  n:"Sternkompass",        e:"🧭", d:"Ziehe jeden Zug 1 Karte mehr",          price:480 },
-  { id:"batterie", n:"Mondbatterie",        e:"🔋", d:"+1 Energie pro Zug",                    price:650 }
-];
-const RM = Object.fromEntries(RELICS.map(r => [r.id, r]));
-
-const ACH = [
-  { id:"w1",   n:"Erste Lieferung",      d:"Gewinne deinen ersten Kampf.",           ok:s=>s.st.wins>=1,   co:30 },
-  { id:"w10",  n:"Stammkurier",          d:"Gewinne 10 Kämpfe.",                     ok:s=>s.st.wins>=10,  co:100 },
-  { id:"w50",  n:"Veteran der Mondbahn", d:"Gewinne 50 Kämpfe.",                     ok:s=>s.st.wins>=50,  co:300, pt:2 },
-  { id:"w150", n:"Legende des Orbits",   d:"Gewinne 150 Kämpfe.",                    ok:s=>s.st.wins>=150, co:800, pt:3 },
-  { id:"b0",   n:"Golem zerbröselt",     d:"Besiege den Regolith-Golem.",            ok:s=>s.bd[0], co:100, pt:1 },
-  { id:"b1",   n:"Piratenflagge",        d:"Besiege Kapitänin Nova.",                ok:s=>s.bd[1], co:200, pt:1 },
-  { id:"b2",   n:"Nebel gelichtet",      d:"Besiege die Nebelhexe Lyra.",            ok:s=>s.bd[2], co:300, pt:2 },
-  { id:"b3",   n:"Eiskalt abgeliefert",  d:"Besiege den Kometenkönig.",              ok:s=>s.bd[3], co:400, pt:2 },
-  { id:"b4",   n:"Jenseits des Horizonts",d:"Besiege den Ereignishorizont.",          ok:s=>s.bd[4], co:1000, pt:3 },
-  { id:"l5",   n:"Aufsteiger",           d:"Erreiche Level 5.",                      ok:s=>s.lv>=5,  co:80 },
-  { id:"l10",  n:"Erfahrener Kurier",    d:"Erreiche Level 10.",                     ok:s=>s.lv>=10, co:200, pt:1 },
-  { id:"l20",  n:"Sternenbote",          d:"Erreiche Level 20.",                     ok:s=>s.lv>=20, co:500, pt:2 },
-  { id:"l30",  n:"Mondlegende",          d:"Erreiche Level 30.",                     ok:s=>s.lv>=30, co:1000, pt:3 },
-  { id:"k15",  n:"Sammler",              d:"Besitze 15 Karten.",                     ok:s=>ownCount(s)>=15, co:80 },
-  { id:"k30",  n:"Kartograf",            d:"Besitze 30 Karten.",                     ok:s=>ownCount(s)>=30, co:250, pt:1 },
-  { id:"kall", n:"Vollständiges Sternbild",d:"Besitze alle 46 Karten.",               ok:s=>ownCount(s)>=CARDS.length, co:1000, pt:3 },
-  { id:"max",  n:"Feinschliff",          d:"Werte eine Karte auf +3 auf.",           ok:s=>Object.values(s.own).some(l=>l>=MAX_CARD_LV), co:100 },
-  { id:"hit",  n:"Volltreffer",          d:"Verursache 50 Schaden mit einem Treffer.",ok:s=>s.st.maxHit>=50, co:150, pt:1 },
-  { id:"gift", n:"Sporenmeister",        d:"Besiege einen Gegner durch Gift.",       ok:s=>s.st.poisonKills>=1, co:100 },
-  { id:"perf", n:"Unberührt",            d:"Gewinne einen Kampf ohne HP zu verlieren.",ok:s=>s.st.perfect>=1, co:100 },
-  { id:"fast", n:"Expresszustellung",    d:"Gewinne einen Kampf in höchstens 2 Zügen.",ok:s=>s.st.fast>=1, co:120 },
-  { id:"rel5", n:"Schatzsucher",         d:"Besitze 5 Artefakte.",                   ok:s=>s.rel.length>=5, co:200, pt:1 }
-];
+// Gegnerstärke je Etappe (per Simulation abgestimmt)
+const EK = [2.88,3.31,1.47,2.44,1.98,1.67,1.82,2.12,1.98,2.31,6.45,8.29,3.85,3.62,4.2,3.17,3.14,3.18,4.21,3.37,13.55,15.66,5.84,7.32,6.49,5.48,4.57,5.43,4.9,2.97,15.84,16.33,9.14,10.52,10.05,7.17,8.86,9.93,8.75,6.13,23.7,22.85,11.14,11.51,11.45,8.79,7.27,8,7.74,4.57];
 
 /* =========================================================
    SPIELSTAND
    ========================================================= */
-const KEY = "sternenkarten-v1";
+const KEY = "sternenkarten-v2";
 function defSave() {
-  const own = {}; STARTER.forEach(id => own[id] = 0);
-  return { v:1, lv:1, xp:0, pts:0, co:60, own, deck:[...STARTER], rel:[], zw:[0,0,0,0,0], bd:[false,false,false,false,false],
-    st:{ wins:0, losses:0, maxHit:0, poisonKills:0, perfect:0, fast:0 }, ach:[], shop:null, seen:false };
+  const cards = {}; STARTER.forEach(id => cards[id] = { l:1, xp:0, st:0 });
+  return { v:2, lv:1, xp:0, tp:0, tal:{}, co:50, dust:0, cards, team:["kiesel","funkel"], prog:0, zone:0, auto:false,
+    stats:{ wins:0, losses:0 }, seen:false };
 }
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) { const d = defSave(); return { ...d, ...o, st:{ ...d.st, ...o.st } }; } }
+    if (raw) { const o = JSON.parse(raw); if (o && o.v === 2) { const d = defSave(); return { ...d, ...o, stats:{ ...d.stats, ...o.stats } }; } }
   } catch (e) {}
   return defSave();
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-
 let S = null;
-const UI = { tab:"adv", filter:"all" };
+const UI = { tab:"hero" };
 let B = null;
 
 /* =========================================================
-   HILFSFUNKTIONEN
+   WERTE
    ========================================================= */
-const $ = s => document.querySelector(s);
 const rnd = a => a[Math.floor(Math.random() * a.length)];
-function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-const need = l => Math.round(20 + 10 * l + 1.6 * l * l);
-const ownCount = s => Object.keys(s.own).length;
-const hasRel = id => S.rel.includes(id);
-const zoneOpen = z => S.lv >= ZONES[z].lv;
-const topZone = () => { let z = 0; ZONES.forEach((Z, i) => { if (zoneOpen(i)) z = i; }); return z; };
-const val = (c, l, k) => (c[k] || 0) + ((c.up && c.up[k]) || 0) * l;
-const costOf = (c, l) => c.c == null ? null : Math.max(0, c.c - (c.upc && l >= c.upc ? 1 : 0));
-const upCost = l => l + 1;
-const maxHP = () => 60 + (hasRel("helm") ? 10 : 0) + (hasRel("anzug") ? 15 : 0) + (hasRel("herz") ? 25 : 0);
-
-function desc(c, l, dmgFn) {
-  if (c.junk) return "Unspielbar. Belegt nur Platz auf der Hand.";
-  const v = k => val(c, l, k), o = [];
-  if (v("energy")) o.push(`+${v("energy")} Energie`);
-  if (v("str")) o.push(`+${v("str")} Stärke`);
-  if (c.sp === "cleanse") o.push("Entferne Schwäche, Verwundbar und Gift");
-  if (v("block")) o.push(`${v("block")} Schild`);
-  if (c.sp === "doubleblock") o.push("Verdopple deinen Schild");
-  if (c.sp === "blockdmg") o.push("Schaden in Höhe deines Schilds");
-  if (v("dmg")) { const d = dmgFn ? dmgFn(v("dmg")) : v("dmg"), h = v("hits") || 1; o.push(`${d} Schaden${h > 1 ? " ×" + h : ""}`); }
-  if (c.sp === "execute") o.push("×3 Schaden, wenn der Gegner unter 30 % HP ist");
-  if (c.sp === "lowhp") o.push("×2 Schaden, wenn du unter 50 % HP bist");
-  if (c.sp === "lifesteal") o.push("Heile um die Hälfte des Schadens");
-  if (v("vuln")) o.push(`${v("vuln")} Verwundbar`);
-  if (v("weak")) o.push(`${v("weak")} Schwäche`);
-  if (v("poison")) o.push(`${v("poison")} Gift`);
-  if (c.sp === "doublepoison") o.push("Verdopple das Gift des Gegners");
-  if (v("heal")) o.push(`Heile ${v("heal")}`);
-  if (v("regen")) o.push(`${v("regen")} Regeneration`);
-  if (v("thorns")) o.push(`${v("thorns")} Dornen`);
-  if (v("draw")) o.push(`Ziehe ${v("draw")}`);
-  if (c.pw) o.push(PW[c.pw](v("pv")));
-  if (c.ex) o.push("Verbraucht");
-  return o.join(". ") + ".";
+const $ = s => document.querySelector(s);
+function talentFx(st = S) {
+  const t = id => st.tal[id] || 0;
+  return {
+    atk:t("a1")*.04, crit:t("a2")*.03, critDmg:t("a3")*.15, first:t("a4")*.1, heroAtk:t("a5")*.08, boss:t("a6")*.06, fall:t("a7"),
+    hp:t("d1")*.05, shield:t("d2")*.04, regen:t("d3")*.015, dodge:t("d4")*.02, heroDr:t("d5")*.05, thorns:t("d6")*.05, unb:t("d7"),
+    xp:t("k1")*.06 + t("k7")*.25, cardXp:t("k2")*.08 + t("k7")*.25, coins:t("k3")*.1, dust:t("k4")*.1, drop:t("k5")*.02, mentor:t("k6")*.1
+  };
 }
+const heroHas = (k, L = S.lv) => HERO_AB.some(a => a.k === k && a.lv <= L);
+function heroStats(st = S) {
+  const L = st.lv, T = talentFx(st), m = Math.pow(G, L - 1), hc = heroHas("hCrit", L);
+  return { hp:Math.round(150 * m * (1 + T.hp)), atk:Math.round(13 * m * (1 + T.heroAtk)), spd:5,
+    crit:.05 + T.crit + (hc ? .25 : 0), critDmg:(hc ? 2.5 : 2) + T.critDmg };
+}
+function cardStats(id, l, stg) {
+  const c = CC[id], R = ROLES[c.role], m = RAR[c.r].m * STAGE_MUL[stg] * Math.pow(G, l - 1);
+  return { hp:Math.round(R.hp * m), atk:Math.round(R.atk * m), spd:R.spd };
+}
+const cardCap = (c, st = S) => Math.min(st.lv, STAGE_CAP[c.st]);
+const form = (id, stg) => CC[id].f[stg];
+const evoCost = (id, toStage) => Math.round(EVO_COST[toStage] * RAR[CC[id].r].cost);
+const packPrice = () => Math.round(100 * Math.pow(1.08, S.lv - 1));
+const dustOffer = () => Math.round(60 * Math.pow(1.09, S.lv - 1));
+const resetPrice = () => Math.round(200 * Math.pow(1.06, S.lv - 1));
+const unitPower = u => Math.sqrt(u.max * u.atk) * (1 + (u.ab ? .15 : 0));
 
-function cardHTML(id, l, opt = {}) {
-  const c = CM[id];
-  if (opt.locked) {
-    return `<div class="card locked" ${opt.attrs || ""}><div class="art">${c.e}</div><div class="cname">???</div>
-      <div class="ctype">${RAR[c.r].n}</div><div class="cdesc">Noch nicht freigeschaltet</div></div>`;
+/* =========================================================
+   KAMPF-ENGINE (wird vorab komplett berechnet, dann abgespielt)
+   ========================================================= */
+let UID = 1;
+function mkUnit(o) {
+  return Object.assign({ uid:UID++, shield:0, dots:[], stun:0, rage:0, shred:0, alive:true, dr:0, dodge:0, crit:.05, critDmg:2, thorns:0, habs:[] }, o);
+}
+function buildTeam(st = S) {
+  const T = talentFx(st), h = heroStats(st), L = st.lv;
+  const P = [mkUnit({ side:"p", hero:true, n:"Mondkurier", e:"🧑‍🚀", hp:h.hp, max:h.hp, atk:h.atk, spd:h.spd, crit:h.crit, critDmg:h.critDmg,
+    dodge:T.dodge, dr:T.heroDr, thorns:T.thorns, habs:HERO_AB.filter(a => a.k && a.lv <= L).map(a => a.k) })];
+  st.team.slice(0, slotsAt(L)).forEach(id => {
+    const c = st.cards[id]; if (!c) return;
+    const s = cardStats(id, c.l, c.st), def = CC[id], ab = { k:def.ab, v:AB[def.ab].v[c.st] }, f = form(id, c.st);
+    const hp = Math.round(s.hp * (1 + T.hp));
+    P.push(mkUnit({ side:"p", cid:id, n:f[0], e:f[1], hp, max:hp, atk:s.atk, spd:s.spd, ab,
+      crit:.05 + T.crit + (ab.k === "crit" ? ab.v : 0), critDmg:2 + T.critDmg,
+      dodge:T.dodge + (ab.k === "dodge" ? ab.v : 0), dr:ab.k === "taunt" ? ab.v : 0, thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0) }));
+  });
+  const aura = T.atk + (heroHas("hAura", L) ? .15 : 0) + P.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
+  P.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
+  return P;
+}
+function waveIds(s) {
+  const Z = ZONES[zoneOf(s)], st = stageNo(s);
+  if (st === 10) return [Z.en[0], Z.boss, Z.en[3]];
+  return Array.from({ length:WAVE[st - 1] }, (_, i) => Z.en[(st + i * 2) % 4]);
+}
+function makeWave(s) {
+  const Z = ZONES[zoneOf(s)], E = recLv(s), m = Math.pow(G, E - 1) * EK[s - 1];
+  const W = waveIds(s).map(d => {
+    const R = ROLES[d[2]], boss = d === Z.boss, ab = d[3] ? { k:d[3], v:AB[d[3]].v[d[4]] } : null;
+    const hp = Math.round(R.hp * m * (boss ? 3.4 : 1)), atk = Math.round(R.atk * m * (boss ? 1.5 : 1));
+    return mkUnit({ side:"e", boss, n:d[0], e:d[1], hp, max:hp, atk, spd:R.spd, ab,
+      crit:.05 + (ab && ab.k === "crit" ? ab.v : 0), dodge:ab && ab.k === "dodge" ? ab.v : 0,
+      dr:ab && ab.k === "taunt" ? ab.v : 0, thorns:ab && ab.k === "thorns" ? ab.v : 0 });
+  });
+  const aura = W.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
+  W.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
+  return W;
+}
+const sidePower = U => Math.round(U.reduce((a, u) => a + unitPower(u), 0));
+
+function simulate(P, E, T) {
+  const ev = [], all = P.concat(E);
+  const foes = u => (u.side === "p" ? E : P).filter(x => x.alive);
+  const mates = u => (u.side === "p" ? P : E).filter(x => x.alive);
+  const snap = u => ({ u:u.uid, hp:Math.max(0, Math.round(u.hp)), sh:Math.round(u.shield) });
+  const over = () => !E.some(x => x.alive) || !P.some(x => x.alive);
+  let round = 0;
+
+  const addShield = (u, v) => { u.shield += v; ev.push({ t:"sh", ...snap(u), v:Math.round(v) }); };
+  const heal = (u, v) => { if (!u.alive) return; const b = u.hp; u.hp = Math.min(u.max, u.hp + v); const g = Math.round(u.hp - b); if (g > 0) ev.push({ t:"heal", ...snap(u), v:g }); };
+  function kill(u) {
+    if (u.hp > 0 || !u.alive) return;
+    if (u.hero && T.unb && !u.unbUsed) { u.unbUsed = true; u.hp = 1; u.shield += u.max * .3; ev.push({ t:"save", ...snap(u), msg:"Unbeugsam!" }); return; }
+    if (u.hero && u.habs.includes("hRevive") && !u.revUsed) { u.revUsed = true; u.hp = u.max * .4; ev.push({ t:"revive", ...snap(u), msg:"Zweiter Atem!" }); return; }
+    u.alive = false; u.hp = 0; u.dots = []; u.stun = 0; u.shield = 0;
+    ev.push({ t:"die", u:u.uid });
+    if (u.ab && u.ab.k === "martyr") {
+      ev.push({ t:"banner", msg:`${u.n} explodiert!` });
+      foes(u).forEach(f => directDmg(u, f, u.atk * u.ab.v));
+    }
+    const ph = mates(u).find(f => f.ab && f.ab.k === "revive" && !f.revGiven);
+    if (ph) { ph.revGiven = true; u.alive = true; u.hp = u.max * ph.ab.v; ev.push({ t:"revive", ...snap(u), msg:`${ph.n}: Wiedergeburt!` }); }
   }
-  const cost = costOf(c, l);
-  return `<div class="card r-${c.r} t-${c.t} ${opt.cls || ""}" ${opt.attrs || ""}>
-    <div class="cost">${cost == null ? "–" : cost}</div>
-    ${opt.deck ? '<div class="indeck">DECK</div>' : ""}
-    <div class="art">${c.e}</div>
-    <div class="cname">${c.n}${l ? `<span class="lv">+${l}</span>` : ""}</div>
-    <div class="ctype">${c.junk ? "Schrott" : TYPE[c.t]}</div>
-    <div class="cdesc">${desc(c, l, opt.dmgFn)}</div></div>`;
-}
-
-function pickWeighted(w) {
-  const tot = Object.values(w).reduce((a, b) => a + b, 0);
-  let r = Math.random() * tot;
-  for (const k in w) { r -= w[k]; if (r <= 0) return k; }
-  return "c";
-}
-// Zufällige Karte nach Seltenheitsgewichten; onlyNew = nur unbekannte Karten
-function pickCard(w, exclude, onlyNew) {
-  const ok = c => !exclude.includes(c.id) && (!onlyNew || !(c.id in S.own));
-  for (let tries = 0; tries < 12; tries++) {
-    const r = pickWeighted(w), pool = CARDS.filter(c => c.r === r && ok(c));
-    if (pool.length) return rnd(pool).id;
+  function directDmg(src, t, d) {
+    if (!t.alive) return;
+    d = Math.max(1, Math.round(d * (1 - t.dr)));
+    const abs = Math.min(t.shield, d); t.shield -= abs; t.hp -= d - abs;
+    ev.push({ t:"hit", a:src.uid, ...snap(t), v:d, aoe:true });
+    kill(t);
   }
-  const rest = CARDS.filter(c => w[c.r] > 0 && ok(c));
-  return rest.length ? rnd(rest).id : null;
+  function hit(a, t, mult, aoe) {
+    if (!t || !t.alive) return 0;
+    if (Math.random() < t.dodge) { ev.push({ t:"miss", a:a.uid, u:t.uid, aoe }); return 0; }
+    const k = a.ab && a.ab.k, v = a.ab && a.ab.v;
+    let d = a.atk * (1 + a.rage) * mult * (.9 + Math.random() * .2);
+    if (a.side === "p" && round <= 2) d *= 1 + T.first;
+    if (a.side === "p" && t.boss) d *= 1 + T.boss;
+    if (k === "execute" && t.hp / t.max < .35) d *= 1 + v;
+    const crit = Math.random() < a.crit; if (crit) d *= a.critDmg;
+    d *= (1 + t.shred) * (1 - t.dr);
+    d = Math.max(1, Math.round(d));
+    const abs = Math.min(t.shield, d); t.shield -= abs; t.hp -= d - abs;
+    ev.push({ t:"hit", a:a.uid, ...snap(t), v:d, crit, aoe });
+    if (k === "poison") t.dots.push({ d:a.atk * v, r:3 });
+    if (k === "shred") t.shred += v;
+    if (k === "stun" && t.hp > 0 && Math.random() < v) { t.stun = 1; ev.push({ t:"stun", u:t.uid }); }
+    if (k === "lifesteal") heal(a, d * v);
+    if (t.thorns > 0 && a.alive) {
+      const r = Math.max(1, Math.round(d * t.thorns)); a.hp -= r; ev.push({ t:"hit", a:t.uid, ...snap(a), v:r, thorns:true }); kill(a);
+    }
+    kill(t);
+    return d;
+  }
+  function target(u) {
+    const fs = foes(u); if (!fs.length) return null;
+    if (u.ab && u.ab.k === "snipe") return fs.reduce((m, f) => f.hp < m.hp ? f : m);
+    const tz = fs.filter(f => f.ab && f.ab.k === "taunt");
+    if (tz.length && Math.random() < .75) return rnd(tz);
+    return rnd(fs);
+  }
+  const aoeAll = (u, mult, name) => { ev.push({ t:"skill", a:u.uid, msg:name }); foes(u).forEach(f => hit(u, f, mult, true)); };
+  const lowest = u => mates(u).reduce((m, f) => f.hp / f.max < m.hp / m.max ? f : m);
+
+  function act(u) {
+    const k = u.ab && u.ab.k, v = u.ab && u.ab.v;
+    if (u.hero) {
+      if (u.habs.includes("hNova") && round % 6 === 0) return aoeAll(u, 3, "Supernova");
+      if (u.habs.includes("hRain") && round % 4 === 0) return aoeAll(u, 1.3, "Sternenregen");
+      if (T.fall && round % 3 === 0) return aoeAll(u, 1, "Sternenfall");
+      if (u.habs.includes("hStun") && round % 5 === 0) { ev.push({ t:"skill", a:u.uid, msg:"Gravitationswelle" }); foes(u).forEach(f => { f.stun = 1; ev.push({ t:"stun", u:f.uid }); }); }
+    }
+    if (k === "aoe" && round % 3 === 0) return aoeAll(u, v, AB.aoe.n);
+    if (k === "dragon" && round % 3 === 0) { aoeAll(u, v, AB.dragon.n); foes(u).forEach(f => f.dots.push({ d:u.atk * .4, r:3 })); return; }
+    if (k === "divine") { ev.push({ t:"skill", a:u.uid, msg:AB.divine.n, quiet:1 }); mates(u).forEach(f => heal(f, u.atk * v)); return; }
+    if (k === "heal") { const lo = lowest(u); if (lo.hp / lo.max < .75) { ev.push({ t:"skill", a:u.uid, msg:AB.heal.n, quiet:1 }); heal(lo, u.atk * v); return; } }
+    if (k === "barrier" && round % 2 === 0) { ev.push({ t:"skill", a:u.uid, msg:AB.barrier.n, quiet:1 }); addShield(lowest(u), u.atk * v); return; }
+    hit(u, target(u), 1 + (k === "snipe" ? v : 0));
+    if (k === "rage") u.rage += v;
+    if (k === "double" && u.alive && Math.random() < v) hit(u, target(u), 1);
+  }
+
+  // Kampfbeginn
+  for (const u of all) {
+    const k = u.ab && u.ab.k;
+    if (k === "shieldTeam") mates(u).forEach(f => addShield(f, f.max * u.ab.v));
+    if (k === "burn") foes(u).forEach(f => f.dots.push({ d:u.atk * u.ab.v, r:4 }));
+    if (u.hero && u.habs.includes("hShield")) P.forEach(f => addShield(f, u.max * .12));
+  }
+  if (T.shield) P.forEach(f => addShield(f, f.max * T.shield));
+
+  while (round < MAX_ROUNDS && !over()) {
+    round++;
+    ev.push({ t:"round", n:round });
+    const order = all.filter(u => u.alive).sort((a, b) => b.spd - a.spd || Math.random() - .5);
+    for (const u of order) {
+      if (!u.alive || over()) continue;
+      if (u.stun > 0) { u.stun--; ev.push({ t:"frozen", u:u.uid }); continue; }
+      ev.push({ t:"act", u:u.uid });
+      act(u);
+    }
+    if (over()) break;
+    for (const u of all) {
+      if (!u.alive) continue;
+      if (u.dots.length) {
+        const d = Math.max(1, Math.round(u.dots.reduce((a, x) => a + x.d, 0)));
+        u.hp -= d; u.dots.forEach(x => x.r--); u.dots = u.dots.filter(x => x.r > 0);
+        ev.push({ t:"dot", ...snap(u), v:d }); kill(u);
+      }
+      if (!u.alive) continue;
+      if (u.hero && u.habs.includes("hRegen")) heal(u, u.max * .04);
+      if (u.side === "p" && T.regen) heal(u, u.max * T.regen);
+    }
+    if (over()) break;
+  }
+  const win = !E.some(x => x.alive) && P.some(x => x.alive);
+  return { ev, win, rounds:round, timeout:!over() };
 }
 
 /* =========================================================
-   TOASTS & MODALS
+   FORTSCHRITT
+   ========================================================= */
+function addCardXP(id, n) {
+  const c = S.cards[id], before = c.l, cap = cardCap(c);
+  c.xp += n;
+  while (c.l < cap && c.xp >= cardNeed(c.l)) { c.xp -= cardNeed(c.l); c.l++; }
+  if (c.l >= cap) c.xp = Math.min(c.xp, cardNeed(c.l));
+  return c.l - before;
+}
+function addHeroXP(n) {
+  const out = { lv:[], abs:[], slots:[] };
+  if (S.lv >= MAX_LV) return out;
+  S.xp += n;
+  while (S.lv < MAX_LV && S.xp >= heroNeed(S.lv)) {
+    S.xp -= heroNeed(S.lv); S.lv++; S.tp++; out.lv.push(S.lv);
+    HERO_AB.filter(a => a.lv === S.lv).forEach(a => out.abs.push(a.n));
+    if (SLOT_LV.includes(S.lv)) out.slots.push(S.lv);
+  }
+  if (S.lv >= MAX_LV) S.xp = 0;
+  if (out.lv.length) Object.keys(S.cards).forEach(id => addCardXP(id, 0));
+  return out;
+}
+function pickRarity(w) {
+  const tot = Object.values(w).reduce((a, b) => a + b, 0); let r = Math.random() * tot;
+  for (const k in w) { r -= w[k]; if (r <= 0) return k; }
+  return "c";
+}
+function rollCard(w) {
+  const r = pickRarity(w), pool = COMP.filter(c => c.r === r);
+  return rnd(pool.length ? pool : COMP).id;
+}
+// Neue Karte oder Duplikat gutschreiben
+function grantCard(id) {
+  if (S.cards[id]) {
+    const c = S.cards[id], dust = Math.round(25 * Math.pow(1.08, S.lv - 1) * RAR[CC[id].r].cost);
+    S.dust += dust;
+    const up = addCardXP(id, cardNeed(c.l));
+    return { id, dup:true, dust, up };
+  }
+  const l = Math.min(STAGE_CAP[0], Math.max(1, Math.floor(S.lv * .6)));
+  S.cards[id] = { l, xp:0, st:0 };
+  if (S.team.length < slotsAt(S.lv)) S.team.push(id);
+  return { id, dup:false, l };
+}
+function teamBonus(k) {
+  return S.team.slice(0, slotsAt(S.lv)).reduce((a, id) => { const c = S.cards[id]; return a + (c && CC[id].ab === k ? AB[k].v[c.st] : 0); }, 0);
+}
+function grantRewards(win, s) {
+  const E = recLv(s), boss = isBoss(s), T = talentFx(), wis = teamBonus("wisdom"), luck = teamBonus("luck");
+  let base = 12 * Math.pow(1.1, E - 1) * (boss ? 3 : 1);
+  if (!win) base *= .3;
+  const hx = Math.round(base * (1 + T.xp + wis));
+  const cx = Math.round(base * .8 * (1 + T.cardXp + wis));
+  const first = win && s > S.prog;
+  const co = win ? Math.round(6 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 : 1) * (1 + T.coins + luck)) : 0;
+  const du = win ? Math.round(5 * Math.pow(1.1, E - 1) * (boss ? 2 : 1) * (1 + T.dust + luck)) : 0;
+  S.co += co; S.dust += du;
+  if (win) { S.stats.wins++; if (first) S.prog = s; } else S.stats.losses++;
+  const team = S.team.slice(0, slotsAt(S.lv)).filter(id => S.cards[id]);
+  const cards = team.map(id => { const c = S.cards[id], from = c.l; addCardXP(id, cx); return { id, from, to:c.l }; });
+  if (T.mentor) Object.keys(S.cards).filter(id => !team.includes(id)).forEach(id => addCardXP(id, Math.round(cx * T.mentor)));
+  const hero = addHeroXP(hx);
+  cards.forEach(c => c.to = S.cards[c.id].l); // Deckel kann durch Helden-Level-Up gestiegen sein
+  let drop = null;
+  if (win && (boss || Math.random() < .08 + T.drop)) {
+    const w = { ...ZONES[zoneOf(s)].w };
+    if (boss) { w.c = 0; w.r = Math.max(w.r, 10); }
+    drop = grantCard(rollCard(w));
+  }
+  save();
+  return { win, s, hx, cx, co, du, first, hero, cards, drop };
+}
+
+/* =========================================================
+   OBERFLÄCHE
    ========================================================= */
 function toast(html) {
-  const t = document.createElement("div");
-  t.className = "toast"; t.innerHTML = html;
-  $("#toasts").appendChild(t);
-  setTimeout(() => t.remove(), 2800);
+  const t = document.createElement("div"); t.className = "toast"; t.innerHTML = html;
+  $("#toasts").appendChild(t); setTimeout(() => t.remove(), 2800);
 }
 function modal(html) {
   $("#modalRoot").innerHTML = html ? `<div class="modal-bg" data-act="closeBg"><div class="modal" role="dialog">${html}</div></div>` : "";
 }
+const bar = (v, n, full) => `<div class="bar ${full ? "full" : ""}"><i style="width:${Math.min(100, n ? v / n * 100 : 100)}%"></i></div>`;
+const stars = st => "★".repeat(st + 1) + `<s>${"★".repeat(2 - st)}</s>`;
 
-function addXP(amount) {
-  const ups = [];
-  S.xp += amount;
-  while (S.lv < MAX_LV && S.xp >= need(S.lv)) {
-    S.xp -= need(S.lv); S.lv++; S.pts += 2; ups.push(S.lv);
-  }
-  if (S.lv >= MAX_LV) S.xp = Math.min(S.xp, need(S.lv));
-  return ups;
-}
-function unlockCard(id) {
-  if (id in S.own) { const d = RAR[CM[id].r].dup; S.co += d; return { dup:d }; }
-  S.own[id] = 0;
-  if (S.deck.length < DECK_MAX) S.deck.push(id);
-  return { dup:0 };
-}
-function checkAch() {
-  let any = true;
-  while (any) {
-    any = false;
-    for (const a of ACH) {
-      if (!S.ach.includes(a.id) && a.ok(S)) {
-        S.ach.push(a.id); S.co += a.co || 0; S.pts += a.pt || 0; any = true;
-        toast(`Erfolg: ${a.n} · +${a.co} Münzen${a.pt ? ` · +${a.pt} ✦` : ""}`);
-      }
-    }
-  }
-}
-function rollShop() {
-  const w = ZONES[topZone()].w, cards = [];
-  for (let i = 0; i < 4; i++) { const id = pickCard(w, cards, true); if (id) cards.push(id); }
-  const pool = shuffle(RELICS.filter(r => !hasRel(r.id)).map(r => r.id));
-  S.shop = { cards, rel: pool.slice(0, 2), sold: [] };
-}
-
-/* =========================================================
-   SCREENS
-   ========================================================= */
 const ICONS = {
-  adv: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-20 12 12)"/></svg>',
-  cards: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="11" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
-  shop: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>',
-  ach: '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
-  hero: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>'
+  hero: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>',
+  team: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="11" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
+  fight: '<svg viewBox="0 0 24 24"><path d="M5 19 19 5M14 5h5v5M5 5l5 5M15 15l4 4M19 15l-4 4"/></svg>',
+  tal: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M12 7v5M12 12l-5 5M12 12l5 5"/></svg>',
+  shop: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>'
 };
+const canEvolve = () => Object.entries(S.cards).some(([id, c]) => c.st < 2 && c.l >= STAGE_CAP[c.st] && S.co >= evoCost(id, c.st + 1));
 function renderTop() {
-  const n = need(S.lv), pct = S.lv >= MAX_LV ? 100 : Math.min(100, S.xp / n * 100);
+  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
   $("#top").innerHTML = `<div class="lvl-badge">LV ${S.lv}</div>
-    <div class="xpwrap"><div class="xpbar"><i style="width:${pct}%"></i></div>
-    <div class="xptext">${S.lv >= MAX_LV ? "Maximales Level" : `${S.xp} / ${n} EP`}</div></div>
-    <div class="res"><span class="coin">${S.co}</span><span class="pts">${S.pts}</span></div>`;
+    <div class="xpwrap">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
+      <div class="xptext">${mx ? "Maximales Level" : `${S.xp} / ${n} EP`}</div></div>
+    <div class="res"><span class="coin">${S.co}</span><span class="dust">${S.dust}</span></div>`;
 }
 function renderNav() {
-  const tabs = [["adv","Abenteuer"],["cards","Karten"],["shop","Shop"],["ach","Erfolge"],["hero","Held"]];
-  const upgradable = S.pts > 0 && Object.entries(S.own).some(([id, l]) => l < MAX_CARD_LV && S.pts >= upCost(l));
+  const tabs = [["hero","Held"],["team","Team"],["fight","Kampf"],["tal","Talente"],["shop","Shop"]];
+  const dot = { tal:S.tp > 0, team:canEvolve() };
   $("#nav").innerHTML = tabs.map(([k, n]) =>
-    `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}" aria-label="${n}"><span class="${k === "cards" && upgradable ? "dot" : ""}">${ICONS[k]}</span>${n}</button>`).join("");
+    `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}" aria-label="${n}"><span class="${dot[k] ? "dot" : ""}">${ICONS[k]}</span>${n}</button>`).join("");
 }
 function render() {
   renderTop(); renderNav();
-  const m = $("#main");
-  m.innerHTML = ({ adv:screenAdv, cards:screenCards, shop:screenShop, ach:screenAch, hero:screenHero })[UI.tab]();
-}
-
-function screenAdv() {
-  return `<div class="screen-title"><h2>Abenteuer</h2><small>${BOSS_WINS} Siege öffnen den Boss</small></div>
-  <div class="zones">${ZONES.map((Z, i) => {
-    const open = zoneOpen(i), wins = S.zw[i], bossOpen = wins >= BOSS_WINS, b = EN[Z.boss];
-    if (!open) return `<div class="zone locked" style="--zbg:${Z.bg}"><div class="zone-head"><div><h3>${Z.n}</h3><div class="zsub">${Z.sub}</div></div>
-      <span class="ztag">ab LV ${Z.lv}</span></div><div class="zlock">Gesperrt. Erreiche Level ${Z.lv}, um diese Zone zu betreten.</div></div>`;
-    return `<div class="zone" style="--zbg:${Z.bg}">
-      <div class="zone-head"><div><h3>${Z.n}</h3><div class="zsub">${Z.sub}</div></div><span class="ztag">Zone ${i + 1}</span></div>
-      <div class="foes">${Z.en.map(id => { const E = EN[id];
-        return `<button class="foe" data-act="fight" data-e="${id}" data-z="${i}"><span class="fe">${E.e}</span><span class="fn">${E.n}</span>
-          <span class="fs">${E.hp} HP · ${E.xp} EP</span></button>`; }).join("")}</div>
-      <button class="bossrow ${bossOpen ? "" : "closed"}" data-act="${bossOpen ? "fight" : "noop"}" data-e="${Z.boss}" data-z="${i}" style="width:100%;text-align:left;color:inherit;font:inherit">
-        <span class="fe" style="${bossOpen ? "" : "filter:grayscale(1) brightness(.5)"}">${b.e}</span>
-        <span class="bi"><span class="bn">${bossOpen ? b.n : "Boss gesperrt"}</span>
-          <span class="bs" style="display:block">${S.bd[i] ? "Besiegt ✓ · erneut herausfordern" : bossOpen ? `${b.hp} HP · ${b.xp} EP · Artefakt und seltene Karte` : `Gewinne ${BOSS_WINS - wins === 1 ? "einen weiteren Kampf" : (BOSS_WINS - wins) + " weitere Kämpfe"} in dieser Zone`}</span>
-          <span class="progress-pips">${Array.from({ length:BOSS_WINS }, (_, k) => `<i class="${k < wins ? "on" : ""}"></i>`).join("")}</span></span>
-        <span class="ztag" style="background:${bossOpen ? "var(--r-l)" : "var(--deck-2)"};color:${bossOpen ? "var(--night)" : "var(--dim)"}">BOSS</span>
-      </button></div>`;
-  }).join("")}</div>`;
-}
-
-function screenCards() {
-  const order = { c:0, r:1, e:2, l:3 };
-  let list = CARDS.slice().sort((a, b) => order[a.r] - order[b.r]);
-  if (UI.filter === "deck") list = list.filter(c => S.deck.includes(c.id));
-  if (UI.filter === "up") list = list.filter(c => c.id in S.own && S.own[c.id] < MAX_CARD_LV);
-  if (UI.filter === "locked") list = list.filter(c => !(c.id in S.own));
-  const f = (k, n) => `<button class="chip ${UI.filter === k ? "on" : ""}" data-act="filter" data-k="${k}">${n}</button>`;
-  return `<div class="screen-title"><h2>Karten</h2><small>${ownCount(S)} / ${CARDS.length} gesammelt · Deck ${S.deck.length}/${DECK_MAX}</small></div>
-    <div class="chips">${f("all","Alle")}${f("deck","Im Deck")}${f("up","Aufwertbar")}${f("locked","Gesperrt")}</div>
-    <div class="cardgrid">${list.map(c => c.id in S.own
-      ? cardHTML(c.id, S.own[c.id], { deck:S.deck.includes(c.id), attrs:`data-act="card" data-id="${c.id}" role="button" tabindex="0"` })
-      : cardHTML(c.id, 0, { locked:true, attrs:`data-act="lockedcard" data-id="${c.id}" role="button" tabindex="0"` })).join("")
-      || `<p style="grid-column:1/-1;color:var(--dim)">Keine Karten in dieser Ansicht.</p>`}</div>`;
-}
-function cardModal(id) {
-  const c = CM[id], l = S.own[id], inDeck = S.deck.includes(id), cost = upCost(l), max = l >= MAX_CARD_LV;
-  const nextCost = costOf(c, l + 1) !== costOf(c, l) ? ` Kosten sinken auf ${costOf(c, l + 1)}.` : "";
-  modal(`<h2>${c.n}</h2>
-    <div class="bigcard">${cardHTML(id, l)}</div>
-    <div class="lvdots">${Array.from({ length:MAX_CARD_LV }, (_, k) => `<i class="${k < l ? "on" : ""}"></i>`).join("")}</div>
-    <p style="text-align:center">${RAR[c.r].n} · ${TYPE[c.t]}</p>
-    ${max ? `<div class="next">Diese Karte ist voll aufgewertet.</div>`
-          : `<div class="next">Stufe +${l + 1}: <b>${desc(c, l + 1)}</b>${nextCost}</div>`}
-    <div class="row">
-      <button class="btn" data-act="upgrade" data-id="${id}" ${max || S.pts < cost ? "disabled" : ""}>${max ? "Maximal" : `Aufwerten · ${cost} ✦`}</button>
-      <button class="btn ghost" data-act="toggleDeck" data-id="${id}" ${(!inDeck && S.deck.length >= DECK_MAX) || (inDeck && S.deck.length <= DECK_MIN) ? "disabled" : ""}>${inDeck ? "Aus dem Deck" : "Ins Deck"}</button>
-    </div>
-    <p style="font-size:13px">Du hast ${S.pts} ✦ Level-Punkte. Jeder Level-Aufstieg bringt 2 Punkte. Dein Deck braucht ${DECK_MIN} bis ${DECK_MAX} Karten.</p>
-    <button class="btn ghost" data-act="close">Schließen</button>`);
-}
-
-function screenShop() {
-  if (!S.shop) { rollShop(); save(); }
-  const sh = S.shop;
-  return `<div class="screen-title"><h2>Shop</h2><small>Neues Angebot nach jedem Kampf</small></div>
-    <div class="panel pack"><div class="packart">✦</div><div class="pi"><h3>Sternenpack</h3>
-      <p>3 zufällige Karten. Doppelte werden zu Münzen.</p>
-      <button class="btn sm" data-act="pack" ${S.co < 120 ? "disabled" : ""}><span class="coin">120</span></button></div></div>
-    <div class="section-label">Karten</div>
-    <div class="shopgrid">${sh.cards.map(id => {
-      const sold = sh.sold.includes(id) || id in S.own, p = RAR[CM[id].r].price;
-      return `<div class="offer">${cardHTML(id, 0)}
-        <button class="btn sm price" data-act="buyCard" data-id="${id}" ${sold || S.co < p ? "disabled" : ""}>${sold ? "Gekauft" : `<span class="coin">${p}</span>`}</button></div>`;
-    }).join("") || `<p style="grid-column:1/-1;color:var(--dim)">Du besitzt alle Karten, die hier angeboten werden können.</p>`}</div>
-    <div class="section-label">Artefakte</div>
-    <div class="panel">${sh.rel.length ? sh.rel.map(id => { const r = RM[id], sold = hasRel(id);
-      return `<div class="relic"><span class="re">${r.e}</span><div class="ri"><div class="rn">${r.n}</div><div class="rd">${r.d}</div></div>
-        <button class="btn sm" data-act="buyRel" data-id="${id}" ${sold || S.co < r.price ? "disabled" : ""}>${sold ? "Gekauft" : `<span class="coin">${r.price}</span>`}</button></div>`;
-    }).join("") : `<p style="margin:0;color:var(--dim)">Alle Artefakte gesammelt.</p>`}</div>
-    <div style="margin-top:14px"><button class="btn ghost" style="width:100%" data-act="reroll" ${S.co < 25 ? "disabled" : ""}>Angebot erneuern · <span class="coin">25</span></button></div>`;
-}
-
-function screenAch() {
-  const done = S.ach.length;
-  return `<div class="screen-title"><h2>Erfolge</h2><small>${done} / ${ACH.length} erreicht</small></div>
-    <div class="achs">${ACH.map(a => { const ok = S.ach.includes(a.id);
-      return `<div class="ach ${ok ? "done" : ""}"><span class="am">${ok ? "★" : "☆"}</span>
-        <div class="ai"><div class="an">${a.n}</div><div class="ad">${a.d}</div></div>
-        <div class="ar"><span class="coin">${a.co}</span>${a.pt ? `<br><span class="pts">${a.pt}</span>` : ""}</div></div>`; }).join("")}</div>`;
+  $("#main").innerHTML = ({ hero:screenHero, team:screenTeam, fight:screenFight, tal:screenTal, shop:screenShop })[UI.tab]();
 }
 
 function screenHero() {
-  return `<div class="hero"><div class="moonface">🧑‍🚀</div><h2>Der Mondkurier</h2>
-    <div class="hl">Level ${S.lv} · ${maxHP()} HP · ${3 + (hasRel("batterie") ? 1 : 0)} Energie pro Zug</div></div>
-    <div class="statgrid">
-      <div class="stat"><b>${S.st.wins}</b><span>Siege</span></div>
-      <div class="stat"><b>${S.st.losses}</b><span>Niederlagen</span></div>
-      <div class="stat"><b>${S.bd.filter(Boolean).length}/5</b><span>Bosse</span></div>
-      <div class="stat"><b>${ownCount(S)}</b><span>Karten</span></div>
-      <div class="stat"><b>${S.rel.length}</b><span>Artefakte</span></div>
-      <div class="stat"><b>${S.st.maxHit}</b><span>Höchster Treffer</span></div>
+  const h = heroStats(), t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
+  const next = HERO_AB.find(a => a.lv > S.lv), nextSlot = SLOT_LV.find(x => x > S.lv);
+  const stat = (v, l) => `<div><b class="num" style="font-family:var(--f-display);font-size:20px">${v}</b><div class="xptext">${l}</div></div>`;
+  return `<div class="herocard" style="--hc:${t[2]}">
+      <div class="hc-head"><div class="hc-portrait">🧑‍🚀</div>
+        <div><div class="hc-title">${t[1]}</div><div class="hc-name">Der Mondkurier</div><div class="hc-lv">Level ${S.lv} von ${MAX_LV}</div></div></div>
+      <div class="hc-xp">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
+        <div class="xptext"><span>${mx ? "Maximum erreicht" : `${S.xp} / ${n} EP`}</span><span>${mx ? "" : `noch ${n - S.xp} EP`}</span></div></div>
+      <div class="statrow">
+        <div><b>${h.hp}</b><span>HP</span></div><div><b>${h.atk}</b><span>ATK</span></div>
+        <div><b>${Math.round(h.crit * 100)}%</b><span>Krit</span></div><div><b>${slotsAt(S.lv)}</b><span>Begleiter</span></div>
+      </div>
     </div>
-    <div class="section-label">So wirst du stärker</div>
-    <div class="panel" style="font-size:14px;line-height:1.5;color:var(--dim)">
-      Siege bringen <b style="color:var(--moon)">EP</b>, Münzen und eine neue Karte. Jeder Level-Aufstieg gibt <b style="color:var(--power)">2 ✦</b>,
-      mit denen du Karten bis +3 aufwertest. Höhere Level öffnen neue Zonen: Asteroidengürtel ab LV 4, Orionnebel ab LV 8,
-      Kometenschweif ab LV 12, Schwarzes Loch ab LV 16.</div>
-    <div class="section-label">Artefakte</div>
-    <div class="panel">${RELICS.map(r => { const ok = hasRel(r.id);
-      return `<div class="relic ${ok ? "" : "missing"}"><span class="re">${r.e}</span><div class="ri"><div class="rn">${ok ? r.n : "Unbekanntes Artefakt"}</div>
-        <div class="rd">${ok ? r.d : "Im Shop oder von Bossen erhältlich"}</div></div></div>`; }).join("")}</div>
-    <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
+    ${next || nextSlot ? `<div class="milestone">${next ? `Nächste Fähigkeit auf <b>Level ${next.lv}</b>: ${next.n}. ` : ""}${nextSlot ? `Neuer Teamplatz auf <b>Level ${nextSlot}</b>.` : ""}</div>` : ""}
+    ${S.tp ? `<button class="btn green" style="width:100%;margin-top:12px" data-act="tab" data-k="tal">${S.tp} Talentpunkt${S.tp > 1 ? "e" : ""} verteilen</button>` : ""}
+    <div class="section-label">Fähigkeiten der Heldenkarte</div>
+    <div class="ablist">${HERO_AB.map(a => `<div class="abrow ${a.lv > S.lv ? "locked" : ""}"><span class="lvtag">LV ${a.lv}</span>
+      <div><div class="an">${a.n}</div><div class="ad">${a.d}</div></div></div>`).join("")}</div>
+    <div class="section-label">Statistik</div>
+    <div class="panel" style="display:flex;justify-content:space-around;text-align:center;gap:8px">
+      ${stat(S.stats.wins, "Siege")}${stat(S.stats.losses, "Niederlagen")}${stat(S.prog + "/50", "Etappen")}${stat(Object.keys(S.cards).length + "/" + COMP.length, "Karten")}
+    </div>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
       <button class="btn ghost" data-act="help">Spielregeln</button>
       <button class="btn ghost" data-act="resetAsk" style="color:var(--hp)">Spielstand löschen</button>
     </div>`;
 }
 
+function screenTeam() {
+  const n = slotsAt(S.lv), P = buildTeam(), order = { l:0, e:1, r:2, c:3 };
+  const owned = Object.keys(S.cards).sort((a, b) => (S.team.includes(b) - S.team.includes(a)) || S.cards[b].l - S.cards[a].l || order[CC[a].r] - order[CC[b].r]);
+  const unknown = COMP.filter(c => !S.cards[c.id]);
+  const slot = i => {
+    if (i >= n) return `<div class="slot locked">🔒<span>ab Level ${SLOT_LV[i]}</span></div>`;
+    const id = S.team[i];
+    if (!id) return `<div class="slot"><span style="font-size:22px">＋</span><span>Freier Platz</span></div>`;
+    const c = S.cards[id], f = form(id, c.st);
+    return `<button class="slot full r-${CC[id].r}" data-act="card" data-id="${id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span><span class="sl">Lv ${c.l}</span></button>`;
+  };
+  return `<div class="screen-title"><h2>Team</h2><small>Held + ${n} Begleiter</small></div>
+    <div class="slots">${[0,1,2,3,4,5].map(slot).join("")}</div>
+    <div class="powerline"><span>Teamstärke inklusive Held</span><b class="num">${sidePower(P)}</b></div>
+    <div class="section-label">Deine Karten · ${owned.length} von ${COMP.length}</div>
+    <div class="clist">${owned.map(id => {
+      const c = S.cards[id], d = CC[id], f = form(id, c.st), cap = cardCap(c), evo = c.l >= STAGE_CAP[c.st] && c.st < 2;
+      return `<button class="crow r-${d.r} ${S.team.includes(id) ? "inteam" : ""}" data-act="card" data-id="${id}">
+        <span class="ce">${f[1]}</span>
+        <span class="ci"><span class="cn">${f[0]} <span class="stars">${stars(c.st)}</span>${S.team.includes(id) ? '<span class="ctag">im Team</span>' : ""}</span>
+          <span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}</span>${bar(c.xp, cardNeed(c.l), c.l >= cap)}</span>
+        <span class="clv">Lv ${c.l}${evo ? '<span class="ready">Entwickeln</span>' : c.l >= cap ? '<span class="ready" style="color:var(--dim)">Max</span>' : ""}</span></button>`;
+    }).join("")}
+    ${unknown.map(d => `<div class="crow unknown r-${d.r}"><span class="ce">${d.f[0][1]}</span><span class="ci"><span class="cn">???</span>
+      <span class="cm">${RAR[d.r].n} · ${ROLES[d.role].n}</span></span></div>`).join("")}</div>`;
+}
+function cardModal(id) {
+  const c = S.cards[id], d = CC[id], f = form(id, c.st), s = cardStats(id, c.l, c.st), cap = cardCap(c), inTeam = S.team.includes(id);
+  const need = cardNeed(c.l), atStageCap = c.l >= STAGE_CAP[c.st];
+  const trainCost = Math.max(0, need - c.xp), canTrain = c.l < cap;
+  const evoOK = atStageCap && c.st < 2, ec = c.st < 2 ? evoCost(id, c.st + 1) : 0;
+  const nf = c.st < 2 ? form(id, c.st + 1) : null, teamFull = S.team.length >= slotsAt(S.lv);
+  const capText = atStageCap ? (c.st < 2 ? "Stufenmaximum erreicht. Entwickle die Karte, um weiterzuleveln." : "Maximales Level") : "Karten können nicht über dein Heldenlevel steigen.";
+  modal(`<div class="bigc r-${d.r}">
+      <div class="bm">${RAR[d.r].n} · ${ROLES[d.role].n}</div>
+      <div class="be">${f[1]}</div><div class="bn">${f[0]}</div><div class="stars" style="font-size:16px">${stars(c.st)}</div>
+      <div class="statrow"><div><b>${s.hp}</b><span>HP</span></div><div><b>${s.atk}</b><span>ATK</span></div><div><b>${c.l}</b><span>Level</span></div></div>
+      <div>${bar(c.xp, need, c.l >= cap)}<div class="xptext" style="margin-top:4px">${c.l >= cap ? capText : `${c.xp} / ${need} EP`}</div></div>
+    </div>
+    <div class="abbox"><b>${AB[d.ab].n}:</b> ${AB[d.ab].d(AB[d.ab].v[c.st])}
+      ${nf ? `<div class="nx" style="margin-top:6px">Entwicklung ab Level ${STAGE_CAP[c.st]} zu ${nf[0]}: ${AB[d.ab].d(AB[d.ab].v[c.st + 1])}</div>` : ""}</div>
+    <div class="evo">${d.f.map((x, i) => `<span class="${i <= c.st ? "on" : ""}" title="${x[0]}">${x[1]}</span>${i < 2 ? "<i>›</i>" : ""}`).join("")}</div>
+    ${evoOK ? `<button class="btn" data-act="evolve" data-id="${id}" ${S.co < ec ? "disabled" : ""}>Zu ${nf[0]} entwickeln · <span class="coin">${ec}</span></button>` : ""}
+    <div class="row">
+      <button class="btn ghost" data-act="train" data-id="${id}" ${!canTrain || S.dust < trainCost ? "disabled" : ""}>${canTrain ? `1 Level trainieren · <span class="dust">${trainCost}</span>` : "Training nicht möglich"}</button>
+      <button class="btn ${inTeam ? "ghost" : "green"}" data-act="toggleTeam" data-id="${id}" ${!inTeam && teamFull ? "disabled" : ""}>${inTeam ? "Aus dem Team" : teamFull ? "Team ist voll" : "Ins Team"}</button>
+    </div>
+    <button class="btn ghost" data-act="close">Schließen</button>`);
+}
+
+// Siegchance per Probekämpfen schätzen (zwischengespeichert, solange sich das Team nicht ändert)
+const oddsCache = {};
+function winChance(s) {
+  const key = [s, S.lv, JSON.stringify(S.tal), S.team.slice(0, slotsAt(S.lv)).map(id => id + S.cards[id].l + "." + S.cards[id].st).join(",")].join("|");
+  if (oddsCache[key] == null) {
+    let w = 0; const n = 30, T = talentFx();
+    for (let i = 0; i < n; i++) if (simulate(buildTeam(), makeWave(s), T).win) w++;
+    oddsCache[key] = w / n;
+  }
+  return oddsCache[key];
+}
+function oddsOf(s) {
+  const c = winChance(s), p = Math.round(c * 100) + " %";
+  if (c >= .8) return ["easy", `Leicht · ${p}`];
+  if (c >= .4) return ["even", `Knapp · ${p}`];
+  return ["hard", `Gefährlich · ${p}`];
+}
+function screenFight() {
+  const z = S.zone, Z = ZONES[z], zOpen = i => i === 0 || S.prog >= i * 10, tp = sidePower(buildTeam());
+  const stages = Array.from({ length:10 }, (_, i) => z * 10 + i + 1);
+  return `<div class="screen-title"><h2>Kampf</h2><small>${S.prog} von 50 Etappen geschafft</small></div>
+    <button class="toggle" data-act="auto"><span><span class="tt">Automatisch weiterkämpfen</span><br>
+      <span class="td">Startet nach jedem Sieg denselben Kampf neu und sammelt so EP. Stoppt bei einer Niederlage.</span></span><span class="sw ${S.auto ? "on" : ""}"></span></button>
+    <div class="chips" style="margin-top:12px">${ZONES.map((x, i) => `<button class="chip ${i === z ? "on" : ""} ${zOpen(i) ? "" : "lock"}" data-act="zone" data-z="${i}">${zOpen(i) ? "" : "🔒 "}Zone ${i + 1}</button>`).join("")}</div>
+    <div class="zonehead" style="--zbg:${Z.bg}"><h3>${Z.n}</h3><p>${Z.sub}</p></div>
+    <div class="stages">${stages.map(s => {
+      const open = s <= S.prog + 1, cleared = s <= S.prog, boss = isBoss(s), o = open ? oddsOf(s) : null;
+      return `<button class="stage ${boss ? "boss" : ""} ${cleared ? "cleared" : ""} ${open ? "" : "locked"} ${s === S.prog + 1 ? "next" : ""}" data-act="${open ? "fight" : "noop"}" data-s="${s}">
+        <span class="sn">${boss ? "👑" : stageNo(s)}</span>
+        <span class="si"><span class="sfoes">${waveIds(s).map(d => d[1]).join("")}</span><span class="sm" style="display:block">${boss ? "Boss · " : ""}Empfohlen ab Level ${recLv(s)} · Stärke ${sidePower(makeWave(s))}</span></span>
+        <span class="ss">${cleared ? "✓ geschafft" : open ? "Neu" : "🔒"}${o ? `<br><span class="odds ${o[0]}">${o[1]}</span>` : ""}</span></button>`;
+    }).join("")}</div>
+    <p style="font-size:13px;color:var(--dim);line-height:1.45;margin-top:12px">Die Prozentzahl ist deine geschätzte Siegchance mit dem aktuellen Team (Teamstärke ${tp}). Ist sie zu niedrig, kämpfe leichtere Etappen erneut, verteile Talentpunkte oder entwickle deine Karten.</p>`;
+}
+
+function screenTal() {
+  const spent = b => TALENTS.filter(t => t.b === b).reduce((a, t) => a + (S.tal[t.id] || 0), 0);
+  return `<div class="screen-title"><h2>Talente</h2><small><span class="tp">${S.tp} Punkt${S.tp === 1 ? "" : "e"}</span> frei · 1 pro Level</small></div>
+    <div class="tree">${BRANCHES.map(br => {
+      const sp = spent(br.k);
+      let html = `<div class="branch" style="--bc:${br.c}"><h3>${br.n}</h3><div class="bp">${sp} Punkte</div>`;
+      [0,1,2,3].forEach(tier => {
+        if (tier) html += `<div class="tier-lbl">ab ${tier * 5} Punkten</div>`;
+        TALENTS.filter(t => t.b === br.k && t.t === tier).forEach(t => {
+          const r = S.tal[t.id] || 0, locked = sp < tier * 5, can = !locked && r < t.max && S.tp > 0;
+          html += `<button class="tnode ${r ? "some" : ""} ${r >= t.max ? "max" : ""} ${locked ? "locked" : ""} ${t.cap ? "cap" : ""} ${can ? "can" : ""}" data-act="talent" data-id="${t.id}">
+            <span class="tn">${t.n}</span><span class="tr">${r}/${t.max}</span></button>`;
+        });
+      });
+      return html + "</div>";
+    }).join("")}</div>
+    <button class="btn ghost" style="width:100%;margin-top:16px" data-act="talReset" ${Object.keys(S.tal).length && S.co >= resetPrice() ? "" : "disabled"}>Talente zurücksetzen · <span class="coin">${resetPrice()}</span></button>`;
+}
+function talentModal(id) {
+  const t = TM[id], r = S.tal[id] || 0, sp = TALENTS.filter(x => x.b === t.b).reduce((a, x) => a + (S.tal[x.id] || 0), 0);
+  const locked = sp < t.t * 5, max = r >= t.max;
+  modal(`<h2>${t.n}</h2>
+    <p>${BRANCHES.find(b => b.k === t.b).n} · Rang ${r} von ${t.max}</p>
+    <div class="abbox">${r ? `<b>Jetzt:</b> ${t.d(r)}<br>` : ""}${max ? "Voll ausgebaut." : `<span class="nx">Nächster Rang: ${t.d(r + 1)}</span>`}</div>
+    ${locked ? `<p>Gesperrt. Setze zuerst ${t.t * 5} Punkte in diesen Zweig (aktuell ${sp}).</p>` : ""}
+    <div class="row"><button class="btn ghost" data-act="close">Schließen</button>
+      <button class="btn green" data-act="learn" data-id="${id}" ${locked || max || S.tp < 1 ? "disabled" : ""}>Punkt setzen</button></div>`);
+}
+
+function screenShop() {
+  const p = packPrice(), w = ZONES[Math.min(4, Math.floor(S.prog / 10))].w, dz = dustOffer();
+  return `<div class="screen-title"><h2>Shop</h2><small>Preise steigen mit deinem Level</small></div>
+    <div class="panel">
+      <div class="offer"><div class="packart">✦</div><div class="oi"><h3>Sternenpack</h3>
+        <p>1 Begleiter-Karte. Doppelte Karten geben 1 Level und Sternenstaub.</p>
+        <button class="btn sm" data-act="pack" data-n="1" ${S.co < p ? "disabled" : ""}><span class="coin">${p}</span></button></div></div>
+      <div class="offer"><div class="packart big">✦✦</div><div class="oi"><h3>Großes Sternenpack</h3>
+        <p>3 Karten, mindestens eine davon selten oder besser.</p>
+        <button class="btn sm" data-act="pack" data-n="3" ${S.co < Math.round(p * 2.5) ? "disabled" : ""}><span class="coin">${Math.round(p * 2.5)}</span></button></div></div>
+      <div class="offer"><div class="packart dustart">✧</div><div class="oi"><h3>Sternenstaub</h3>
+        <p>${dz} Staub, um Karten gezielt zu trainieren.</p>
+        <button class="btn sm" data-act="buyDust" ${S.co < dz ? "disabled" : ""}><span class="coin">${dz}</span></button></div></div>
+    </div>
+    <div class="section-label">Chancen im Pack</div>
+    <div class="panel" style="font-size:13px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      ${Object.entries(w).map(([k, v]) => `<span><b style="color:var(--r-${k})">${RAR[k].n}</b> ${v} %</span>`).join("")}
+    </div>
+    <p style="font-size:13px;color:var(--dim);line-height:1.45">Seltene Karten werden häufiger, je weiter du in den Zonen kommst. Neue Karten starten mit 60 % deines Heldenlevels, gerade also auf Level ${Math.max(1, Math.min(20, Math.floor(S.lv * .6)))}.</p>`;
+}
+
 function helpModal() {
-  modal(`<h2>Willkommen, Mondkurier</h2>
-    <p>Kämpfe mit Karten gegen die Kreaturen des Alls. Jeder Zug bringt dir 3 Energie und 5 Karten. Tippe eine Karte an, um sie auszuspielen.</p>
-    <p>Über dem Gegner siehst du, was er als Nächstes vorhat: rote Zahlen sind Angriffe. Plane deinen Schild entsprechend.</p>
-    <p><b style="color:var(--moon)">Schild</b> fängt Schaden ab und verfällt zu Beginn deines Zuges. <b style="color:var(--moon)">Gift</b> trifft jede Runde und sinkt um 1. <b style="color:var(--moon)">Verwundbar</b> heißt +50 % Schaden, <b style="color:var(--moon)">Schwäche</b> −25 %.</p>
-    <p>Siege schalten neue Karten frei und bringen EP. Mit Level-Punkten wertest du Karten auf, höhere Level öffnen neue Zonen.</p>
+  modal(`<h2>Der Mondkurier</h2>
+    <p>Dein Held ist eine Karte, die immer mitkämpft. Mit jedem Level wird sie stärker und lernt neue Fähigkeiten.</p>
+    <p>Kämpfe laufen automatisch. Ob du gewinnst, entscheidet allein deine Entwicklung: Heldenlevel, Talente, Kartenlevel und Entwicklungsstufen.</p>
+    <p>Jede Begleiter-Karte hat eine eigene Fähigkeit, sammelt eigene EP und entwickelt sich auf Level 20 und 40 in eine stärkere Form.</p>
+    <p>Kommst du nicht weiter, kämpfe frühere Etappen erneut. Auch Niederlagen geben ein wenig EP.</p>
     <button class="btn" data-act="close">Los geht's</button>`);
 }
 
 /* =========================================================
-   KAMPF
+   KAMPF ABSPIELEN
    ========================================================= */
-function startBattle(eid, z) {
-  const E = EN[eid];
-  const pile = shuffle(S.deck.map((id, i) => ({ id, l:S.own[id] || 0, u:i })));
-  B = {
-    eid, z, E, turn:0, busy:false, over:false, uid:1000, startHP:0, poisonKill:false,
-    e:{ hp:E.hp, max:E.hp, block:0, st:{ str:0, weak:0, vuln:0, poison:hasRel("phiole") ? 5 : 0 }, i:0, phase:1 },
-    p:{ hp:maxHP(), max:maxHP(), block:0, energy:0, st:{ str:hasRel("handsch") ? 1 : 0, weak:0, vuln:0, poison:0, regen:0, thorns:hasRel("ring") ? 2 : 0 } },
-    powers:{}, draw:pile, hand:[], disc:[], exh:[], log:""
-  };
-  B.startHP = B.p.hp;
+function startBattle(s) {
+  UID = 1;
+  const P = buildTeam(), E = makeWave(s), units = P.concat(E).map(u => ({ ...u }));
+  const res = simulate(P, E, talentFx());
+  const speed = B ? B.speed : (UI.speed || 1);
+  B = { s, res, units:Object.fromEntries(units.map(u => [u.uid, u])), i:0, speed, timer:null, done:false };
+  const tile = u => `<div class="unit ${u.hero ? "hero" : ""} ${u.boss ? "boss" : ""}" id="u${u.uid}">
+      <span class="ust" id="st${u.uid}"></span><span class="ue">${u.e}</span><span class="un">${u.n}</span>
+      <span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${u.hp}</span></div>`;
   const bt = $("#battle");
-  bt.style.setProperty("--zbg", ZONES[z].bg);
+  bt.style.setProperty("--zbg", ZONES[zoneOf(s)].bg);
   bt.innerHTML = `<div class="bwrap">
-    <div class="b-top"><button class="btn ghost sm" data-act="fleeAsk">Aufgeben</button><span class="bz" id="bInfo"></span></div>
-    <div class="b-enemy" id="bEnemy"></div>
-    <div class="b-log" id="bLog"></div>
-    <div class="b-player" id="bPlayer"></div>
-    <div class="b-hand" id="bHand"></div>
-    <div class="b-ctrl"><div class="energy" id="bEnergy"></div><div class="piles" id="bPiles"></div>
-      <button class="btn" id="endBtn" data-act="endTurn">Zug beenden</button></div>
+    <div class="b-top"><div><div class="bz">${ZONES[zoneOf(s)].n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Bereit</div></div>
+      <div class="speeds">${[1,2,4].map(x => `<button data-act="speed" data-x="${x}" class="${speed === x ? "on" : ""}">${x}×</button>`).join("")}<button data-act="skip">Ende ⏭</button></div></div>
+    <div class="b-enemies"><div class="side">${units.filter(u => u.side === "e").map(tile).join("")}</div></div>
+    <div class="b-mid" id="bMid">${S.auto ? "Automatisch weiterkämpfen ist an" : ""}</div>
+    <div class="b-team"><div class="side">${units.filter(u => u.side === "p").map(tile).join("")}</div></div>
     <div id="fx"></div></div>`;
   bt.hidden = false;
-  $("#app").setAttribute("aria-hidden", "true");
-  playerTurn();
+  B.timer = setTimeout(step, 500 / speed);
 }
-const curPattern = () => (B.e.phase === 2 && B.E.p2) ? B.E.p2 : B.E.p;
-const intent = () => { const p = curPattern(); return p[B.e.i % p.length]; };
-function calc(base, att, def) {
-  let d = base + (att.str || 0);
-  if (att.weak > 0) d *= 0.75;
-  if (def.vuln > 0) d *= 1.5;
-  return Math.max(0, Math.floor(d));
+function setHP(uid, hp, sh) {
+  const u = B.units[uid], el = $("#u" + uid); if (!el) return;
+  el.querySelector(".uhp i").style.width = Math.max(0, hp / u.max * 100) + "%";
+  el.querySelector(".ush").style.width = Math.min(100, sh / u.max * 100) + "%";
+  $("#hv" + uid).textContent = sh > 0 ? `${hp} +${sh}` : hp;
 }
-function fx(target, text, cls) {
-  const layer = $("#fx"); if (!layer) return;
-  const el = target === "e" ? $("#bEnemy .sprite") : $("#bPlayer");
-  if (!el) return;
-  const r = el.getBoundingClientRect(), lr = layer.getBoundingClientRect();
-  const f = document.createElement("div");
+function floatAt(uid, text, cls) {
+  const layer = $("#fx"), el = $("#u" + uid); if (!layer || !el) return;
+  const r = el.getBoundingClientRect(), lr = layer.getBoundingClientRect(), f = document.createElement("div");
   f.className = "float " + cls; f.textContent = text;
-  f.style.left = (r.left - lr.left + r.width / 2 + (Math.random() * 40 - 20)) + "px";
-  f.style.top = (r.top - lr.top + (target === "e" ? r.height * 0.3 : -10)) + "px";
-  layer.appendChild(f); setTimeout(() => f.remove(), 1000);
+  f.style.left = (r.left - lr.left + r.width / 2 + (Math.random() * 24 - 12)) + "px";
+  f.style.top = (r.top - lr.top + r.height * .25) + "px";
+  layer.appendChild(f); setTimeout(() => f.remove(), 900);
 }
-function anim(sel, cls, keep) { if (B && !keep) (B.pend = B.pend || []).push([sel, cls]); const el = $(sel); if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
-function statusHTML(st, powers) {
-  const L = { str:["▲","Stärke"], weak:["↓","Schwäche"], vuln:["◎","Verwundbar"], poison:["☠","Gift"], regen:["✚","Regeneration"], thorns:["✶","Dornen"] };
-  let h = Object.keys(L).filter(k => st[k] > 0).map(k => `<span class="st ${k}" title="${L[k][1]}">${L[k][0]} ${L[k][1]} ${st[k]}</span>`).join("");
-  if (powers) h += Object.entries(powers).map(([k, v]) => `<span class="st pw">◆ ${PW_SHORT[k]} ${v}</span>`).join("");
-  return h;
+function banner(msg) {
+  const layer = $("#fx"); if (!layer) return;
+  const b = document.createElement("div"); b.className = "banner"; b.textContent = msg;
+  layer.appendChild(b); setTimeout(() => b.remove(), 1100);
 }
-function intentHTML(it) {
-  const o = [];
-  if (it.a) o.push(`<span class="i-atk">⚔ ${calc(it.a, B.e.st, B.p.st)}${it.n > 1 ? " ×" + it.n : ""}</span>`);
-  if (it.b) o.push(`<span class="i-blk">⛨ ${it.b}</span>`);
-  if (it.s) o.push(`<span class="i-buf">▲ +${it.s} Stärke</span>`);
-  if (it.h) o.push(`<span class="i-heal">✚ ${it.h}</span>`);
-  if (it.weak) o.push(`<span class="i-deb">↓ Schwäche ${it.weak}</span>`);
-  if (it.vuln) o.push(`<span class="i-deb">◎ Verwundbar ${it.vuln}</span>`);
-  if (it.poison) o.push(`<span class="i-deb">☠ Gift ${it.poison}</span>`);
-  if (it.junk) o.push(`<span class="i-junk">🗑 ${it.junk} Schrott</span>`);
-  return o.join("");
+function flash(uid, cls) { const el = $("#u" + uid); if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+// Ein Ereignis anzeigen; gibt die Wartezeit in ms zurück
+function applyEv(e, quiet) {
+  const U = B.units;
+  switch (e.t) {
+    case "round": $("#bRound").textContent = `Runde ${e.n}`; return 150;
+    case "act": if (!quiet) { document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act")); const el = $("#u" + e.u); if (el) el.classList.add("act"); } return 40;
+    case "hit": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, (e.crit ? "✦" : "") + e.v, e.crit ? "crit" : "dmg"); flash(e.u, "hurt"); } return e.aoe ? 110 : e.thorns ? 150 : 330;
+    case "miss": if (!quiet) floatAt(e.u, "verfehlt", "miss"); return e.aoe ? 110 : 260;
+    case "heal": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "+" + e.v, "heal"); return 200;
+    case "sh": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "⛨" + e.v, "sh"); return 110;
+    case "dot": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "☠" + e.v, "dot"); return 160;
+    case "stun": { const s = $("#st" + e.u); if (s) s.textContent = "❄"; if (!quiet) floatAt(e.u, "eingefroren", "info"); return 140; }
+    case "frozen": { const s = $("#st" + e.u); if (s) s.textContent = ""; if (!quiet) floatAt(e.u, "setzt aus", "miss"); return 220; }
+    case "skill": if (quiet) return 0; if (e.quiet) { floatAt(e.a, e.msg, "info"); return 120; } banner(`${U[e.a].n}: ${e.msg}`); return 650;
+    case "die": { const el = $("#u" + e.u); if (el) el.classList.add("dead"); const s = $("#st" + e.u); if (s) s.textContent = ""; setHP(e.u, 0, 0); return 300; }
+    case "revive": case "save": { const el = $("#u" + e.u); if (el) { el.classList.remove("dead"); if (!quiet) flash(e.u, "revive"); } setHP(e.u, e.hp, e.sh); if (!quiet) banner(e.msg); return 700; }
+    case "banner": if (!quiet) banner(e.msg); return 600;
+  }
+  return 0;
 }
-function renderBattle() {
-  if (!B) return;
-  const e = B.e, p = B.p;
-  $("#bInfo").textContent = `${ZONES[B.z].n} · Zug ${B.turn}`;
-  $("#bEnemy").innerHTML = `
-    <div class="intent" title="Absicht des Gegners">${B.over ? "&nbsp;" : intentHTML(intent())}</div>
-    <div class="sprite ${B.E.boss ? "boss" : ""}">${B.E.e}</div>
-    <div class="ename">${B.E.n}${B.E.boss ? `<span class="bosstag">BOSS${e.phase === 2 ? " · WUT" : ""}</span>` : ""}</div>
-    <div class="hpline">${e.block ? `<span class="blk">${e.block}</span>` : ""}<div class="hpbar"><i style="width:${Math.max(0, e.hp / e.max * 100)}%"></i></div>
-      <span class="hpnum">${Math.max(0, e.hp)} / ${e.max}</span></div>
-    <div class="statuses">${statusHTML(e.st)}</div>`;
-  $("#bPlayer").innerHTML = `
-    <div class="prow"><span class="pname">Mondkurier</span>${p.block ? `<span class="blk">${p.block}</span>` : ""}
-      <div class="hpbar"><i style="width:${Math.max(0, p.hp / p.max * 100)}%"></i></div><span class="hpnum">${Math.max(0, p.hp)} / ${p.max}</span></div>
-    <div class="statuses" style="justify-content:flex-start">${statusHTML(p.st, B.powers)}</div>`;
-  const dmgFn = d => calc(d, p.st, e.st);
-  $("#bHand").innerHTML = B.hand.map((c, i) => {
-    const card = CM[c.id], cost = costOf(card, c.l), off = card.junk || cost > p.energy || B.busy || B.over;
-    return cardHTML(c.id, c.l, { cls: off ? "off" : "", dmgFn, attrs:`data-act="play" data-i="${i}" role="button" tabindex="0"` });
+function step() {
+  if (!B || B.done) return;
+  if (B.i >= B.res.ev.length) return finishBattle();
+  const d = applyEv(B.res.ev[B.i++], false);
+  B.timer = setTimeout(step, d / B.speed);
+}
+function skipBattle() {
+  if (!B || B.done) return;
+  clearTimeout(B.timer);
+  while (B.i < B.res.ev.length) applyEv(B.res.ev[B.i++], true);
+  finishBattle();
+}
+function finishBattle() {
+  if (B.done) return;
+  B.done = true;
+  document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act"));
+  const R = grantRewards(B.res.win, B.s);
+  setTimeout(() => { if (B) showResult(R); }, 450);
+}
+function showResult(R) {
+  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV, auto = S.auto && R.win, lvUp = R.hero.lv.length;
+  const cardLines = R.cards.map(c => {
+    const st = S.cards[c.id], f = form(c.id, st.st), up = c.to > c.from;
+    return `<div class="cg"><span class="ge">${f[1]}</span><span class="gb">${bar(st.xp, cardNeed(st.l), st.l >= cardCap(st))}</span>
+      <span class="gl ${up ? "up" : ""}">${up ? `Lv ${c.from} → ${c.to}` : `Lv ${c.to}`}</span></div>`;
   }).join("");
-  $("#bEnergy").textContent = `${p.energy}`;
-  $("#bEnergy").classList.toggle("empty", p.energy === 0);
-  $("#bPiles").innerHTML = `Nachziehstapel ${B.draw.length}<br>Ablage ${B.disc.length}${B.exh.length ? ` · Verbraucht ${B.exh.length}` : ""}`;
-  $("#bLog").textContent = B.log;
-  $("#endBtn").disabled = B.busy || B.over;
-  const pend = B.pend || []; B.pend = [];
-  pend.forEach(([sel, cls]) => anim(sel, cls, true));
-}
-function drawCards(n) {
-  for (let k = 0; k < n; k++) {
-    if (!B.draw.length) { if (!B.disc.length) break; B.draw = shuffle(B.disc); B.disc = []; }
-    if (B.hand.length >= 10) break;
-    B.hand.push(B.draw.pop());
+  let drop = "";
+  if (R.drop) {
+    const d = CC[R.drop.id], f = form(R.drop.id, S.cards[R.drop.id].st);
+    drop = `<div class="drop r-${d.r}"><div class="dm">${R.drop.dup ? "Doppelte Karte" : "Neue Karte gefunden!"}</div><div class="de">${f[1]}</div><div class="dn">${f[0]}</div>
+      <div class="dm">${RAR[d.r].n} · ${AB[d.ab].n}${R.drop.dup ? ` · +${R.drop.dust} Staub${R.drop.up ? ", +1 Level" : ""}` : ` · startet auf Level ${R.drop.l}`}</div></div>`;
   }
-}
-function heal(n) { const before = B.p.hp; B.p.hp = Math.min(B.p.max, B.p.hp + n); if (B.p.hp > before) fx("p", "+" + (B.p.hp - before), "heal"); }
-function damageEnemy(d) {
-  const e = B.e, absorbed = Math.min(e.block, d);
-  e.block -= absorbed; const lost = d - absorbed; e.hp -= lost;
-  if (d > S.st.maxHit) S.st.maxHit = d;
-  fx("e", absorbed && !lost ? "⛨" : "-" + d, absorbed && !lost ? "blk" : "dmg");
-  anim("#bEnemy .sprite", "hit");
-  return lost;
-}
-function damagePlayer(d) {
-  const p = B.p, absorbed = Math.min(p.block, d);
-  p.block -= absorbed; const lost = d - absorbed; p.hp -= lost;
-  fx("p", lost ? "-" + lost : "⛨ " + absorbed, lost ? "dmg" : "blk");
-  if (lost) anim("#bPlayer", "hit");
-  return lost;
-}
-function checkPhase() {
-  if (B.E.p2 && B.e.phase === 1 && B.e.hp > 0 && B.e.hp <= B.e.max / 2) {
-    B.e.phase = 2; B.e.i = 0; B.log = `${B.E.n} gerät in Wut!`;
-    anim("#battle", "phase-flash");
-  }
-}
-
-function playerTurn() {
-  B.turn++;
-  const p = B.p;
-  p.block = 0;
-  if (p.st.poison > 0) {
-    p.hp -= p.st.poison; fx("p", "☠ -" + p.st.poison, "dmg"); p.st.poison--;
-    if (p.hp <= 0) { renderBattle(); return endBattle(false); }
-  }
-  if (B.turn === 1 && hasRel("amulett")) p.block += 8;
-  p.energy = 3 + (hasRel("batterie") ? 1 : 0) + (B.powers.pEnergy || 0);
-  if (B.powers.pStr) p.st.str += B.powers.pStr;
-  if (B.powers.pBlock) p.block += B.powers.pBlock;
-  drawCards(5 + (B.powers.pDraw || 0) + (hasRel("kompass") ? 1 : 0) + (B.turn === 1 && hasRel("uhr") ? 2 : 0));
-  B.busy = false;
-  if (B.turn === 1) B.log = "Dein Zug. Tippe Karten an, um sie auszuspielen.";
-  else if (!B.log) B.log = "Dein Zug.";
-  renderBattle();
-}
-
-function playCard(i) {
-  if (!B || B.busy || B.over) return;
-  const inst = B.hand[i]; if (!inst) return;
-  const c = CM[inst.id], l = inst.l, cost = costOf(c, l), p = B.p, e = B.e;
-  if (c.junk) { B.log = "Weltraumschrott lässt sich nicht ausspielen."; return renderBattle(); }
-  if (cost > p.energy) { B.log = "Nicht genug Energie."; return renderBattle(); }
-  p.energy -= cost;
-  B.hand.splice(i, 1);
-  const v = k => val(c, l, k);
-  B.log = `${c.n} ausgespielt.`;
-
-  if (v("energy")) p.energy += v("energy");
-  if (v("str")) p.st.str += v("str");
-  if (c.sp === "cleanse") { p.st.weak = 0; p.st.vuln = 0; p.st.poison = 0; }
-  if (v("block")) { p.block += v("block"); fx("p", "⛨ +" + v("block"), "blk"); }
-  if (c.sp === "doubleblock") p.block *= 2;
-  let dealt = 0;
-  const strike = base => {
-    if (e.hp <= 0) return;
-    dealt += damageEnemy(calc(base, p.st, e.st));
-    if (B.powers.pPoison) e.st.poison += B.powers.pPoison;
-  };
-  if (c.sp === "blockdmg") strike(p.block);
-  if (v("dmg")) {
-    const hits = v("hits") || 1;
-    for (let h = 0; h < hits; h++) {
-      let base = v("dmg");
-      if (c.sp === "lowhp" && p.hp < p.max / 2) base *= 2;
-      if (c.sp === "execute" && e.hp < e.max * 0.3) base *= 3;
-      strike(base);
-    }
-  }
-  if (c.sp === "lifesteal" && dealt > 0) heal(Math.floor(dealt / 2));
-  if (v("vuln")) e.st.vuln += v("vuln");
-  if (v("weak")) e.st.weak += v("weak");
-  if (v("poison")) e.st.poison += v("poison");
-  if (c.sp === "doublepoison") e.st.poison *= 2;
-  if (v("heal")) heal(v("heal"));
-  if (v("regen")) p.st.regen += v("regen");
-  if (v("thorns")) p.st.thorns += v("thorns");
-  if (c.pw) { B.powers[c.pw] = (B.powers[c.pw] || 0) + v("pv"); }
-  if (v("draw")) drawCards(v("draw"));
-
-  if (c.ex || c.t === "K") B.exh.push(inst); else B.disc.push(inst);
-  if (e.hp <= 0) { renderBattle(); return endBattle(true); }
-  checkPhase();
-  renderBattle();
-}
-
-function endTurn() {
-  if (!B || B.busy || B.over) return;
-  B.busy = true;
-  const p = B.p;
-  B.disc.push(...B.hand); B.hand = [];
-  if (p.st.regen > 0) { heal(p.st.regen); p.st.regen--; }
-  if (B.powers.pRegen) heal(B.powers.pRegen);
-  if (hasRel("kristall")) heal(2);
-  if (p.st.weak > 0) p.st.weak--;
-  if (p.st.vuln > 0) p.st.vuln--;
-  B.log = `${B.E.n} ist am Zug …`;
-  renderBattle();
-  setTimeout(enemyTurn, 550);
-}
-
-function enemyTurn() {
-  if (!B || B.over) return;
-  const e = B.e, p = B.p, it = intent();
-  e.block = 0;
-  if (e.st.poison > 0) {
-    e.hp -= e.st.poison; fx("e", "☠ -" + e.st.poison, "dmg"); e.st.poison--;
-    if (e.hp <= 0) { B.poisonKill = true; renderBattle(); return endBattle(true); }
-    checkPhase();
-  }
-  const parts = [];
-  if (it.s) { e.st.str += it.s; parts.push(`wird stärker`); fx("e", "▲ +" + it.s, "info"); }
-  if (it.b) { e.block += it.b; parts.push(`errichtet ${it.b} Schild`); }
-  if (it.h) { const b = e.hp; e.hp = Math.min(e.max, e.hp + it.h); fx("e", "+" + (e.hp - b), "heal"); parts.push(`heilt sich`); }
-  if (it.a) {
-    anim("#bEnemy .sprite", "lunge");
-    const n = it.n || 1;
-    for (let k = 0; k < n; k++) {
-      if (p.hp <= 0) break;
-      damagePlayer(calc(it.a, e.st, p.st));
-      if (p.st.thorns > 0) { e.hp -= p.st.thorns; fx("e", "✶ -" + p.st.thorns, "dmg"); }
-    }
-    parts.push(`greift an`);
-  }
-  if (it.weak) p.st.weak += it.weak;
-  if (it.vuln) p.st.vuln += it.vuln;
-  if (it.poison) p.st.poison += it.poison;
-  if (it.weak || it.vuln || it.poison) parts.push("schwächt dich");
-  if (it.junk) { for (let k = 0; k < it.junk; k++) B.disc.push({ id:"schrott", l:0, u:B.uid++ }); parts.push(`wirft ${it.junk} Schrott in deine Ablage`); }
-  B.log = `${B.E.n} ${parts.join(", ")}.`;
-  if (e.st.weak > 0) e.st.weak--;
-  if (e.st.vuln > 0) e.st.vuln--;
-  e.i++;
-  renderBattle();
-  if (p.hp <= 0) return endBattle(false);
-  if (e.hp <= 0) return endBattle(true);
-  checkPhase();
-  setTimeout(() => { if (B && !B.over) playerTurn(); }, 650);
-}
-
-function endBattle(won) {
-  B.over = true; B.busy = true;
-  renderBattle();
-  if (won) anim("#bEnemy .sprite", "dead");
-  setTimeout(() => won ? victory() : defeat(), won ? 700 : 500);
-}
-
-function victory() {
-  const E = B.E, z = B.z;
-  let xp = E.xp, co = E.co;
-  if (hasRel("linse")) xp = Math.round(xp * 1.25);
-  if (hasRel("karte")) co = Math.round(co * 1.25);
-  const startLv = S.lv, startXP = S.xp;
-  S.st.wins++; S.co += co;
-  if (E.boss) S.bd[z] = true; else S.zw[z] = Math.min(BOSS_WINS, S.zw[z] + 1);
-  if (B.poisonKill) S.st.poisonKills++;
-  if (B.p.hp >= B.startHP) S.st.perfect++;
-  if (B.turn <= 2) S.st.fast++;
-  const ups = addXP(xp);
-  // Karten-Auswahl
-  let w = { ...ZONES[z].w };
-  if (E.boss) { const order = ["c","r","e","l"], min = order.indexOf(ZONES[z].bossR); order.forEach((r, k) => { if (k < min) w[r] = 0; else w[r] = w[r] || 5; }); }
-  const opts = [];
-  for (let k = 0; k < 3; k++) { const id = pickCard(w, opts, true); if (id) opts.push(id); }
-  let relic = null;
-  if (E.boss) { const pool = RELICS.filter(r => !hasRel(r.id)); if (pool.length) { relic = rnd(pool).id; S.rel.push(relic); } }
-  rollShop();
-  checkAch(); save();
-  B.reward = { opts, picked:null, skipCoins: 10 + z * 10 };
-
-  const n0 = need(startLv);
-  const newZones = ZONES.filter(Z => Z.lv > startLv && Z.lv <= S.lv).map(Z => Z.n);
-  modal(`<h2>Sieg!</h2>
-    <p>${E.n} wurde besiegt.${B.poisonKill ? " Das Gift hat ganze Arbeit geleistet." : ""}</p>
-    <div class="gains"><span class="x">+${xp} EP</span><span class="coin">+${co}</span></div>
-    <div class="reward-xp"><div class="xpbar"><i id="rxp" style="width:${S.lv > startLv ? 0 : startXP / n0 * 100}%"></i></div>
-      <div class="xptext" style="text-align:center">Level ${S.lv} · ${S.lv >= MAX_LV ? "Maximum" : `${S.xp} / ${need(S.lv)} EP`}</div></div>
-    ${ups.length ? `<div class="lvup">Level ${S.lv}! +${ups.length * 2} ✦ Level-Punkte</div>` : ""}
-    ${newZones.length ? `<div class="next">Neue Zone freigeschaltet: <b>${newZones.join(", ")}</b></div>` : ""}
-    ${relic ? `<div class="relic" style="border:0"><span class="re">${RM[relic].e}</span><div class="ri"><div class="rn">Artefakt: ${RM[relic].n}</div><div class="rd">${RM[relic].d}</div></div></div>` : ""}
-    ${opts.length ? `<p style="text-align:center;color:var(--moon);font-weight:600">Wähle eine neue Karte</p>
-      <div class="choice" id="choice">${opts.map(id => cardHTML(id, 0, { attrs:`data-act="pick" data-id="${id}" role="button" tabindex="0"` })).join("")}</div>
-      <button class="btn ghost" data-act="skipPick">Überspringen · <span class="coin">+${B.reward.skipCoins}</span></button>`
-      : `<div class="next">Du besitzt bereits alle Karten dieser Seltenheit. Bonus: <span class="coin">+50</span></div>`}
-    <button class="btn" id="contBtn" data-act="leave" ${opts.length ? "hidden" : ""}>Weiter</button>`);
-  if (!opts.length) { S.co += 50; save(); }
-  requestAnimationFrame(() => { const x = $("#rxp"); if (x) setTimeout(() => x.style.width = (S.lv >= MAX_LV ? 100 : S.xp / need(S.lv) * 100) + "%", 80); });
-}
-function defeat() {
-  const xp = Math.round(B.E.xp * 0.25);
-  S.st.losses++;
-  const ups = addXP(xp);
-  checkAch(); save();
-  modal(`<h2>Niederlage</h2>
-    <p>${B.E.n} war diesmal zu stark. Du bekommst trotzdem <b style="color:var(--r-r)">${xp} EP</b> für die Erfahrung.</p>
-    ${ups.length ? `<div class="lvup">Level ${S.lv}! +${ups.length * 2} ✦</div>` : ""}
-    <div class="next">Tipp: Werte deine besten Karten im Karten-Tab auf, nimm mehr Schild-Karten ins Deck oder sammle in leichteren Zonen weitere EP.</div>
-    <button class="btn" data-act="leave">Zurück zur Karte</button>`);
+  const nextOpen = R.win && R.s < 50;
+  const loseMsg = B.res.timeout ? "Nach 30 Runden ist die Zeit abgelaufen. Dein Team macht noch zu wenig Schaden." : "Dein Team ist gefallen. Werde stärker und versuch es nochmal.";
+  modal(`<div class="result-head ${R.win ? "win" : "lose"}"><h2>${R.win ? "Sieg" : "Niederlage"}</h2>
+      <p>${R.win ? (R.first ? "Etappe zum ersten Mal geschafft: doppelte Münzen." : `Gewonnen in ${B.res.rounds} Runden.`) : loseMsg}</p></div>
+    <div class="gains"><span class="x">+${R.hx} EP</span>${R.co ? `<span class="coin">+${R.co}</span>` : ""}${R.du ? `<span class="dust">+${R.du}</span>` : ""}</div>
+    <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${mx ? "Maximum" : `${S.xp} / ${n} EP`}</div></div>
+    ${lvUp ? `<div class="lvup"><b>Level ${S.lv}!</b><span>+${lvUp} Talentpunkt${lvUp > 1 ? "e" : ""}</span>
+      ${R.hero.abs.map(a => `<span>Neue Fähigkeit: ${a}</span>`).join("")}${R.hero.slots.length ? "<span>Neuer Platz im Team frei</span>" : ""}</div>` : ""}
+    ${cardLines ? `<div class="cgain"><div class="xptext">+${R.cx} EP für jeden Begleiter</div>${cardLines}</div>` : ""}
+    ${drop}
+    ${auto ? `<div class="autoline" id="autoLine">Nächster Kampf in 2 Sekunden …</div>` : ""}
+    <div class="row">
+      <button class="btn ghost" data-act="leave">Zurück</button>
+      ${nextOpen && !auto ? `<button class="btn" data-act="again" data-s="${R.s + 1}">Nächste Etappe</button>` : ""}
+      <button class="btn ${nextOpen && !auto ? "ghost" : ""}" data-act="again" data-s="${R.s}">${auto ? "Sofort" : "Nochmal"}</button>
+    </div>
+    ${auto ? `<button class="btn ghost sm" data-act="autoOff">Automatik stoppen</button>` : ""}`);
+  if (auto) B.autoT = setTimeout(() => { if (B && B.done && S.auto) { modal(""); startBattle(R.s); } }, 2000);
+  if (!R.win && S.auto) { S.auto = false; save(); }
 }
 function leaveBattle() {
+  if (B) { clearTimeout(B.timer); clearTimeout(B.autoT); UI.speed = B.speed; }
   B = null; modal("");
   $("#battle").hidden = true; $("#battle").innerHTML = "";
-  $("#app").removeAttribute("aria-hidden");
-  UI.tab = "adv"; render();
+  render();
 }
 
 /* =========================================================
@@ -1147,97 +1104,80 @@ function leaveBattle() {
 function act(el, ev) {
   const a = el.dataset.act, id = el.dataset.id;
   switch (a) {
-    case "tab": UI.tab = el.dataset.k; render(); $("#main").scrollTop = 0; break;
-    case "filter": UI.filter = el.dataset.k; render(); break;
-    case "fight": startBattle(el.dataset.e, +el.dataset.z); break;
-    case "noop": toast(`Gewinne ${BOSS_WINS} Kämpfe in dieser Zone, um den Boss zu öffnen.`); break;
+    case "tab": UI.tab = el.dataset.k; modal(""); render(); $("#main").scrollTop = 0; break;
     case "card": cardModal(id); break;
-    case "lockedcard": {
-      const c = CM[id], zs = ZONES.filter(Z => Z.w[c.r] > 0).map(Z => Z.n);
-      modal(`<h2>Gesperrte Karte</h2><div class="bigcard">${cardHTML(id, 0, { locked:true })}</div>
-        <p>Seltenheit: <b style="color:var(--moon)">${RAR[c.r].n}</b>. Gewinne Kämpfe, um sie als Belohnung zu ziehen. Sie kann in folgenden Zonen auftauchen: ${zs.join(", ")}. Manchmal liegt sie auch im Shop.</p>
-        <button class="btn ghost" data-act="close">Schließen</button>`);
-      break;
-    }
-    case "upgrade": {
-      const l = S.own[id], cost = upCost(l);
-      if (l >= MAX_CARD_LV || S.pts < cost) return;
-      S.pts -= cost; S.own[id] = l + 1; checkAch(); save();
-      toast(`${CM[id].n} ist jetzt +${l + 1}`);
-      render(); cardModal(id); break;
-    }
-    case "toggleDeck": {
-      const i = S.deck.indexOf(id);
-      if (i >= 0) { if (S.deck.length <= DECK_MIN) return; S.deck.splice(i, 1); }
-      else { if (S.deck.length >= DECK_MAX) return; S.deck.push(id); }
-      save(); render(); cardModal(id); break;
-    }
     case "close": modal(""); break;
     case "closeBg": if (ev.target === el && !B) modal(""); break;
-    case "buyCard": {
-      const p = RAR[CM[id].r].price;
-      if (S.co < p || id in S.own) return;
-      S.co -= p; unlockCard(id); S.shop.sold.push(id); checkAch(); save();
-      toast(`${CM[id].n} freigeschaltet${S.deck.includes(id) ? " und ins Deck gelegt" : ""}`); render(); break;
+    case "toggleTeam": {
+      const i = S.team.indexOf(id);
+      if (i >= 0) S.team.splice(i, 1); else if (S.team.length < slotsAt(S.lv)) S.team.push(id);
+      save(); render(); cardModal(id); break;
     }
-    case "buyRel": {
-      const r = RM[id]; if (S.co < r.price || hasRel(id)) return;
-      S.co -= r.price; S.rel.push(id); checkAch(); save(); toast(`${r.n} erworben`); render(); break;
+    case "train": {
+      const c = S.cards[id], cost = Math.max(0, cardNeed(c.l) - c.xp);
+      if (c.l >= cardCap(c) || S.dust < cost) return;
+      S.dust -= cost; addCardXP(id, cost); save(); render(); cardModal(id);
+      toast(`${form(id, c.st)[0]} ist jetzt Level ${c.l}`); break;
     }
-    case "reroll": if (S.co < 25) return; S.co -= 25; rollShop(); save(); render(); break;
-    case "pack": {
-      if (S.co < 120) return;
-      S.co -= 120;
-      const w = ZONES[topZone()].w, got = [];
-      for (let k = 0; k < 3; k++) { const cid = pickCard(w, [], false); const r = unlockCard(cid); got.push({ id:cid, dup:r.dup }); }
-      checkAch(); save(); render();
-      modal(`<h2>Sternenpack</h2><div class="choice">${got.map(g => `<div>${cardHTML(g.id, S.own[g.id])}${g.dup ? `<div class="dup" style="text-align:center">Doppelt · <span class="coin">+${g.dup}</span></div>` : `<div class="dup" style="text-align:center;color:var(--venom)">Neu!</div>`}</div>`).join("")}</div>
-        <button class="btn" data-act="close">Super</button>`);
-      break;
+    case "evolve": {
+      const c = S.cards[id], cost = evoCost(id, c.st + 1);
+      if (c.st >= 2 || c.l < STAGE_CAP[c.st] || S.co < cost) return;
+      S.co -= cost; c.st++; addCardXP(id, 0); save(); render(); cardModal(id);
+      toast(`Entwickelt: ${form(id, c.st)[1]} ${form(id, c.st)[0]}`); break;
     }
-    case "play": playCard(+el.dataset.i); break;
-    case "endTurn": endTurn(); break;
-    case "fleeAsk":
-      if (!B || B.over) return;
-      modal(`<h2>Kampf aufgeben?</h2><p>Du erhältst keine Belohnung und der Kampf zählt als Niederlage.</p>
-        <div class="row"><button class="btn ghost" data-act="close">Weiterkämpfen</button><button class="btn danger" data-act="flee">Aufgeben</button></div>`);
-      break;
-    case "flee": S.st.losses++; save(); leaveBattle(); break;
-    case "pick": {
-      if (!B || !B.reward || B.reward.picked) return;
-      B.reward.picked = id; unlockCard(id); checkAch(); save();
-      el.classList.add("picked");
-      document.querySelectorAll("#choice .card").forEach(c => { if (c !== el) c.style.opacity = ".3"; });
-      toast(`${CM[id].n} freigeschaltet${S.deck.includes(id) ? " und ins Deck gelegt" : ""}`);
-      const sk = document.querySelector('[data-act="skipPick"]'); if (sk) sk.hidden = true;
-      $("#contBtn").hidden = false; break;
-    }
-    case "skipPick":
-      if (!B || !B.reward || B.reward.picked) return;
-      B.reward.picked = "skip"; S.co += B.reward.skipCoins; save(); leaveBattle(); break;
+    case "zone": { const z = +el.dataset.z; if (z > 0 && S.prog < z * 10) { toast(`Besiege zuerst den Boss von Zone ${z}.`); return; } S.zone = z; save(); render(); break; }
+    case "fight": startBattle(+el.dataset.s); break;
+    case "noop": toast("Schaffe zuerst die Etappe davor."); break;
+    case "auto": S.auto = !S.auto; save(); render(); break;
+    case "speed": B.speed = +el.dataset.x; document.querySelectorAll(".speeds [data-x]").forEach(b => b.classList.toggle("on", +b.dataset.x === B.speed)); break;
+    case "skip": skipBattle(); break;
+    case "again": { const s = +el.dataset.s; if (B) clearTimeout(B.autoT); modal(""); S.zone = zoneOf(s); startBattle(s); break; }
+    case "autoOff": { S.auto = false; save(); if (B) clearTimeout(B.autoT); const l = $("#autoLine"); if (l) l.textContent = "Automatik gestoppt."; el.hidden = true; break; }
     case "leave": leaveBattle(); break;
+    case "talent": talentModal(id); break;
+    case "learn": {
+      const t = TM[id], r = S.tal[id] || 0, sp = TALENTS.filter(x => x.b === t.b).reduce((s2, x) => s2 + (S.tal[x.id] || 0), 0);
+      if (S.tp < 1 || r >= t.max || sp < t.t * 5) return;
+      S.tp--; S.tal[id] = r + 1; save(); render(); talentModal(id); break;
+    }
+    case "talReset": {
+      const p = resetPrice(); if (S.co < p) return;
+      modal(`<h2>Talente zurücksetzen?</h2><p>Du bekommst alle ${Object.values(S.tal).reduce((x, y) => x + y, 0)} Punkte zurück und kannst sie neu verteilen. Kosten: ${p} Münzen.</p>
+        <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn" data-act="talResetOk">Zurücksetzen</button></div>`); break;
+    }
+    case "talResetOk": {
+      const p = resetPrice(); if (S.co < p) return;
+      S.co -= p; S.tp += Object.values(S.tal).reduce((x, y) => x + y, 0); S.tal = {}; save(); modal(""); render(); break;
+    }
+    case "pack": {
+      const n = +el.dataset.n, p = n === 1 ? packPrice() : Math.round(packPrice() * 2.5);
+      if (S.co < p) return;
+      S.co -= p;
+      const w = ZONES[Math.min(4, Math.floor(S.prog / 10))].w, got = [];
+      for (let i = 0; i < n; i++) got.push(grantCard(rollCard(n === 3 && i === 0 ? { ...w, c:0, r:Math.max(w.r, 10) } : w)));
+      save(); render();
+      modal(`<h2>${n === 1 ? "Sternenpack" : "Großes Sternenpack"}</h2>${got.map(g => {
+        const d = CC[g.id], f = form(g.id, S.cards[g.id].st);
+        return `<div class="drop r-${d.r}"><div class="dm">${g.dup ? "Doppelt" : "Neu!"}</div><div class="de">${f[1]}</div><div class="dn">${f[0]}</div>
+          <div class="dm">${RAR[d.r].n} · ${AB[d.ab].n}${g.dup ? ` · +${g.dust} Staub${g.up ? ", +1 Level" : ""}` : ` · Level ${g.l}`}</div></div>`;
+      }).join("")}<button class="btn" data-act="close">Super</button>`);
+      break;
+    }
+    case "buyDust": { const p = dustOffer(); if (S.co < p) return; S.co -= p; S.dust += p; save(); render(); toast(`+${p} Sternenstaub`); break; }
     case "help": helpModal(); break;
     case "resetAsk":
-      modal(`<h2>Spielstand löschen?</h2><p>Level, Karten, Münzen und Erfolge gehen verloren. Das lässt sich nicht rückgängig machen.</p>
-        <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn danger" data-act="reset">Löschen</button></div>`);
-      break;
-    case "reset": S = defSave(); S.seen = true; rollShop(); save(); modal(""); UI.tab = "adv"; render(); toast("Neues Spiel gestartet"); break;
+      modal(`<h2>Spielstand löschen?</h2><p>Level, Karten, Talente und Münzen gehen verloren. Das lässt sich nicht rückgängig machen.</p>
+        <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn danger" data-act="reset">Löschen</button></div>`); break;
+    case "reset": S = defSave(); S.seen = true; save(); modal(""); UI.tab = "hero"; render(); toast("Neues Spiel gestartet"); break;
   }
 }
-document.addEventListener("click", ev => {
-  const el = ev.target.closest("[data-act]");
-  if (el) act(el, ev);
-});
-document.addEventListener("keydown", ev => {
-  if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches("[data-act][tabindex]")) { ev.preventDefault(); act(ev.target, ev); }
-});
+document.addEventListener("click", ev => { const el = ev.target.closest("[data-act]"); if (el) act(el, ev); });
 
 /* =========================================================
    START
    ========================================================= */
 function start(data) {
-  S = (data && data.S) || load();
-  if (!S.shop) rollShop();
+  S = (data && data.S && data.S.v === 2) ? data.S : load();
   render();
   if (!S.seen) { S.seen = true; save(); helpModal(); }
 }
