@@ -197,7 +197,17 @@ p { margin: 0; }
 .mghint { text-align: center; font-size: 14px; color: var(--dim); padding-block: 8px 14px; min-height: 40px; }
 .mgtime { height: 6px; background: var(--deck-2); border-radius: 3px; overflow: hidden; margin-top: 4px; width: 120px; }
 .mgtime i { display: block; height: 100%; background: var(--gold); transition: width .2s linear; }
-.memgrid { position: absolute; inset: 10px; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); grid-template-rows: repeat(4, minmax(0,1fr)); gap: 8px; }
+.memgrid { position: absolute; inset: 10px; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); grid-template-rows: repeat(var(--rows, 4), minmax(0,1fr)); gap: 7px; }
+.memgrid.r6 .mem { font-size: 26px; }
+.pwr { position: absolute; top: 34px; right: 12px; font-size: 13px; font-weight: 700; color: var(--shield); text-align: right; }
+.met.big { font-size: 60px; width: 76px; height: 76px; margin: -38px 0 0 -38px; }
+.met.big.hit1 { filter: brightness(1.3) saturate(.6); } .met.big.hit2 { filter: brightness(1.7) saturate(.2); }
+.frosted .met { filter: hue-rotate(160deg) brightness(1.2); }
+.weak { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; border: 0; font-size: 40px; background: radial-gradient(circle, color-mix(in srgb, var(--gold) 45%, transparent), transparent 70%); animation: pop .3s ease; z-index: 3; touch-action: manipulation; }
+.crystal { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); border: 2px solid var(--shield); border-radius: 16px; background: color-mix(in srgb, var(--shield) 22%, var(--deck)); font-size: 34px; padding: 6px 14px; z-index: 3; touch-action: manipulation; }
+.crystal span { display: block; font-size: 12px; font-weight: 700; color: var(--shield); }
+.bossbtn.shielded { filter: drop-shadow(0 0 18px var(--shield)) saturate(.5); }
+.bossstage { font-family: var(--f-display); font-weight: 700; color: var(--gold); font-size: 14px; }
 .mem { border: 0; border-radius: 14px; background: linear-gradient(150deg, var(--r-e), var(--r-r) 60%, var(--deck-2)); font-size: 34px; display: grid; place-items: center; transition: transform .25s; color: transparent; }
 .mem::after { content: "✦"; color: var(--moon); font-size: 22px; opacity: .8; }
 .mem.up { background: var(--deck); border: 2px solid var(--moon); color: inherit; transform: rotateY(180deg) scaleX(-1); }
@@ -728,13 +738,13 @@ const ZONES = [
 const MODES = [
   { k:"story",  n:"Kurierroute",   i:"🗺️", lv:1,  c:"var(--gold)",   d:"Die Story: kämpfe dich durch Etappen und Zonen." },
   { k:"sprint", n:"Mondsprint",    i:"🏃", lv:1,  c:"var(--r-r)",    d:"Spring über Krater und Felsen und sammle Pakete.",
-    rules:"Tippe irgendwo auf das Spielfeld, um zu springen. Tippe in der Luft noch einmal für einen Doppelsprung. Sammle 📦 Pakete. Felsen und Krater kosten 3 Sekunden. Du hast 30 Sekunden." },
+    rules:"Tippe auf das Spielfeld, um zu springen, und in der Luft nochmal für einen Doppelsprung. Sammle 📦 Pakete: Pakete am Stück erhöhen den Multiplikator, alle 10 am Stück gibt es +2 Sekunden. Weiche Felsen, Kratern und 🛸 Drohnen aus (die fliegen in Sprunghöhe). Extras: ⏱️ +3 Sekunden, 🛡️ Schild gegen einen Treffer, 🧲 Magnet zieht Pakete heran." },
   { k:"memory", n:"Sternen-Memory",i:"🃏", lv:4,  c:"var(--r-e)",    d:"Finde alle Paare deiner Begleiter gegen die Zeit.",
-    rules:"Decke zwei Karten auf. Sind sie gleich, bleiben sie offen. Finde alle 8 Paare in 60 Sekunden. Übrige Zeit gibt Bonus-EP." },
+    rules:"Decke zwei Karten auf. Gleiche Karten bleiben offen und geben +2 Sekunden, Paare am Stück bringen mehr Punkte. Ein Fehlgriff kostet 1 Sekunde. Ist das Brett leer, kommt ein größeres und du bekommst +15 Sekunden. Ab Brett 2: ⏱️ Zeitpaar (+8 Sekunden) und 👁️ Späherauge, das kurz alle Karten zeigt." },
   { k:"meteor", n:"Meteorabwehr",  i:"☄️", lv:8,  c:"var(--hp)",     d:"Tippe Meteore weg, bevor sie die Mondbasis treffen.",
-    rules:"Tippe ☄️ Meteore an, bevor sie unten ankommen. 🌟 Sterne geben 3 Punkte. Tippe keine 🛰️ Satelliten an! Jeder Treffer auf die Basis kostet ein Leben, du hast 3. Viele Treffer am Stück erhöhen die Kombo." },
+    rules:"Tippe ☄️ Meteore an, jeder gibt +1 Sekunde. 🌟 Sterne geben 3 Punkte und +2 Sekunden. Große 🪨 Meteore brauchen 3 Treffer. Tippe keine 🛰️ Satelliten an! Extras: ❤️ Leben, 🧊 Zeitfrost, 💣 Bombe räumt alles ab, ⚡ doppelte Punkte. Es wird immer schneller, du hast 3 Leben." },
   { k:"boss",   n:"Bossjagd",      i:"👹", lv:12, c:"var(--r-l)",    d:"Tippe auf den Koloss, dein Team schlägt mit zu.",
-    rules:"Tippe so schnell du kannst auf den Koloss. Jeder Tipp ist ein Schlag des Helden und lädt die Kurier-Energie. Ist sie voll, löse den Spezialangriff aus. Dein Team greift automatisch mit an. Wie viel Schaden du in 30 Sekunden schaffst, bestimmt die Belohnung." }
+    rules:"Tippe auf den Koloss, jeder Tipp lädt die Kurier-Energie für den Spezialangriff. 🎯 Schwachstellen geben 8-fachen Schaden. Hebt der Boss seinen Schild, tippe 4-mal auf den 💎 Kristall, um ihn zu brechen. Jeder besiegte Koloss gibt +10 Sekunden, dann kommt ein stärkerer. Dein Team greift automatisch mit an." }
 ];
 const MM = Object.fromEntries(MODES.map(m => [m.k, m]));
 const today = () => new Date().toDateString();
@@ -1290,6 +1300,7 @@ function miniShell(m, extra) {
   bt.hidden = false;
 }
 const mgSet = (score, left, total) => {
+  total = Math.max(total, MG && MG.peak || 0, left); if (MG) MG.peak = total;
   const sc = $("#mgScore"), tm = $("#mgTime"), b = $("#mgBar");
   if (sc) sc.textContent = fmt(score);
   if (tm) tm.textContent = `${Math.max(0, Math.ceil(left))} s`;
@@ -1327,13 +1338,13 @@ function finishMini(k, score, mult, lines) {
 
 /* ---------- Mondsprint ---------- */
 function startSprint() {
-  const m = MM.sprint; miniShell(m);
+  const m = MM.sprint; miniShell(m, '<div class="combo" id="combo"></div><div class="pwr" id="pwr" style="top:8px;left:12px;right:auto;text-align:left"></div>');
   const area = $("#mgArea"), cv = document.createElement("canvas"); area.appendChild(cv);
   const W = area.clientWidth, H = area.clientHeight, dpr = window.devicePixelRatio || 1;
   cv.width = W * dpr; cv.height = H * dpr; const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
   const img = new Image(); img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(heroSVG(S.lv, S.eq, 60, false));
-  const GY = H - 60, TOTAL = 30, stars = Array.from({ length:50 }, () => [Math.random() * W, Math.random() * (GY - 20), Math.random() * 1.5 + .4]);
-  const st = { t:TOTAL, score:0, speed:240, dist:0, nextSpawn:300, y:GY, vy:0, jumps:0, obs:[], pk:[], hurt:0, started:false };
+  const GY = H - 60, START = 30, stars = Array.from({ length:50 }, () => [Math.random() * W, Math.random() * (GY - 20), Math.random() * 1.5 + .4]);
+  const st = { t:START, score:0, pkCount:0, combo:0, speed:240, dist:0, nextSpawn:300, y:GY, vy:0, jumps:0, obs:[], items:[], hurt:0, shield:0, magnet:0, started:false, el:0 };
   MG = { k:"sprint" };
   $("#mgHint").textContent = "Tippe zum Springen. Zweimal tippen = Doppelsprung.";
   const jump = () => { if (!st.started) st.started = true; if (st.jumps < 2) { st.vy = st.jumps ? -560 : -640; st.jumps++; } };
@@ -1342,131 +1353,219 @@ function startSprint() {
   area.addEventListener("pointerdown", onDown); document.addEventListener("keydown", onKey);
   MG.cleanup = () => { area.removeEventListener("pointerdown", onDown); document.removeEventListener("keydown", onKey); };
   const PX = W * .2, PW = 38, PH = 46;
+  const mult = () => Math.min(5, 1 + Math.floor(st.combo / 10));
+  const hud = () => {
+    $("#combo").textContent = st.combo >= 10 ? `Kombo ×${mult()}` : st.combo ? `${st.combo} am Stück` : "";
+    $("#pwr").textContent = [st.shield ? "🛡️ Schild" : "", st.magnet > 0 ? `🧲 ${Math.ceil(st.magnet)} s` : ""].filter(Boolean).join("  ");
+  };
   let last = performance.now();
   function spawn() {
-    const r = Math.random(), x = W + 40;
-    if (r < .38) st.obs.push({ k:"rock", x, w:28, h:26 + Math.random() * 14 });
-    else if (r < .66) st.obs.push({ k:"gap", x, w:70 + Math.random() * 50 });
-    const n = 1 + Math.floor(Math.random() * 3), hy = GY - 40 - Math.random() * 120;
-    for (let i = 0; i < n; i++) st.pk.push({ x:x + 60 + i * 36, y:hy - Math.sin(i / 2) * 20 });
-    st.nextSpawn = 260 + Math.random() * 220;
+    const r = Math.random(), x = W + 40, late = st.el > 8;
+    if (r < .32) st.obs.push({ k:"rock", x, w:28, h:26 + Math.random() * 14 });
+    else if (r < .56) st.obs.push({ k:"gap", x, w:70 + Math.random() * 50 });
+    else if (r < .74 && late) st.obs.push({ k:"drone", x, w:34, y:GY - 95 - Math.random() * 25 });
+    const n = 1 + Math.floor(Math.random() * 4), hy = GY - 40 - Math.random() * 110;
+    for (let i = 0; i < n; i++) st.items.push({ k:"pk", x:x + 70 + i * 34, y:hy - Math.sin(i / 2) * 22 });
+    const q = Math.random();
+    if (q < .12) st.items.push({ k:"clock", x:x + 220, y:GY - 70 - Math.random() * 90 });
+    else if (q < .19) st.items.push({ k:"shield", x:x + 220, y:GY - 60 - Math.random() * 90 });
+    else if (q < .26) st.items.push({ k:"magnet", x:x + 220, y:GY - 60 - Math.random() * 90 });
+    st.nextSpawn = Math.max(200, 300 - st.el * 2) + Math.random() * 200;
   }
-  function penalty(text) { st.t -= 3; st.hurt = .8; mgFloat(PX + 10, st.y - 70, text, "dmg"); }
+  function penalty(text) {
+    if (st.shield) { st.shield = 0; mgFloat(PX + 10, st.y - 70, "Schild!", "sh"); st.hurt = .5; hud(); return; }
+    st.t -= 3; st.hurt = .8; st.combo = 0; mgFloat(PX + 10, st.y - 70, text, "dmg"); hud();
+  }
+  const ICON = { pk:"📦", clock:"⏱️", shield:"🛡️", magnet:"🧲" };
   function frame(now) {
     if (MG.dead) return;
     const dt = Math.min(.05, (now - last) / 1000); last = now;
     if (st.started) {
-      st.t -= dt; st.speed += 7 * dt; const dx = st.speed * dt; st.dist += dx; st.nextSpawn -= dx;
+      st.t -= dt; st.el += dt; st.speed += 7 * dt; const dx = st.speed * dt; st.dist += dx; st.nextSpawn -= dx;
       if (st.nextSpawn <= 0) spawn();
-      st.obs.forEach(o => o.x -= dx); st.pk.forEach(p => p.x -= dx);
-      st.obs = st.obs.filter(o => o.x + o.w > -20); st.pk = st.pk.filter(p => p.x > -20 && !p.got);
+      st.obs.forEach(o => o.x -= dx); st.items.forEach(p => p.x -= dx);
+      if (st.magnet > 0) { st.magnet -= dt; st.items.forEach(p => { if (p.k === "pk" && p.x < PX + 240) { p.x += (PX + PW / 2 - p.x) * 6 * dt; p.y += (st.y - PH / 2 - p.y) * 6 * dt; } }); if (st.magnet <= 0) hud(); }
+      st.obs = st.obs.filter(o => o.x + o.w > -20); st.items = st.items.filter(p => p.x > -20 && !p.got);
       st.vy += 1900 * dt; st.y += st.vy * dt;
       const overGap = st.obs.find(o => o.k === "gap" && PX + 8 > o.x && PX + PW - 8 < o.x + o.w);
       if (st.y >= GY && !overGap) { st.y = GY; st.vy = 0; st.jumps = 0; }
       if (overGap && st.y > GY + 40) { penalty("Krater! −3 s"); st.y = GY - 120; st.vy = 0; st.jumps = 1; overGap.w = 0; }
-      st.obs.forEach(o => { if (o.k === "rock" && !o.hit && PX + PW - 6 > o.x && PX + 6 < o.x + o.w && st.y > GY - o.h + 4) { o.hit = true; penalty("Felsen! −3 s"); } });
-      st.pk.forEach(p => { if (!p.got && Math.abs(p.x - (PX + PW / 2)) < 26 && Math.abs(p.y - (st.y - PH / 2)) < 30) { p.got = true; st.score++; mgFloat(p.x, p.y - 20, "+1", "heal"); } });
+      st.obs.forEach(o => {
+        if (o.hit) return;
+        if (o.k === "rock" && PX + PW - 6 > o.x && PX + 6 < o.x + o.w && st.y > GY - o.h + 4) { o.hit = true; penalty("Felsen! −3 s"); }
+        if (o.k === "drone" && PX + PW - 6 > o.x && PX + 6 < o.x + o.w && st.y - PH < o.y + 14 && st.y > o.y - 14) { o.hit = true; penalty("Drohne! −3 s"); }
+      });
+      st.items.forEach(p => {
+        if (p.got || Math.abs(p.x - (PX + PW / 2)) > 28 || Math.abs(p.y - (st.y - PH / 2)) > 32) return;
+        p.got = true;
+        if (p.k === "pk") {
+          st.combo++; st.pkCount++; st.score += mult(); mgFloat(p.x, p.y - 20, "+" + mult(), "heal");
+          if (st.combo % 10 === 0) { st.t += 2; mgFloat(p.x, p.y - 44, "+2 s", "info"); }
+        }
+        if (p.k === "clock") { st.t += 3; mgFloat(p.x, p.y - 20, "+3 s", "info"); }
+        if (p.k === "shield") { st.shield = 1; mgFloat(p.x, p.y - 20, "Schild", "sh"); }
+        if (p.k === "magnet") { st.magnet = 6; mgFloat(p.x, p.y - 20, "Magnet", "sh"); }
+        hud();
+      });
       st.hurt = Math.max(0, st.hurt - dt);
-      mgSet(st.score, st.t, TOTAL);
-      if (st.t <= 0) return finishMini("sprint", st.score, .3 + st.score * .07, `Du hast <b>${st.score} Pakete</b> eingesammelt und ${fmt(st.dist / 10)} Meter geschafft.`);
+      mgSet(st.score, st.t, START);
+      if (st.t <= 0) return finishMini("sprint", st.score, .3 + st.score * .05, `<b>${st.score} Punkte</b> mit ${st.pkCount} Paketen, ${fmt(st.dist / 10)} Meter in ${Math.round(st.el)} Sekunden.`);
     }
-    // Zeichnen
     ctx.clearRect(0, 0, W, H);
     stars.forEach(([x, y, r]) => { ctx.fillStyle = "rgba(236,232,217,.6)"; ctx.beginPath(); ctx.arc((x - st.dist * .1 % W + W) % W, y, r, 0, 7); ctx.fill(); });
     ctx.fillStyle = "#8e8977"; ctx.fillRect(0, GY, W, H - GY);
     ctx.fillStyle = "#b9b39e"; ctx.fillRect(0, GY, W, 6);
+    ctx.font = "26px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     st.obs.forEach(o => {
       if (o.k === "gap") { ctx.fillStyle = "#0c0f22"; ctx.fillRect(o.x, GY, o.w, H - GY); }
+      else if (o.k === "drone") { ctx.globalAlpha = o.hit ? .3 : 1; ctx.fillText("🛸", o.x + o.w / 2, o.y); ctx.globalAlpha = 1; }
       else { ctx.fillStyle = o.hit ? "#5b5748" : "#6f6a5b"; ctx.beginPath(); ctx.moveTo(o.x, GY); ctx.lineTo(o.x + 5, GY - o.h); ctx.lineTo(o.x + o.w - 4, GY - o.h + 6); ctx.lineTo(o.x + o.w, GY); ctx.fill(); }
     });
-    ctx.font = "26px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    st.pk.forEach(p => ctx.fillText("📦", p.x, p.y));
+    st.items.forEach(p => ctx.fillText(ICON[p.k], p.x, p.y));
+    if (st.shield) { ctx.strokeStyle = "rgba(110,203,255,.8)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(PX + 19, st.y - 26, 36, 0, 7); ctx.stroke(); }
     if (!(st.hurt > 0 && Math.floor(st.hurt * 10) % 2)) ctx.drawImage(img, PX - 6, st.y - PH - 8, 50, 58);
     if (!st.started) { ctx.fillStyle = "#ece8d9"; ctx.font = "bold 20px system-ui, sans-serif"; ctx.fillText("Tippe zum Starten", W / 2, H * .35); }
     MG.raf = requestAnimationFrame(frame);
   }
-  mgSet(0, TOTAL, TOTAL);
+  mgSet(0, START, START); hud();
   MG.raf = requestAnimationFrame(frame);
 }
 
 /* ---------- Sternen-Memory ---------- */
 function startMemory() {
   const m = MM.memory; miniShell(m, '<div class="memgrid" id="memGrid"></div>');
-  const icons = COMP.map(c => c.f[formOf(Math.max(S.lv, 1))][1]);
-  const deck = icons.concat(icons).map((e, i) => ({ e, i })).sort(() => Math.random() - .5);
-  const TOTAL = 60;
-  const st = { t:TOTAL, open:[], found:0, moves:0, lock:false };
+  const comp = COMP.map(c => c.f[formOf(Math.max(S.lv, 1))][1]), extra = ["🌙", "🪐", "🚀", "🌍", "👽", "☄️"];
+  const START = 45, st = { t:START, board:0, score:0, pairs:0, combo:0, moves:0, open:[], lock:false, deck:[], left:0 };
   MG = { k:"memory" };
-  $("#memGrid").innerHTML = deck.map((c, i) => `<button class="mem" data-mem="${i}" aria-label="Karte ${i + 1}">${c.e}</button>`).join("");
-  $("#mgHint").textContent = "Finde alle 8 Paare.";
+  const grid = $("#memGrid");
+  function deal() {
+    st.board++;
+    const nPairs = st.board === 1 ? 8 : st.board === 2 ? 10 : 12;
+    const pool = comp.concat(extra).sort(() => Math.random() - .5);
+    let icons = pool.slice(0, nPairs - (st.board > 1 ? 1 : 0));
+    if (st.board > 1) icons.push("⏱️");
+    const cards = icons.concat(icons).map(e => ({ e }));
+    if (st.board > 1) cards.push({ e:"👁️", eye:true });   // einzelnes Späherauge ohne Partner
+    st.deck = cards.sort(() => Math.random() - .5);
+    st.left = icons.length;
+    const rows = Math.ceil(st.deck.length / 4);
+    grid.style.setProperty("--rows", rows); grid.classList.toggle("r6", rows >= 6);
+    grid.innerHTML = st.deck.map((c, i) => `<button class="mem" data-mem="${i}" aria-label="Karte ${i + 1}">${c.e}</button>`).join("");
+    $("#mgHint").textContent = `Brett ${st.board}: finde ${icons.length} Paare.`;
+  }
+  const peek = () => {
+    st.lock = true;
+    grid.querySelectorAll(".mem:not(.done)").forEach(b => b.classList.add("up"));
+    MG.to = setTimeout(() => { grid.querySelectorAll(".mem:not(.done)").forEach(b => b.classList.remove("up")); st.open = []; st.lock = false; }, 1300);
+  };
   const onClick = e => {
     const b = e.target.closest("[data-mem]"); if (!b || st.lock || b.classList.contains("up") || b.classList.contains("done")) return;
+    const card = st.deck[+b.dataset.mem];
+    if (card.eye) { b.classList.add("done"); b.classList.add("up"); mgFloat(b.offsetLeft + b.offsetWidth / 2, b.offsetTop, "Späherauge!", "info"); st.open.forEach(x => x.classList.remove("up")); st.open = []; peek(); return; }
     b.classList.add("up"); st.open.push(b);
-    if (st.open.length === 2) {
-      st.moves++; const [a, c] = st.open;
-      if (deck[+a.dataset.mem].e === deck[+c.dataset.mem].e) {
-        a.classList.add("done"); c.classList.add("done"); st.open = []; st.found++;
-        mgSet(st.found, st.t, TOTAL);
-        if (st.found === 8) end();
-      } else {
-        st.lock = true; a.classList.add("bad"); c.classList.add("bad");
-        MG.to = setTimeout(() => { a.classList.remove("up", "bad"); c.classList.remove("up", "bad"); st.open = []; st.lock = false; }, 650);
-      }
+    if (st.open.length < 2) return;
+    st.moves++; const [a, c] = st.open, x = c.offsetLeft + c.offsetWidth / 2, y = c.offsetTop;
+    if (st.deck[+a.dataset.mem].e === st.deck[+c.dataset.mem].e) {
+      a.classList.add("done"); c.classList.add("done"); st.open = []; st.pairs++; st.left--; st.combo++;
+      const pts = 10 * Math.min(10, st.combo); st.score += pts; st.t += 2;
+      const isClock = st.deck[+a.dataset.mem].e === "⏱️";
+      if (isClock) { st.t += 8; mgFloat(x, y - 22, "+10 s", "info"); } else mgFloat(x, y, `+${pts}  +2 s`, "heal");
+      mgSet(st.score, st.t, START);
+      if (st.left === 0) { st.t += 15; st.lock = true; mgFloat(grid.clientWidth / 2, grid.clientHeight / 2, `Brett geschafft! +15 s`, "crit"); MG.to = setTimeout(() => { st.lock = false; deal(); }, 900); }
+    } else {
+      st.lock = true; st.combo = 0; st.t -= 1; a.classList.add("bad"); c.classList.add("bad"); mgFloat(x, y, "−1 s", "dmg");
+      MG.to = setTimeout(() => { a.classList.remove("up", "bad"); c.classList.remove("up", "bad"); st.open = []; st.lock = false; }, 650);
     }
   };
-  $("#memGrid").addEventListener("click", onClick);
-  function end() {
-    const left = Math.max(0, st.t);
-    finishMini("memory", st.found * 100 + Math.round(left) * 5, st.found / 8 * 2 + (st.found === 8 ? left / TOTAL * 1.5 : 0),
-      st.found === 8 ? `Alle Paare gefunden, mit <b>${Math.round(left)} Sekunden</b> übrig und ${st.moves} Zügen.` : `Du hast <b>${st.found} von 8 Paaren</b> gefunden.`);
-  }
-  MG.iv = setInterval(() => { st.t -= .2; mgSet(st.found, st.t, TOTAL); if (st.t <= 0) end(); }, 200);
-  mgSet(0, TOTAL, TOTAL);
+  grid.addEventListener("click", onClick);
+  MG.cleanup = () => grid.removeEventListener("click", onClick);
+  MG.iv = setInterval(() => {
+    st.el = (st.el || 0) + .2; st.t -= .2 * (1 + st.el / 120); mgSet(st.score, st.t, START);
+    if (st.t <= 0) finishMini("memory", st.score, .3 + st.score * .006, `<b>${st.score} Punkte</b>: ${st.pairs} Paare auf ${st.board} ${st.board === 1 ? "Brett" : "Brettern"}, ${st.moves} Züge.`);
+  }, 200);
+  deal(); mgSet(0, START, START);
 }
 
 /* ---------- Meteorabwehr ---------- */
 function startMeteor() {
-  const m = MM.meteor; miniShell(m, '<div class="lives" id="lives">❤️❤️❤️</div><div class="combo" id="combo"></div><div class="base" id="base">🏠 🛰️ 🌕 📡 🏠</div>');
-  const area = $("#mgArea"), W = area.clientWidth, H = area.clientHeight, BASE = H - 46, TOTAL = 40;
-  const st = { t:TOTAL, score:0, lives:3, combo:0, list:[], next:.4, speed:90 };
+  const m = MM.meteor; miniShell(m, '<div class="lives" id="lives"></div><div class="combo" id="combo"></div><div class="pwr" id="pwr"></div><div class="base" id="base">🏠 🛰️ 🌕 📡 🏠</div>');
+  const area = $("#mgArea"), W = area.clientWidth, H = area.clientHeight, BASE = H - 46, START = 30;
+  const st = { t:START, score:0, lives:3, combo:0, list:[], next:.4, el:0, frost:0, x2:0, caught:0 };
   MG = { k:"meteor" };
-  $("#mgHint").textContent = "Tippe ☄️ und 🌟 an. Finger weg von 🛰️!";
-  const lifeTxt = () => { $("#lives").textContent = "❤️".repeat(st.lives) + "🖤".repeat(3 - st.lives); };
-  function spawn() {
-    const r = Math.random(), k = r < .12 ? "star" : r < .27 ? "sat" : "met";
-    const el = document.createElement("button"); el.className = "met"; el.textContent = k === "star" ? "🌟" : k === "sat" ? "🛰️" : "☄️";
-    const o = { el, k, x:30 + Math.random() * (W - 60), y:-30, v:st.speed * (.8 + Math.random() * .5) * (k === "sat" ? .8 : 1) };
+  $("#mgHint").textContent = "Jeder Meteor gibt +1 Sekunde, aber die Uhr läuft immer schneller. Finger weg von 🛰️!";
+  const ICON = { met:"☄️", big:"🪨", star:"🌟", sat:"🛰️", heart:"❤️", frost:"🧊", bomb:"💣", zap:"⚡" };
+  const lifeTxt = () => { $("#lives").textContent = "❤️".repeat(st.lives) + "🖤".repeat(Math.max(0, 3 - st.lives)); };
+  const mul = () => Math.min(5, 1 + Math.floor(st.combo / 10)) * (st.x2 > 0 ? 2 : 1);
+  const hud = () => {
+    $("#combo").textContent = mul() > 1 ? `Punkte ×${mul()}` : st.combo >= 5 ? `${st.combo} am Stück` : "";
+    $("#pwr").textContent = [st.frost > 0 ? `🧊 ${Math.ceil(st.frost)} s` : "", st.x2 > 0 ? `⚡ ${Math.ceil(st.x2)} s` : ""].filter(Boolean).join("  ");
+    area.classList.toggle("frosted", st.frost > 0);
+  };
+  function add(k, x, y, v) {
+    const el = document.createElement("button"); el.className = "met" + (k === "big" ? " big" : ""); el.textContent = ICON[k];
+    const o = { el, k, x, y, v, hp:k === "big" ? 3 : 1, dx:(Math.random() - .5) * 30 };
     el.addEventListener("pointerdown", ev => { ev.preventDefault(); tap(o); });
     area.appendChild(el); st.list.push(o);
+    el.style.transform = `translate(${x}px, ${y}px)`;
   }
+  function spawn() {
+    const e = st.el, r = Math.random() * 100;
+    const table = [["met", 58], ["big", e > 10 ? 9 : 0], ["star", 7], ["sat", 12 + Math.min(10, e / 6)], ["heart", st.lives < 5 ? 2 : 0], ["frost", e > 8 ? 3 : 0], ["bomb", e > 8 ? 3 : 0], ["zap", e > 8 ? 3 : 0]];
+    const tot = table.reduce((a, x) => a + x[1], 0); let q = Math.random() * tot, k = "met";
+    for (const [kk, w] of table) { q -= w; if (q <= 0) { k = kk; break; } }
+    const base = 90 + e * 3.2;
+    add(k, 34 + Math.random() * (W - 68), -40, base * (.8 + Math.random() * .5) * (k === "big" ? .7 : k === "sat" ? .85 : 1));
+  }
+  function gain(o, pts, secs) {
+    st.combo++; const p = pts * mul(); st.score += p; st.t += secs; st.caught++;
+    mgFloat(o.x, o.y - 24, `+${p}${secs ? `  +${secs} s` : ""}`, pts > 1 ? "crit" : "heal");
+  }
+  function kill(o) { o.gone = true; o.el.classList.add("pop"); setTimeout(() => o.el.remove(), 260); }
   function tap(o) {
     if (o.gone || MG.dead) return;
-    o.gone = true; o.el.classList.add("pop"); setTimeout(() => o.el.remove(), 260);
+    if (o.k === "big") {
+      o.hp--; if (o.hp > 0) { o.el.classList.add("hit" + (3 - o.hp)); mgFloat(o.x, o.y - 30, "Noch " + o.hp, "info"); return; }
+      kill(o); gain(o, 3, 2); add("met", o.x - 26, o.y, o.v * 1.1); add("met", o.x + 26, o.y, o.v * 1.1); hud(); return;
+    }
+    kill(o);
     if (o.k === "sat") { st.lives--; st.combo = 0; lifeTxt(); mgFloat(o.x, o.y, "Satellit! −1 ❤️", "dmg"); }
-    else { st.combo++; const pts = (o.k === "star" ? 3 : 1) * (1 + Math.floor(st.combo / 10)); st.score += pts; mgFloat(o.x, o.y - 20, "+" + pts, o.k === "star" ? "crit" : "heal"); }
-    $("#combo").textContent = st.combo >= 10 ? `Kombo ×${1 + Math.floor(st.combo / 10)}` : "";
+    else if (o.k === "met") gain(o, 1, 1);
+    else if (o.k === "star") gain(o, 3, 2);
+    else if (o.k === "heart") { st.lives = Math.min(5, st.lives + 1); lifeTxt(); mgFloat(o.x, o.y, "+1 ❤️", "heal"); }
+    else if (o.k === "frost") { st.frost = 5; mgFloat(o.x, o.y, "Zeitfrost!", "sh"); }
+    else if (o.k === "zap") { st.x2 = 6; mgFloat(o.x, o.y, "Doppelte Punkte!", "crit"); }
+    else if (o.k === "bomb") {
+      mgFloat(o.x, o.y, "BUMM!", "crit");
+      const bw = $(".bwrap"); bw.classList.remove("ultflash"); void bw.offsetWidth; bw.classList.add("ultflash");
+      st.list.filter(x => !x.gone && x.k !== "sat" && x.k !== "heart").forEach(x => { kill(x); gain(x, x.k === "star" || x.k === "big" ? 3 : 1, 1); });
+    }
+    hud();
   }
   let last = performance.now();
   function frame(now) {
     if (MG.dead) return;
     const dt = Math.min(.05, (now - last) / 1000); last = now;
-    st.t -= dt; st.speed += 4 * dt; st.next -= dt;
-    if (st.next <= 0) { spawn(); st.next = Math.max(.28, .85 - (TOTAL - st.t) * .014) * (.6 + Math.random() * .8); }
+    st.el += dt; st.t -= dt * (1 + st.el / 45); st.next -= dt;
+    st.frost = Math.max(0, st.frost - dt); st.x2 = Math.max(0, st.x2 - dt);
+    if (st.next <= 0) { spawn(); st.next = Math.max(.2, .8 - st.el * .011) * (.6 + Math.random() * .8); }
+    const slow = st.frost > 0 ? .35 : 1;
     st.list.forEach(o => {
       if (o.gone) return;
-      o.y += o.v * dt; o.el.style.transform = `translate(${o.x}px, ${o.y}px)`;
+      o.y += o.v * dt * slow; o.x = Math.max(20, Math.min(W - 20, o.x + o.dx * dt * slow));
+      o.el.style.transform = `translate(${o.x}px, ${o.y}px)`;
       if (o.y > BASE - 10) {
         o.gone = true; o.el.remove();
-        if (o.k === "met") { st.lives--; st.combo = 0; lifeTxt(); const b = $("#base"); b.classList.remove("hit"); void b.offsetWidth; b.classList.add("hit"); $("#combo").textContent = ""; }
+        if (o.k === "met" || o.k === "big") { st.lives -= o.k === "big" ? 2 : 1; st.combo = 0; lifeTxt(); const b = $("#base"); b.classList.remove("hit"); void b.offsetWidth; b.classList.add("hit"); }
       }
     });
     st.list = st.list.filter(o => !o.gone);
-    mgSet(st.score, st.t, TOTAL);
-    if (st.t <= 0 || st.lives <= 0) return finishMini("meteor", st.score, .3 + st.score * .015 * (st.lives > 0 ? 1 : .8),
-      st.lives > 0 ? `Die Mondbasis hat gehalten! <b>${st.score} Punkte</b>.` : `Die Basis ist gefallen, aber du hast <b>${st.score} Punkte</b> geholt.`);
+    if (Math.random() < .1) hud();
+    mgSet(st.score, st.t, START);
+    if (st.t <= 0 || st.lives <= 0) return finishMini("meteor", st.score, .3 + st.score * .012,
+      `<b>${st.score} Punkte</b>, ${st.caught} Meteore abgefangen in ${Math.round(st.el)} Sekunden. ${st.lives > 0 ? "Die Zeit ist abgelaufen." : "Die Mondbasis ist gefallen."}`);
     MG.raf = requestAnimationFrame(frame);
   }
-  lifeTxt(); mgSet(0, TOTAL, TOTAL);
+  lifeTxt(); hud(); mgSet(0, START, START);
   MG.raf = requestAnimationFrame(frame);
 }
 
@@ -1474,52 +1573,86 @@ function startMeteor() {
 function startBossHunt() {
   const m = MM.boss, P = buildTeam(), hero = P[0], team = P.slice(1), U = hero.ult;
   const tap = hero.atk * .5, auto = team.reduce((a, u) => a + u.atk, 0) * .6, ult = hero.atk * U.mult * hero.ultMul * 4;
-  const HP = Math.round(30 * (auto + hero.atk * 2.2) + 3 * ult), TOTAL = 30;
-  const boss = rnd([["Weltraumkoloss", "👹"], ["Sternenkrake", "🐙"], ["Kometenwal", "🐋"], ["Mondtitan", "🗿"]]);
-  miniShell(m, `<div class="bosszone"><div class="bossinfo" id="bossName">${boss[0]}</div>
-    <div class="bosshp"><i id="bossHp" style="width:100%"></i><b style="left:33%"></b><b style="left:66%"></b></div>
-    <div class="bossinfo" id="bossTxt">${fmt(HP)} Leben</div>
-    <button class="bossbtn" id="bossBtn" aria-label="Boss angreifen">${boss[1]}</button>
+  const HP0 = Math.round(30 * (auto + hero.atk * 2.2) + 3 * ult), START = 30;
+  const NAMES = [["Weltraumkoloss", "👹"], ["Sternenkrake", "🐙"], ["Kometenwal", "🐋"], ["Mondtitan", "🗿"], ["Nebeldrache", "🐉"], ["Leerenfürst", "👾"]];
+  miniShell(m, `<div class="bosszone"><div class="bossstage" id="bossStage"></div><div class="bossinfo" id="bossName"></div>
+    <div class="bosshp"><i id="bossHp" style="width:100%"></i></div>
+    <div class="bossinfo" id="bossTxt"></div>
+    <button class="bossbtn" id="bossBtn" aria-label="Boss angreifen"></button>
     <div class="bossinfo">Kurier-Energie</div><div class="uen" style="width:90%;height:12px"><i id="bossEn"></i></div>
     <button class="btn ultbtn" id="ultBtn" disabled>${U.n}</button></div>`);
-  const st = { t:TOTAL, dmg:0, en:0, taps:0, started:false };
+  const st = { t:START, dmg:0, en:0, taps:0, started:false, n:0, hp:0, max:0, shield:0, crystal:0, nextShield:7, nextWeak:2.5, beaten:0 };
   MG = { k:"boss" };
-  $("#mgHint").textContent = "Tippe so schnell du kannst auf den Koloss!";
-  const btn = $("#bossBtn"), ub = $("#ultBtn");
-  function deal(v, x, y, cls) {
-    st.dmg += v; const left = Math.max(0, HP - st.dmg);
-    $("#bossHp").style.width = (left / HP * 100) + "%"; $("#bossTxt").textContent = `${fmt(left)} Leben übrig`;
-    mgFloat(x, y, fmt(v), cls); mgSet(Math.round(st.dmg), st.t, TOTAL);
-    if (left <= 0) end();
+  $("#mgHint").textContent = "Tippe auf den Koloss! Achte auf 🎯 und den 💎 Kristall.";
+  const btn = $("#bossBtn"), ub = $("#ultBtn"), area = $("#mgArea");
+  function nextBoss() {
+    const b = NAMES[st.n % NAMES.length]; st.n++;
+    st.max = st.hp = Math.round(HP0 * Math.pow(1.5, st.n - 1));
+    $("#bossStage").textContent = `Koloss ${st.n}`; $("#bossName").textContent = b[0]; btn.textContent = b[1];
+    $("#bossHp").style.width = "100%"; $("#bossTxt").textContent = `${fmt(st.hp)} Leben`;
   }
-  function rel(e) { const r = $("#mgArea").getBoundingClientRect(); return [e.clientX - r.left + (Math.random() * 30 - 15), e.clientY - r.top - 30]; }
+  function deal(v, x, y, cls) {
+    st.dmg += v; st.hp -= v;
+    $("#bossHp").style.width = Math.max(0, st.hp / st.max * 100) + "%"; $("#bossTxt").textContent = `${fmt(Math.max(0, st.hp))} Leben übrig`;
+    mgFloat(x, y, fmt(v), cls); mgSet(Math.round(st.dmg), st.t, START);
+    if (st.hp <= 0) {
+      st.beaten++; st.t += 10; endShield(false);
+      mgFloat(area.clientWidth / 2, area.clientHeight * .25, `Koloss besiegt! +10 s`, "crit");
+      const bw = $(".bwrap"); bw.classList.remove("ultflash"); void bw.offsetWidth; bw.classList.add("ultflash");
+      nextBoss();
+    }
+  }
+  function rel(e) { const r = area.getBoundingClientRect(); return [e.clientX - r.left + (Math.random() * 30 - 15), e.clientY - r.top - 30]; }
+  function charge(v) { st.en = Math.min(100, st.en + v * hero.charge); $("#bossEn").style.width = st.en + "%"; if (st.en >= 100) { ub.disabled = false; ub.classList.add("ready"); } }
   const onTap = e => {
     e.preventDefault(); if (MG.dead) return; st.started = true; st.taps++;
-    const crit = Math.random() < hero.crit, v = Math.round(tap * (.9 + Math.random() * .2) * (crit ? hero.critDmg : 1));
-    const [x, y] = rel(e); deal(v, x, y, crit ? "crit" : "dmg");
+    const crit = Math.random() < hero.crit, v = Math.round(tap * (.9 + Math.random() * .2) * (crit ? hero.critDmg : 1) * (st.shield > 0 ? .1 : 1));
+    const [x, y] = rel(e); deal(v, x, y, st.shield > 0 ? "miss" : crit ? "crit" : "dmg");
     btn.classList.remove("hurt"); void btn.offsetWidth; btn.classList.add("hurt");
-    st.en = Math.min(100, st.en + 4 * hero.charge); $("#bossEn").style.width = st.en + "%";
-    if (st.en >= 100) { ub.disabled = false; ub.classList.add("ready"); }
+    charge(st.shield > 0 ? 1 : 4);
   };
   const onUlt = () => {
     if (st.en < 100 || MG.dead) return; st.en = 0; $("#bossEn").style.width = "0%"; ub.disabled = true; ub.classList.remove("ready");
     const bw = $(".bwrap"); bw.classList.remove("ultflash"); void bw.offsetWidth; bw.classList.add("ultflash");
-    const r = $("#mgArea").getBoundingClientRect(); deal(Math.round(ult), r.width / 2, r.height * .3, "crit");
+    deal(Math.round(ult * (st.shield > 0 ? .5 : 1)), area.clientWidth / 2, area.clientHeight * .3, "crit");
   };
+  // Schwachstelle
+  function weak() {
+    const w = document.createElement("button"); w.className = "weak"; w.textContent = "🎯";
+    const r = btn.getBoundingClientRect(), ar = area.getBoundingClientRect();
+    w.style.left = (r.left - ar.left + Math.random() * r.width) + "px"; w.style.top = (r.top - ar.top + Math.random() * r.height) + "px";
+    w.addEventListener("pointerdown", ev => { ev.preventDefault(); if (MG.dead) return; w.remove(); const [x, y] = rel(ev); deal(Math.round(tap * 8), x, y, "crit"); charge(20); });
+    area.appendChild(w); setTimeout(() => w.remove(), 1400);
+  }
+  // Schild
+  let crystalEl = null;
+  function startShield() {
+    st.shield = 4; st.crystal = 4; btn.classList.add("shielded");
+    crystalEl = document.createElement("button"); crystalEl.className = "crystal"; crystalEl.innerHTML = "💎<span>4× tippen</span>";
+    crystalEl.addEventListener("pointerdown", ev => {
+      ev.preventDefault(); if (MG.dead) return; st.crystal--; crystalEl.querySelector("span").textContent = st.crystal ? `${st.crystal}× tippen` : "";
+      if (st.crystal <= 0) { endShield(true); const [x, y] = rel(ev); mgFloat(x, y, "Schild gebrochen! +2 s", "sh"); st.t += 2; charge(15); }
+    });
+    area.appendChild(crystalEl); $("#mgHint").textContent = "Der Koloss hebt seinen Schild! Brich den 💎 Kristall.";
+  }
+  function endShield() { st.shield = 0; btn.classList.remove("shielded"); if (crystalEl) { crystalEl.remove(); crystalEl = null; } $("#mgHint").textContent = "Tippe auf den Koloss! Achte auf 🎯 und den 💎 Kristall."; }
   btn.addEventListener("pointerdown", onTap); ub.addEventListener("click", onUlt);
   MG.cleanup = () => { btn.removeEventListener("pointerdown", onTap); ub.removeEventListener("click", onUlt); };
   function end() {
-    const ratio = Math.min(1, st.dmg / HP), win = ratio >= 1;
-    finishMini("boss", Math.round(st.dmg), ratio * 3 + (win ? Math.max(0, st.t) / TOTAL : 0),
-      win ? `Der ${boss[0]} ist besiegt, mit <b>${Math.ceil(Math.max(0, st.t))} Sekunden</b> übrig!` : `Du hast <b>${Math.round(ratio * 100)} %</b> seiner Leben geschafft (${fmt(st.dmg)} Schaden, ${st.taps} Schläge).`);
+    const frac = Math.min(1, Math.max(0, 1 - st.hp / st.max));
+    finishMini("boss", Math.round(st.dmg), .3 + (st.beaten + frac) * .9,
+      `<b>${st.beaten} ${st.beaten === 1 ? "Koloss" : "Kolosse"}</b> besiegt und den nächsten zu ${Math.round(frac * 100)} % geschafft. ${fmt(st.dmg)} Schaden mit ${st.taps} Schlägen.`);
   }
   MG.iv = setInterval(() => {
     if (!st.started || MG.dead) return;
-    st.t -= .5; const r = $("#mgArea").getBoundingClientRect();
-    deal(Math.round(auto * .5), r.width * (.25 + Math.random() * .5), r.height * .45, "dot");
+    st.t -= .25;
+    if (Math.round(st.t * 4) % 2 === 0) deal(Math.round(auto * .5 * (st.shield > 0 ? .1 : 1)), area.clientWidth * (.25 + Math.random() * .5), area.clientHeight * .45, "dot");
+    if (st.shield > 0) { st.shield -= .25; if (st.shield <= 0) endShield(); }
+    else if ((st.nextShield -= .25) <= 0) { startShield(); st.nextShield = 7 + Math.random() * 4; }
+    if ((st.nextWeak -= .25) <= 0) { weak(); st.nextWeak = 2 + Math.random() * 2.5; }
     if (st.t <= 0) end();
-  }, 500);
-  mgSet(0, TOTAL, TOTAL);
+  }, 250);
+  nextBoss(); mgSet(0, START, START);
 }
 const MINI = { sprint:startSprint, memory:startMemory, meteor:startMeteor, boss:startBossHunt };
 
