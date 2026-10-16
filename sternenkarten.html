@@ -352,9 +352,6 @@ p { margin: 0; }
 .b-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-block: 10px 0; }
 .b-top .bz { font-size: 13px; color: var(--dim); }
 .b-top .round { font-family: var(--f-display); font-weight: 700; font-size: 18px; }
-.speeds { display: flex; gap: 4px; }
-.speeds button { background: var(--deck-2); border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; font-weight: 700; font-size: 13px; color: var(--dim); }
-.speeds button.on { background: var(--moon); color: var(--night); }
 .sidelabel { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 700; text-align: center; }
 .sidelabel.foe { color: var(--hp); } .sidelabel.own { color: var(--good); }
 .side { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
@@ -785,7 +782,7 @@ function load() {
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 let S = null;
-const UI = { tab:"home", speed:1, zoom:1 };
+const UI = { tab:"home", zoom:1 };
 let B = null;
 
 /* =========================================================
@@ -1657,14 +1654,14 @@ function startBattle(s) {
   bt.style.setProperty("--zbg", zoneAt(zoneOf(s)).bg);
   bt.innerHTML = `<div class="bwrap">
     <div class="b-top"><div><div class="bz">${zoneAt(zoneOf(s)).n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Kampf beginnt</div></div>
-      <div class="speeds">${[1,2,4].map(x => `<button data-act="speed" data-x="${x}" class="${UI.speed === x ? "on" : ""}">${x}×</button>`).join("")}<button data-act="skip">Ergebnis</button></div></div>
+</div>
     <div class="b-enemies"><div class="sidelabel foe">Gegner</div><div class="side">${units.filter(u => u.side === "e").map(tile).join("")}</div></div>
     <div class="b-log" id="bLog"><span>${S.auto ? "Automatisch wiederholen ist an" : "Dein Team kämpft von allein."}</span></div>
     <div class="b-team"><div class="sidelabel own">Dein Team</div>${tile(units.find(u => u.hero))}<div class="side">${units.filter(u => u.side === "p" && !u.hero).map(tile).join("")}</div>
       <div class="legend"><span><i style="background:var(--hp)"></i>Leben</span><span><i style="background:var(--shield)"></i>Schild</span><span>❄ eingefroren</span></div></div>
     <div id="fx"></div></div>`;
   bt.hidden = false;
-  B.timer = setTimeout(step, 600 / UI.speed);
+  B.timer = setTimeout(step, 600);
 }
 function setHP(uid, hp, sh) {
   const u = B.units[uid], el = $("#u" + uid); if (!el) return;
@@ -1734,13 +1731,7 @@ function step() {
   if (!B || B.done) return;
   if (B.i >= B.res.ev.length) return finishBattle();
   const d = applyEv(B.res.ev[B.i++], false);
-  B.timer = setTimeout(step, d / UI.speed);
-}
-function skipBattle() {
-  if (!B || B.done) return;
-  clearTimeout(B.timer);
-  while (B.i < B.res.ev.length) applyEv(B.res.ev[B.i++], true);
-  finishBattle();
+  B.timer = setTimeout(step, d);
 }
 function finishBattle() {
   if (B.done) return;
@@ -1819,8 +1810,6 @@ function act(el, ev) {
     case "miniBack": UI.tab = "home"; closeMini(); break;
     case "noop": toast("Schaffe zuerst die Etappe davor."); break;
     case "auto": S.auto = !S.auto; save(); render(); break;
-    case "speed": UI.speed = +el.dataset.x; document.querySelectorAll(".speeds [data-x]").forEach(b => b.classList.toggle("on", +b.dataset.x === UI.speed)); break;
-    case "skip": skipBattle(); break;
     case "again": { const s = +el.dataset.s; if (B) clearTimeout(B.autoT); modal(""); S.zone = zoneOf(s); startBattle(s); break; }
     case "autoOff": { S.auto = false; save(); if (B) clearTimeout(B.autoT); const l = $("#autoLine"); if (l) l.textContent = "Automatisch wiederholen ist aus."; el.hidden = true; break; }
     case "leave": UI.tab = "home"; leaveBattle(); break;
