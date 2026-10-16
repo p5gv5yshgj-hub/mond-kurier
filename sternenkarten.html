@@ -9,23 +9,22 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one phone-sized column — status bar, scrolling screen, tab bar; the auto-battle takes over the whole column. */
+/* Layout: one phone-sized column. Status bar on top, one screen in the middle, five tabs at the bottom.
+   Every screen leads with one clear action; details live one tap deeper. */
 :root {
   --night: #0c0f22;      /* deep lunar night, page ground */
-  --deck: #161a35;       /* raised panels */
-  --deck-2: #20254a;     /* chips, empty bars */
-  --line: #2f3566;       /* hairlines */
+  --deck: #171b37;       /* raised panels */
+  --deck-2: #222851;     /* chips, empty bars */
+  --line: #313869;       /* hairlines */
   --moon: #ece8d9;       /* moon-silver text */
-  --dim: #9a9cba;        /* secondary text */
-  --gold: #f2c14e;       /* lunar gold accent */
+  --dim: #a3a5c2;        /* secondary text */
+  --gold: #f2c14e;       /* lunar gold: the one action colour */
   --gold-ink: #1b1606;
   --hp: #ff5d6c;
   --shield: #6ecbff;
-  --venom: #7bd88f;
-  --xp: #8f7bff;
-  --t-a: #ff7a59;  /* Talentzweig Angriff */
-  --t-d: #59b8ff;  /* Talentzweig Abwehr */
-  --t-k: #f2c14e;  /* Talentzweig Kurier */
+  --good: #7bd88f;
+  --xp: #9a88ff;
+  --t-a: #ff7a59; --t-d: #59b8ff; --t-k: #f2c14e;
   --r-c: #9aa3b8; --r-r: #4fb3ff; --r-e: #b77bff; --r-l: #ffb347;
   --f-display: "Chakra Petch", "Trebuchet MS", system-ui, sans-serif;
   --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -36,234 +35,255 @@
 html, body { height: 100%; }
 body {
   margin: 0; background: var(--night); color: var(--moon);
-  font-family: var(--f-body); font-size: 15px;
+  font-family: var(--f-body); font-size: 16px; line-height: 1.35;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
 }
 body::after {
-  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .5;
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .4;
   background-image:
     radial-gradient(1px 1px at 12% 18%, var(--moon) 50%, transparent 51%),
     radial-gradient(1px 1px at 72% 9%, var(--moon) 50%, transparent 51%),
     radial-gradient(1.5px 1.5px at 41% 63%, var(--dim) 50%, transparent 51%),
     radial-gradient(1px 1px at 88% 47%, var(--moon) 50%, transparent 51%),
     radial-gradient(1px 1px at 23% 86%, var(--dim) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 63% 92%, var(--moon) 50%, transparent 51%),
-    radial-gradient(1px 1px at 5% 52%, var(--moon) 50%, transparent 51%),
-    radial-gradient(1px 1px at 95% 75%, var(--dim) 50%, transparent 51%);
+    radial-gradient(1.5px 1.5px at 63% 92%, var(--moon) 50%, transparent 51%);
 }
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible, [data-act]:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; letter-spacing: .02em; }
+p { margin: 0; }
 .num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--dim); }
 
 #app { position: relative; z-index: 1; max-width: 520px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; }
 
 /* ---------- Statusleiste ---------- */
-#top { display: flex; align-items: center; gap: 10px; padding-block: 10px 8px; }
-.lvl-badge { font-family: var(--f-display); font-weight: 700; font-size: 13px; background: var(--gold); color: var(--gold-ink); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
-.xpwrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.bar { height: 7px; background: var(--deck-2); border-radius: 4px; overflow: hidden; }
+#top { display: flex; align-items: center; gap: 12px; padding-block: 12px 10px; border-bottom: 1px solid var(--line); }
+.lvl-badge { font-family: var(--f-display); font-weight: 700; font-size: 14px; background: var(--gold); color: var(--gold-ink); padding: 4px 9px; border-radius: 7px; white-space: nowrap; }
+.xpwrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.bar { height: 8px; background: var(--deck-2); border-radius: 4px; overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--xp); border-radius: 4px; transition: width .5s ease; }
-.bar.full i { background: var(--gold); }
-.xptext { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.res { display: flex; gap: 10px; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; }
-.coin::before { content: ""; display: inline-block; width: .8em; height: .8em; border-radius: 50%; background: var(--gold); box-shadow: inset -2px -2px 0 rgba(0,0,0,.25); margin-right: 4px; vertical-align: -1px; }
-.dust { color: var(--shield); }
-.dust::before { content: "✧"; margin-right: 3px; }
-.tp { color: var(--venom); }
+.bar.gold i { background: var(--gold); }
+.xptext { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.coins { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 16px; white-space: nowrap; }
+.coin::before { content: ""; display: inline-block; width: .8em; height: .8em; border-radius: 50%; background: var(--gold); box-shadow: inset -2px -2px 0 rgba(0,0,0,.25); margin-right: 5px; vertical-align: -1px; }
 
-#main { flex: 1; overflow-y: auto; overflow-x: hidden; padding-block: 4px 20px; -webkit-overflow-scrolling: touch; }
-.screen-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 6px 0 12px; flex-wrap: wrap; }
-.screen-title h2 { font-size: 22px; }
-.screen-title small { color: var(--dim); font-size: 13px; }
-.section-label { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .12em; font-size: 11px; color: var(--dim); margin: 18px 0 8px; }
+#main { flex: 1; overflow-y: auto; overflow-x: hidden; padding-block: 14px 24px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 14px; }
+#main > * { flex-shrink: 0; }
+.screen-title h2 { font-size: 24px; }
+.screen-title p { color: var(--dim); font-size: 14px; margin-top: 2px; }
+.label { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .12em; font-size: 12px; color: var(--dim); margin-top: 6px; }
 
-#nav { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); padding-block: 6px; }
-#nav button { background: none; border: 0; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--dim); font-size: 11px; font-weight: 600; }
-#nav button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#nav { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); padding-block: 6px 8px; }
+#nav button { background: none; border: 0; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--dim); font-size: 12px; font-weight: 600; }
+#nav button svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #nav button.on { color: var(--gold); }
-#nav .dot { position: relative; }
-#nav .dot::after { content: ""; position: absolute; top: -1px; right: -4px; width: 7px; height: 7px; border-radius: 50%; background: var(--venom); }
+#nav .badge { position: relative; }
+#nav .badge b { position: absolute; top: -4px; right: -10px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--good); color: var(--night); font-size: 11px; line-height: 17px; }
 
-.btn { border: 0; border-radius: 10px; padding: 11px 16px; font-weight: 700; background: var(--gold); color: var(--gold-ink); font-family: var(--f-display); letter-spacing: .03em; transition: transform .12s ease, opacity .2s; }
-.btn:active { transform: scale(.96); }
+.btn { border: 0; border-radius: 12px; padding: 13px 18px; font-weight: 700; font-size: 16px; background: var(--gold); color: var(--gold-ink); font-family: var(--f-display); letter-spacing: .03em; transition: transform .12s ease, opacity .2s; }
+.btn:active { transform: scale(.97); }
 .btn.ghost { background: var(--deck-2); color: var(--moon); }
-.btn.green { background: var(--venom); color: var(--night); }
+.btn.green { background: var(--good); color: var(--night); }
 .btn.danger { background: var(--hp); color: var(--night); }
+.btn.big { width: 100%; font-size: 20px; padding: 16px; }
+.btn.sm { padding: 8px 12px; font-size: 14px; border-radius: 9px; }
+.btn.wide { width: 100%; }
 .btn[disabled] { opacity: .4; pointer-events: none; }
-.btn.sm { padding: 7px 11px; font-size: 13px; border-radius: 8px; }
-.panel { background: var(--deck); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
-.chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { background: var(--deck-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--dim); }
-.chip.on { background: var(--moon); color: var(--night); border-color: var(--moon); }
-.chip.lock { opacity: .45; }
+.panel { background: var(--deck); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
 .r-c { --rc: var(--r-c); } .r-r { --rc: var(--r-r); } .r-e { --rc: var(--r-e); } .r-l { --rc: var(--r-l); }
-.stars { color: var(--gold); letter-spacing: 1px; font-size: 12px; }
-.stars s { color: var(--line); text-decoration: none; }
+.rar { color: var(--rc); font-weight: 700; }
 
-/* ---------- Heldenkarte ---------- */
-.herocard {
-  position: relative; border-radius: 20px; padding: 16px; overflow: hidden;
-  background: linear-gradient(160deg, var(--deck-2), var(--deck) 55%);
-  border: 2px solid var(--hc, var(--r-c));
-  box-shadow: 0 0 28px color-mix(in srgb, var(--hc, var(--r-c)) 25%, transparent);
-}
-.herocard::before { content: ""; position: absolute; width: 220px; height: 220px; right: -70px; top: -80px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, var(--moon), #b9b39e 55%, #6f6a5b); opacity: .12; }
-.hc-head { position: relative; display: flex; gap: 14px; align-items: center; }
-.hc-portrait { width: 76px; height: 76px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 42px;
+/* Siegchance: Farbe + Wort + Zahl */
+.chance { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 14px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chance.easy { background: color-mix(in srgb, var(--good) 20%, transparent); color: var(--good); }
+.chance.even { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold); }
+.chance.hard { background: color-mix(in srgb, var(--hp) 20%, transparent); color: var(--hp); }
+
+/* ---------- Start ---------- */
+.herobar { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--deck); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+.portrait { width: 64px; height: 64px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 36px;
   background: radial-gradient(circle at 35% 30%, var(--moon), #b9b39e 55%, #6f6a5b); box-shadow: 0 0 0 3px var(--hc, var(--r-c)); }
-.hc-title { font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--hc, var(--dim)); font-weight: 700; }
-.hc-name { font-family: var(--f-display); font-size: 22px; font-weight: 700; }
-.hc-lv { font-family: var(--f-display); font-size: 15px; color: var(--dim); }
-.hc-xp { position: relative; margin-top: 14px; }
-.hc-xp .bar { height: 10px; }
-.hc-xp .xptext { margin-top: 4px; display: flex; justify-content: space-between; }
-.statrow { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-top: 14px; }
-.statrow div { background: color-mix(in srgb, var(--night) 60%, transparent); border-radius: 10px; padding: 8px 4px; text-align: center; }
-.statrow b { display: block; font-family: var(--f-display); font-size: 18px; font-variant-numeric: tabular-nums; }
-.statrow span { font-size: 10.5px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
-.ablist { display: flex; flex-direction: column; gap: 8px; }
-.abrow { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; background: var(--deck); border: 1px solid var(--line); border-radius: 12px; }
-.abrow .lvtag { font-family: var(--f-display); font-weight: 700; font-size: 12px; min-width: 46px; text-align: center; padding: 3px 0; border-radius: 6px; background: var(--gold); color: var(--gold-ink); }
-.abrow.locked { opacity: .55; }
-.abrow.locked .lvtag { background: var(--deck-2); color: var(--dim); }
-.abrow .an { font-weight: 700; }
-.abrow .ad { font-size: 13px; color: var(--dim); line-height: 1.35; }
-.milestone { margin-top: 10px; font-size: 13px; color: var(--dim); }
-.milestone b { color: var(--moon); }
+.herobar .hb { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.herobar .ht { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--hc); font-weight: 700; }
+.herobar .hn { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
+.herobar .chev { color: var(--dim); font-size: 22px; }
+.nextfight { position: relative; overflow: hidden; border-radius: 20px; padding: 18px; border: 2px solid var(--gold); background: var(--deck); display: flex; flex-direction: column; gap: 12px; }
+.nextfight::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .55; pointer-events: none; }
+.nextfight > * { position: relative; }
+.nf-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.nf-kicker { font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--gold); font-weight: 700; }
+.nf-title { font-family: var(--f-display); font-size: 22px; font-weight: 700; margin-top: 2px; }
+.nf-foes { font-size: 44px; letter-spacing: 6px; text-align: center; line-height: 1.2; }
+.nf-hint { font-size: 14px; color: var(--moon); background: color-mix(in srgb, var(--night) 55%, transparent); border-radius: 12px; padding: 10px 12px; line-height: 1.4; }
+.switchrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; background: none; border: 0; padding: 0; text-align: left; font-size: 14px; color: var(--dim); }
+.switchrow b { color: var(--moon); }
+.sw { width: 46px; height: 28px; border-radius: 999px; background: var(--deck-2); position: relative; flex: none; transition: background .2s; border: 1px solid var(--line); }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--dim); transition: transform .2s, background .2s; }
+.sw.on { background: color-mix(in srgb, var(--good) 40%, var(--deck-2)); }
+.sw.on::after { transform: translateX(18px); background: var(--good); }
+.todos { display: flex; flex-direction: column; gap: 8px; }
+.todo { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--deck); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.todo .ti { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; flex: none; background: var(--deck-2); }
+.todo .tt { flex: 1; min-width: 0; }
+.todo .tt b { display: block; }
+.todo .tt span { font-size: 13px; color: var(--dim); }
+.todo .chev { color: var(--dim); font-size: 20px; }
+.todo.hot { border-color: var(--good); }
+.todo.hot .ti { background: color-mix(in srgb, var(--good) 22%, var(--deck-2)); }
+.goal { font-size: 14px; color: var(--dim); line-height: 1.45; }
+.goal b { color: var(--moon); }
+
+/* ---------- Etappen ---------- */
+.zonetabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-inline: -2px; padding: 2px; }
+.zonetabs::-webkit-scrollbar { display: none; }
+.ztab { flex: none; background: var(--deck-2); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; text-align: left; color: var(--dim); }
+.ztab b { display: block; font-size: 14px; color: var(--moon); }
+.ztab span { font-size: 12px; }
+.ztab.on { background: var(--moon); border-color: var(--moon); }
+.ztab.on b, .ztab.on span { color: var(--night); }
+.ztab.lock { opacity: .45; }
+.zonehead { position: relative; border-radius: 16px; padding: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--deck); }
+.zonehead::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .6; }
+.zonehead > * { position: relative; }
+.zonehead h3 { font-size: 21px; }
+.zonehead p { color: var(--dim); font-size: 14px; margin-top: 4px; }
+.stages { display: flex; flex-direction: column; gap: 8px; }
+.stage { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--deck); border: 1px solid var(--line); border-radius: 14px; text-align: left; width: 100%; min-height: 64px; }
+.stage .sn { font-family: var(--f-display); font-weight: 700; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 16px; flex: none; background: var(--deck-2); }
+.stage.cleared .sn { background: color-mix(in srgb, var(--good) 25%, var(--deck-2)); color: var(--good); }
+.stage .sf { flex: 1; min-width: 0; font-size: 26px; letter-spacing: 3px; }
+.stage .sf small { display: block; font-size: 12px; letter-spacing: 0; color: var(--dim); font-family: var(--f-body); }
+.stage.boss { border-color: var(--r-l); }
+.stage.boss .sn { background: var(--r-l); color: var(--night); }
+.stage.locked { opacity: .4; }
+.stage.next { border: 2px solid var(--gold); }
 
 /* ---------- Team ---------- */
 .slots { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.slot { min-height: 92px; border-radius: 12px; border: 1px dashed var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; padding: 6px; font-size: 12px; color: var(--dim); background: none; }
+.slot { min-height: 118px; border-radius: 14px; border: 1px dashed var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; padding: 8px 4px; font-size: 13px; color: var(--dim); background: none; min-width: 0; }
 .slot.full { border: 2px solid var(--rc); background: var(--deck); color: var(--moon); }
-.slot .se { font-size: 30px; line-height: 1.1; }
-.slot .sn { font-weight: 700; font-size: 12px; line-height: 1.15; }
-.slot .sl { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.slot .se { font-size: 34px; line-height: 1.15; }
+.slot .sn { font-weight: 700; font-size: 13px; line-height: 1.15; max-width: 100%; overflow-wrap: anywhere; }
+.slot .sl { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.slot .sa { font-size: 11px; color: var(--rc); font-weight: 700; }
+.slot.empty { border-color: var(--good); color: var(--good); }
 .slot.locked { opacity: .5; }
-.powerline { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; color: var(--dim); }
-.powerline b { color: var(--moon); font-family: var(--f-display); font-size: 16px; }
 .clist { display: flex; flex-direction: column; gap: 8px; }
-.crow { display: flex; gap: 12px; align-items: center; padding: 10px 12px; background: var(--deck); border: 1px solid var(--line); border-left: 4px solid var(--rc); border-radius: 12px; text-align: left; width: 100%; }
-.crow.inteam { background: color-mix(in srgb, var(--deck-2) 70%, var(--deck)); }
-.crow .ce { font-size: 32px; width: 42px; text-align: center; flex: none; }
-.crow .ci { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.crow .cn { font-weight: 700; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
-.crow .cm { font-size: 12px; color: var(--dim); }
-.crow .ctag { font-size: 10px; font-weight: 700; color: var(--venom); text-transform: uppercase; letter-spacing: .08em; }
-.crow .clv { font-family: var(--f-display); font-weight: 700; font-size: 15px; text-align: right; white-space: nowrap; }
-.crow .ready { color: var(--gold); font-size: 10px; display: block; text-transform: uppercase; letter-spacing: .06em; }
-.crow.unknown .ce { filter: grayscale(1) brightness(.4); }
-.crow.unknown .cn { color: var(--dim); }
+.crow { display: flex; gap: 12px; align-items: center; padding: 12px; background: var(--deck); border: 1px solid var(--line); border-left: 4px solid var(--rc); border-radius: 14px; text-align: left; width: 100%; }
+.crow .ce { font-size: 34px; width: 44px; text-align: center; flex: none; }
+.crow .ci { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.crow .cn { font-weight: 700; font-size: 16px; }
+.crow .cm { font-size: 13px; color: var(--dim); }
+.crow .clv { font-family: var(--f-display); font-weight: 700; font-size: 16px; text-align: right; white-space: nowrap; }
+.flag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--gold); color: var(--gold-ink); margin-top: 3px; }
 
 /* ---------- Modal ---------- */
-.modal-bg { position: fixed; inset: 0; z-index: 50; background: color-mix(in srgb, var(--night) 84%, transparent); display: flex; align-items: center; justify-content: center;
+.modal-bg { position: fixed; inset: 0; z-index: 50; background: color-mix(in srgb, var(--night) 86%, transparent); display: flex; align-items: center; justify-content: center;
   padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); animation: fade .2s ease; }
-.modal { width: 100%; max-width: 420px; max-height: 100%; overflow-y: auto; background: var(--deck); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-.modal h2 { font-size: 21px; }
-.modal p { margin: 0; color: var(--dim); line-height: 1.45; }
+.modal { width: 100%; max-width: 420px; max-height: 100%; overflow-y: auto; background: var(--deck); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.modal h2 { font-size: 22px; }
+.modal p { color: var(--dim); line-height: 1.45; }
 .modal .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .modal .row .btn { flex: 1; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-.bigc { border: 2px solid var(--rc); border-radius: 16px; padding: 14px; text-align: center; background: linear-gradient(170deg, var(--deck-2), var(--deck) 70%); display: flex; flex-direction: column; gap: 6px; }
-.bigc .be { font-size: 60px; line-height: 1.1; }
-.bigc .bn { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
-.bigc .bm { font-size: 12px; color: var(--rc); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
-.bigc .statrow { margin-top: 4px; grid-template-columns: repeat(3, minmax(0,1fr)); }
-.abbox { background: var(--deck-2); border-radius: 12px; padding: 10px 12px; text-align: left; font-size: 13px; line-height: 1.4; }
-.abbox b { color: var(--moon); }
-.abbox .nx { color: var(--venom); }
-.evo { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 26px; }
-.evo span { opacity: .35; } .evo span.on { opacity: 1; }
-.evo i { font-style: normal; font-size: 14px; color: var(--dim); }
-
-/* ---------- Kampf-Auswahl ---------- */
-.zonehead { position: relative; border-radius: 16px; padding: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--deck); margin-top: 10px; }
-.zonehead::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .6; }
-.zonehead > * { position: relative; }
-.zonehead h3 { font-size: 20px; }
-.zonehead p { margin: 4px 0 0; color: var(--dim); font-size: 13px; }
-.stages { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-.stage { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--deck); border: 1px solid var(--line); border-radius: 12px; text-align: left; width: 100%; }
-.stage .sn { font-family: var(--f-display); font-weight: 700; width: 30px; text-align: center; font-size: 17px; flex: none; }
-.stage .si { flex: 1; min-width: 0; }
-.stage .sfoes { font-size: 20px; letter-spacing: 2px; }
-.stage .sm { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.stage .ss { font-size: 12px; font-weight: 700; text-align: right; white-space: nowrap; }
-.stage.boss { border-color: var(--r-l); }
-.stage.cleared .ss { color: var(--venom); }
-.stage.locked { opacity: .4; }
-.stage.next { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
-.odds { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-top: 3px; }
-.odds.easy { background: color-mix(in srgb, var(--venom) 22%, transparent); color: var(--venom); }
-.odds.even { background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold); }
-.odds.hard { background: color-mix(in srgb, var(--hp) 22%, transparent); color: var(--hp); }
-.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; background: var(--deck); border: 1px solid var(--line); border-radius: 12px; width: 100%; text-align: left; }
-.toggle .tt { font-weight: 700; } .toggle .td { font-size: 12px; color: var(--dim); }
-.sw { width: 44px; height: 26px; border-radius: 999px; background: var(--deck-2); position: relative; flex: none; transition: background .2s; }
-.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--dim); transition: transform .2s, background .2s; }
-.sw.on { background: color-mix(in srgb, var(--venom) 45%, var(--deck-2)); }
-.sw.on::after { transform: translateX(18px); background: var(--venom); }
+.mhead { display: flex; gap: 14px; align-items: center; }
+.mhead .me { font-size: 56px; line-height: 1; width: 72px; height: 72px; border-radius: 18px; display: grid; place-items: center; background: var(--deck-2); border: 2px solid var(--rc); flex: none; }
+.mhead .mt { min-width: 0; }
+.mhead .mt h2 { font-size: 22px; }
+.mhead .mt p { font-size: 14px; }
+.box { background: var(--deck-2); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.box .bt { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); font-weight: 700; }
+.box .bb { font-size: 15px; line-height: 1.4; }
+.box .bb b { color: var(--gold); }
+.stats3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.stats3 div { background: var(--deck-2); border-radius: 12px; padding: 10px 4px; text-align: center; }
+.stats3 b { display: block; font-family: var(--f-display); font-size: 20px; font-variant-numeric: tabular-nums; }
+.stats3 span { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+.evorow { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
+.evorow div { text-align: center; border-radius: 12px; padding: 8px 4px; border: 1px solid var(--line); opacity: .45; }
+.evorow div.on { opacity: 1; border-color: var(--rc); background: color-mix(in srgb, var(--rc) 12%, transparent); }
+.evorow .ee { font-size: 28px; line-height: 1.2; }
+.evorow .en { font-size: 12px; font-weight: 700; line-height: 1.15; }
+.evorow .el { font-size: 11px; color: var(--dim); }
+.ablist { display: flex; flex-direction: column; gap: 8px; }
+.abrow { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; background: var(--deck-2); border-radius: 12px; }
+.abrow .lvtag { font-family: var(--f-display); font-weight: 700; font-size: 12px; min-width: 48px; text-align: center; padding: 3px 0; border-radius: 6px; background: var(--gold); color: var(--gold-ink); flex: none; }
+.abrow.locked { opacity: .5; }
+.abrow.locked .lvtag { background: var(--line); color: var(--dim); }
+.abrow .an { font-weight: 700; }
+.abrow .ad { font-size: 13px; color: var(--dim); line-height: 1.35; }
+.steps { display: flex; flex-direction: column; gap: 10px; }
+.steps div { display: flex; gap: 12px; align-items: flex-start; }
+.steps i { font-style: normal; font-family: var(--f-display); font-weight: 700; width: 28px; height: 28px; border-radius: 50%; background: var(--gold); color: var(--gold-ink); display: grid; place-items: center; flex: none; }
+.steps p { color: var(--moon); }
+.steps span { color: var(--dim); font-size: 14px; display: block; }
 
 /* ---------- Talente ---------- */
-.tree { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.branch { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.branch h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--bc); text-align: center; padding-bottom: 4px; border-bottom: 2px solid var(--bc); }
-.branch .bp { font-size: 11px; color: var(--dim); text-align: center; font-variant-numeric: tabular-nums; }
-.tier-lbl { font-size: 10px; color: var(--dim); text-align: center; text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
-.tnode { border: 1px solid var(--line); background: var(--deck); border-radius: 10px; padding: 8px 6px; text-align: center; display: flex; flex-direction: column; gap: 3px; min-height: 62px; justify-content: center; }
-.tnode .tn { font-size: 12px; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
-.tnode .tr { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.tnode.some { border-color: var(--bc); }
-.tnode.max { background: color-mix(in srgb, var(--bc) 18%, var(--deck)); border-color: var(--bc); }
-.tnode.max .tr { color: var(--bc); }
-.tnode.locked { opacity: .4; }
-.tnode.cap { border-width: 2px; border-style: dashed; }
-.tnode.can { box-shadow: 0 0 0 1px var(--venom); }
+.btabs { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
+.btab { background: var(--deck-2); border: 2px solid transparent; border-radius: 12px; padding: 8px 4px; text-align: center; color: var(--dim); }
+.btab b { display: block; font-size: 15px; color: var(--bc); }
+.btab span { font-size: 12px; }
+.btab.on { border-color: var(--bc); background: color-mix(in srgb, var(--bc) 12%, var(--deck)); }
+.tier { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); font-weight: 700; margin-top: 4px; }
+.trow { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--deck); border: 1px solid var(--line); border-radius: 14px; }
+.trow .tinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.trow .tname { font-weight: 700; }
+.trow .tdesc { font-size: 14px; color: var(--dim); line-height: 1.35; }
+.trow .tdesc em { font-style: normal; color: var(--good); }
+.pips { display: flex; gap: 4px; margin-top: 2px; }
+.pips i { width: 16px; height: 6px; border-radius: 3px; background: var(--deck-2); }
+.pips i.on { background: var(--bc); }
+.plus { width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--good); color: var(--night); font-size: 26px; font-weight: 700; line-height: 1; flex: none; }
+.plus[disabled] { background: var(--deck-2); color: var(--dim); opacity: .6; }
+.trow.locked { opacity: .45; }
+.trow.maxed { border-color: var(--bc); }
 
 /* ---------- Shop ---------- */
 .offer { display: flex; align-items: center; gap: 14px; }
-.offer + .offer { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
-.packart { width: 60px; height: 80px; border-radius: 10px; flex: none; display: grid; place-items: center; font-size: 22px; color: var(--moon); border: 2px solid var(--moon); background: linear-gradient(150deg, var(--r-e), var(--r-r) 60%, var(--night)); }
+.offer + .offer { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.packart { width: 62px; height: 84px; border-radius: 12px; flex: none; display: grid; place-items: center; font-size: 22px; color: var(--moon); border: 2px solid var(--moon); background: linear-gradient(150deg, var(--r-e), var(--r-r) 60%, var(--night)); }
 .packart.big { background: linear-gradient(150deg, var(--r-l), var(--r-e) 55%, var(--night)); }
-.packart.dustart { background: linear-gradient(150deg, var(--shield), var(--deck-2) 70%); }
-.offer .oi { flex: 1; min-width: 0; }
-.offer h3 { font-size: 16px; }
-.offer p { margin: 2px 0 8px; color: var(--dim); font-size: 13px; line-height: 1.35; }
+.offer .oi { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.offer h3 { font-size: 17px; }
+.offer p { color: var(--dim); font-size: 14px; line-height: 1.35; }
+.oddsline { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 14px; }
 
 /* ---------- Kampf ---------- */
 #battle { position: fixed; inset: 0; z-index: 20; background: var(--night); display: flex; justify-content: center;
   padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
 #battle::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .45; pointer-events: none; }
-.bwrap { position: relative; width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; }
-.b-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-block: 10px 4px; }
-.b-top .bz { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .1em; font-size: 12px; color: var(--dim); }
-.b-top .round { font-family: var(--f-display); font-weight: 700; font-size: 15px; }
+.bwrap { position: relative; width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; gap: 6px; }
+.b-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-block: 10px 0; }
+.b-top .bz { font-size: 13px; color: var(--dim); }
+.b-top .round { font-family: var(--f-display); font-weight: 700; font-size: 18px; }
 .speeds { display: flex; gap: 4px; }
-.speeds button { background: var(--deck-2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px; font-weight: 700; font-size: 12px; color: var(--dim); }
+.speeds button { background: var(--deck-2); border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; font-weight: 700; font-size: 13px; color: var(--dim); }
 .speeds button.on { background: var(--moon); color: var(--night); }
+.sidelabel { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 700; text-align: center; }
+.sidelabel.foe { color: var(--hp); } .sidelabel.own { color: var(--good); }
 .side { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.b-enemies { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
-.b-mid { text-align: center; font-size: 13px; color: var(--dim); min-height: 22px; padding-block: 6px; }
-.b-team { padding-bottom: 12px; }
+.b-enemies { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.b-log { text-align: center; font-size: 15px; font-weight: 600; min-height: 46px; padding: 8px 12px; background: color-mix(in srgb, var(--deck) 85%, transparent); border: 1px solid var(--line); border-radius: 12px; display: grid; place-items: center; }
+.b-team { padding-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
 .b-team .side { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); }
 .unit { position: relative; border-radius: 12px; background: var(--deck); border: 1px solid var(--line); padding: 6px 5px 7px; text-align: center; display: flex; flex-direction: column; gap: 3px; transition: transform .15s ease, opacity .3s, filter .3s; min-width: 0; }
-.b-enemies .unit { width: 100px; padding: 8px 6px; }
+.b-enemies .unit { width: 104px; padding: 8px 6px; border-color: color-mix(in srgb, var(--hp) 40%, var(--line)); }
 .unit .ue { font-size: 30px; line-height: 1.15; }
 .b-enemies .unit .ue { font-size: 46px; }
-.b-enemies .unit.boss { width: 132px; border-color: var(--r-l); }
+.b-enemies .unit.boss { width: 136px; border-color: var(--r-l); }
 .b-enemies .unit.boss .ue { font-size: 64px; }
 .unit.hero { border: 2px solid var(--gold); }
-.unit .un { font-size: 10.5px; font-weight: 600; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.unit .uhp { height: 6px; background: var(--deck-2); border-radius: 3px; overflow: hidden; position: relative; }
+.unit .un { font-size: 11px; font-weight: 600; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unit .uhp { height: 7px; background: var(--deck-2); border-radius: 4px; overflow: hidden; position: relative; }
 .unit .uhp i { display: block; height: 100%; background: var(--hp); transition: width .25s ease; }
-.unit .ush { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--shield) 75%, transparent); transition: width .25s; width: 0; }
-.unit .uv { font-size: 10px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.unit .ust { position: absolute; top: 2px; right: 4px; font-size: 11px; }
-.unit.act { transform: translateY(-6px) scale(1.06); border-color: var(--moon); }
+.unit .ush { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--shield) 80%, transparent); transition: width .25s; width: 0; }
+.unit .uv { font-size: 11px; color: var(--moon); font-weight: 600; font-variant-numeric: tabular-nums; }
+.unit .ust { position: absolute; top: 2px; right: 4px; font-size: 12px; }
+.unit.act { transform: translateY(-6px) scale(1.06); border-color: var(--moon); box-shadow: 0 0 0 2px var(--moon); }
 .b-enemies .unit.act { transform: translateY(6px) scale(1.06); }
 .unit.hurt { animation: shake .3s; }
 .unit.dead { opacity: .25; filter: grayscale(1); }
@@ -271,35 +291,35 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; lette
 @keyframes shake { 0%,100% { translate: 0; } 25% { translate: -6px 0; } 50% { translate: 5px 0; } 75% { translate: -3px 0; } }
 @keyframes pop { 0% { transform: scale(.6); } 70% { transform: scale(1.15); } }
 #fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.float { position: absolute; font-family: var(--f-display); font-weight: 700; font-size: 18px; text-shadow: 0 2px 5px rgba(0,0,0,.85); animation: floatup .9s ease-out forwards; transform: translateX(-50%); white-space: nowrap; }
-.float.dmg { color: var(--moon); } .float.crit { color: var(--gold); font-size: 24px; } .float.heal { color: var(--venom); } .float.sh { color: var(--shield); } .float.miss { color: var(--dim); font-size: 14px; } .float.dot { color: var(--venom); font-size: 15px; } .float.info { color: var(--gold); font-size: 14px; }
+.float { position: absolute; font-family: var(--f-display); font-weight: 700; font-size: 19px; text-shadow: 0 2px 5px rgba(0,0,0,.85); animation: floatup .9s ease-out forwards; transform: translateX(-50%); white-space: nowrap; }
+.float.dmg { color: var(--moon); } .float.crit { color: var(--gold); font-size: 25px; } .float.heal { color: var(--good); } .float.sh { color: var(--shield); } .float.miss { color: var(--dim); font-size: 14px; } .float.dot { color: var(--good); font-size: 16px; } .float.info { color: var(--gold); font-size: 14px; }
 @keyframes floatup { from { opacity: 1; margin-top: 0; } to { opacity: 0; margin-top: -46px; } }
-.banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%); font-family: var(--f-display); font-weight: 700; font-size: 18px; color: var(--gold); text-shadow: 0 2px 10px rgba(0,0,0,.9); animation: bannerin 1.1s ease forwards; white-space: nowrap; pointer-events: none; }
-@keyframes bannerin { 0% { opacity: 0; scale: .7; } 20% { opacity: 1; scale: 1.05; } 80% { opacity: 1; } 100% { opacity: 0; } }
+.legend { display: flex; justify-content: center; gap: 12px; font-size: 11px; color: var(--dim); flex-wrap: wrap; }
+.legend i { display: inline-block; width: 10px; height: 6px; border-radius: 3px; margin-right: 4px; vertical-align: 1px; }
 
 /* Ergebnis */
 .result-head { text-align: center; display: flex; flex-direction: column; gap: 6px; }
-.result-head h2 { font-size: 28px; }
+.result-head h2 { font-size: 30px; }
 .result-head.win h2 { color: var(--gold); } .result-head.lose h2 { color: var(--hp); }
-.gains { display: flex; gap: 14px; justify-content: center; font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.gains { display: flex; gap: 16px; justify-content: center; font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
 .gains .x { color: var(--xp); }
-.lvup { text-align: center; background: color-mix(in srgb, var(--gold) 14%, var(--deck)); border: 1px solid var(--gold); border-radius: 12px; padding: 10px; animation: pop .5s ease; }
-.lvup b { font-family: var(--f-display); font-size: 19px; color: var(--gold); display: block; }
-.lvup span { font-size: 13px; color: var(--moon); display: block; margin-top: 2px; }
-.cgain { display: flex; flex-direction: column; gap: 6px; }
-.cg { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-.cg .ge { font-size: 22px; width: 28px; text-align: center; }
-.cg .gb { flex: 1; min-width: 0; }
-.cg .gl { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.cg .gl.up { color: var(--venom); }
-.drop { text-align: center; border: 2px solid var(--rc); border-radius: 14px; padding: 12px; animation: pop .5s ease; }
+.lvup { text-align: center; background: color-mix(in srgb, var(--gold) 14%, var(--deck)); border: 1px solid var(--gold); border-radius: 14px; padding: 12px; animation: pop .5s ease; }
+.lvup b { font-family: var(--f-display); font-size: 21px; color: var(--gold); display: block; }
+.lvup span { font-size: 14px; color: var(--moon); display: block; margin-top: 3px; }
+.cg { display: grid; grid-template-columns: 30px minmax(0,1fr) auto; align-items: center; gap: 4px 10px; font-size: 14px; }
+.cg .ge { font-size: 24px; grid-row: span 2; text-align: center; }
+.cg .gn { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cg .gl { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.cg .gl.up { color: var(--good); }
+.cg .bar { grid-column: 2 / 4; height: 6px; }
+.drop { text-align: center; border: 2px solid var(--rc); border-radius: 16px; padding: 12px; animation: pop .5s ease; }
 .drop .de { font-size: 46px; }
-.drop .dn { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
-.drop .dm { font-size: 12px; color: var(--dim); }
-.autoline { text-align: center; font-size: 13px; color: var(--venom); }
+.drop .dn { font-family: var(--f-display); font-weight: 700; font-size: 18px; }
+.drop .dm { font-size: 13px; color: var(--dim); }
+.autoline { text-align: center; font-size: 14px; color: var(--good); }
 
 #toasts { position: fixed; z-index: 80; left: 0; right: 0; top: calc(env(safe-area-inset-top, 0px) + 10px); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; padding: 0 16px; }
-.toast { background: var(--moon); color: var(--night); font-weight: 700; font-size: 14px; padding: 9px 14px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.4); animation: tin .3s ease, tout .3s ease 2.4s forwards; max-width: 420px; text-align: center; }
+.toast { background: var(--moon); color: var(--night); font-weight: 700; font-size: 15px; padding: 10px 16px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.4); animation: tin .3s ease, tout .3s ease 2.4s forwards; max-width: 420px; text-align: center; }
 @keyframes tin { from { transform: translateY(-20px); opacity: 0; } }
 @keyframes tout { to { transform: translateY(-20px); opacity: 0; } }
 
@@ -307,9 +327,8 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; lette
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
 }
 @media (max-width: 360px) {
-  .b-enemies .unit { width: 86px; }
-  .tree { gap: 5px; }
-  .tnode .tn { font-size: 11px; }
+  .b-enemies .unit { width: 88px; }
+  .nf-foes { font-size: 36px; }
 }
 </style>
 </head>
@@ -357,30 +376,30 @@ const ROLES = {
 
 // Fähigkeiten: v = Wert je Entwicklungsstufe
 const AB = {
-  taunt:     { n:"Spott",        v:[.15,.25,.35], d:v => `Zieht die meisten Angriffe auf sich und erleidet ${pct(v)} weniger Schaden.` },
-  shieldTeam:{ n:"Schutzfeld",   v:[.2,.32,.45],  d:v => `Kampfbeginn: Alle Verbündeten erhalten einen Schild von ${pct(v)} ihrer Max-HP.` },
-  heal:      { n:"Reparatur",    v:[1.6,2.2,3],   d:v => `Heilt den schwächsten Verbündeten um ${pct(v)} ATK, sobald jemand unter 75 % HP fällt.` },
-  aoe:       { n:"Kettenblitz",  v:[.9,1.2,1.6],  d:v => `Jede 3. Runde: ${pct(v)} ATK Schaden an allen Gegnern.` },
-  poison:    { n:"Sporengift",   v:[.3,.45,.6],   d:v => `Treffer vergiften: ${pct(v)} ATK Schaden pro Runde, 3 Runden lang.` },
-  crit:      { n:"Funkeln",      v:[.25,.35,.5],  d:v => `${pct(v)} Chance auf kritische Treffer.` },
-  lifesteal: { n:"Blutdurst",    v:[.35,.5,.7],   d:v => `Heilt sich um ${pct(v)} des verursachten Schadens.` },
-  stun:      { n:"Frost",        v:[.18,.25,.33], d:v => `${pct(v)} Chance, das Ziel eine Runde einzufrieren.` },
-  aura:      { n:"Schlachtruf",  v:[.08,.13,.2],  d:v => `Alle Verbündeten erhalten +${pct(v)} ATK.` },
-  revive:    { n:"Wiedergeburt", v:[.3,.5,.75],   d:v => `Belebt den ersten gefallenen Verbündeten mit ${pct(v)} HP wieder.` },
-  execute:   { n:"Hinrichtung",  v:[.6,1,1.5],    d:v => `+${pct(v)} Schaden gegen Gegner unter 35 % HP.` },
+  taunt:     { n:"Spott",        v:[.15,.25,.35], d:v => `Lockt die Gegner an und nimmt ${pct(v)} weniger Schaden.` },
+  shieldTeam:{ n:"Schutzfeld",   v:[.2,.32,.45],  d:v => `Zu Kampfbeginn bekommt das ganze Team einen Schild von ${pct(v)} seiner Lebenspunkte.` },
+  heal:      { n:"Reparatur",    v:[1.6,2.2,3],   d:v => `Heilt das schwächste Teammitglied, sobald jemand verletzt ist (${pct(v)} des Angriffs).` },
+  aoe:       { n:"Kettenblitz",  v:[.9,1.2,1.6],  d:v => `Jede 3. Runde trifft sie alle Gegner gleichzeitig (${pct(v)} des Angriffs).` },
+  poison:    { n:"Sporengift",   v:[.3,.45,.6],   d:v => `Treffer vergiften: 3 Runden lang ${pct(v)} des Angriffs als Schaden.` },
+  crit:      { n:"Funkeln",      v:[.25,.35,.5],  d:v => `${pct(v)} Chance auf doppelten Schaden.` },
+  lifesteal: { n:"Blutdurst",    v:[.35,.5,.7],   d:v => `Heilt sich bei jedem Treffer um ${pct(v)} des Schadens.` },
+  stun:      { n:"Frost",        v:[.18,.25,.33], d:v => `${pct(v)} Chance, das Ziel einzufrieren. Es setzt dann eine Runde aus.` },
+  aura:      { n:"Schlachtruf",  v:[.08,.13,.2],  d:v => `Das ganze Team macht ${pct(v)} mehr Schaden.` },
+  revive:    { n:"Wiedergeburt", v:[.3,.5,.75],   d:v => `Holt das erste gefallene Teammitglied mit ${pct(v)} Leben zurück.` },
+  execute:   { n:"Hinrichtung",  v:[.6,1,1.5],    d:v => `${pct(v)} mehr Schaden gegen fast besiegte Gegner.` },
   double:    { n:"Schattenhieb", v:[.3,.45,.6],   d:v => `${pct(v)} Chance, zweimal anzugreifen.` },
-  thorns:    { n:"Stacheln",     v:[.25,.4,.6],   d:v => `Wirft ${pct(v)} des erlittenen Schadens auf den Angreifer zurück.` },
-  dodge:     { n:"Ausweichen",   v:[.18,.26,.35], d:v => `${pct(v)} Chance, Angriffen auszuweichen.` },
-  rage:      { n:"Wut",          v:[.07,.1,.14],  d:v => `Jeder eigene Angriff erhöht die ATK um ${pct(v)}.` },
-  burn:      { n:"Plasmabrand",  v:[.35,.5,.7],   d:v => `Kampfbeginn: Alle Gegner brennen 4 Runden lang für ${pct(v)} ATK pro Runde.` },
-  luck:      { n:"Goldnase",     v:[.15,.25,.4],  d:v => `Nach Siegen +${pct(v)} Münzen und Sternenstaub.` },
-  wisdom:    { n:"Weisheit",     v:[.1,.16,.25],  d:v => `Nach jedem Kampf +${pct(v)} EP für Held und Team.` },
-  martyr:    { n:"Explosion",    v:[2,3,4.5],     d:v => `Beim Fallen: ${pct(v)} ATK Schaden an allen Gegnern.` },
-  snipe:     { n:"Zielfernrohr", v:[.25,.4,.6],   d:v => `Greift immer den schwächsten Gegner an, mit +${pct(v)} Schaden.` },
-  barrier:   { n:"Bollwerk",     v:[1.8,2.6,3.6], d:v => `Jede 2. Runde: Schild von ${pct(v)} ATK für den schwächsten Verbündeten.` },
-  shred:     { n:"Säure",        v:[.06,.09,.13], d:v => `Jeder Treffer lässt das Ziel dauerhaft ${pct(v)} mehr Schaden nehmen (stapelbar).` },
-  dragon:    { n:"Drachenatem",  v:[1,1.4,1.9],   d:v => `Jede 3. Runde: ${pct(v)} ATK an allen Gegnern, die danach 3 Runden brennen.` },
-  divine:    { n:"Segen",        v:[.7,1,1.4],    d:v => `Heilt jede Runde alle Verbündeten um ${pct(v)} ATK, statt anzugreifen.` }
+  thorns:    { n:"Stacheln",     v:[.25,.4,.6],   d:v => `Wer sie angreift, bekommt ${pct(v)} des Schadens zurück.` },
+  dodge:     { n:"Ausweichen",   v:[.18,.26,.35], d:v => `${pct(v)} Chance, einem Angriff auszuweichen.` },
+  rage:      { n:"Wut",          v:[.07,.1,.14],  d:v => `Wird mit jedem eigenen Angriff ${pct(v)} stärker.` },
+  burn:      { n:"Plasmabrand",  v:[.35,.5,.7],   d:v => `Setzt zu Kampfbeginn alle Gegner 4 Runden lang in Brand (${pct(v)} des Angriffs pro Runde).` },
+  luck:      { n:"Goldnase",     v:[.15,.25,.4],  d:v => `Nach jedem Sieg ${pct(v)} mehr Münzen.` },
+  wisdom:    { n:"Weisheit",     v:[.1,.16,.25],  d:v => `Nach jedem Kampf ${pct(v)} mehr EP für Held und Team.` },
+  martyr:    { n:"Explosion",    v:[2,3,4.5],     d:v => `Explodiert beim Fallen und trifft alle Gegner (${pct(v)} des Angriffs).` },
+  snipe:     { n:"Zielfernrohr", v:[.25,.4,.6],   d:v => `Greift immer den schwächsten Gegner an und macht ${pct(v)} mehr Schaden.` },
+  barrier:   { n:"Bollwerk",     v:[1.8,2.6,3.6], d:v => `Jede 2. Runde bekommt das schwächste Teammitglied einen Schild (${pct(v)} des Angriffs).` },
+  shred:     { n:"Säure",        v:[.06,.09,.13], d:v => `Jeder Treffer macht das Ziel dauerhaft ${pct(v)} verwundbarer.` },
+  dragon:    { n:"Drachenatem",  v:[1,1.4,1.9],   d:v => `Jede 3. Runde trifft er alle Gegner (${pct(v)} des Angriffs) und setzt sie in Brand.` },
+  divine:    { n:"Segen",        v:[.7,1,1.4],    d:v => `Greift nicht an, heilt aber jede Runde das ganze Team (${pct(v)} des Angriffs).` }
 };
 
 // Begleiter mit drei Entwicklungsstufen
@@ -415,45 +434,49 @@ const STARTER = ["kiesel", "funkel", "sani"];
 
 // Heldenfähigkeiten, die mit dem Level automatisch dazukommen
 const HERO_AB = [
-  { lv:1,  n:"Kurierschlag",      d:"Normaler Angriff auf einen Gegner." },
-  { lv:5,  k:"hShield", n:"Mondschild",       d:"Kampfbeginn: Alle Verbündeten erhalten 12 % der Helden-HP als Schild." },
-  { lv:10, k:"hRain",   n:"Sternenregen",     d:"Jede 4. Runde: 130 % ATK Schaden an allen Gegnern." },
-  { lv:15, k:"hRegen",  n:"Ausdauer",         d:"Der Held heilt sich jede Runde um 4 % seiner Max-HP." },
-  { lv:20, k:"hRevive", n:"Zweiter Atem",     d:"Einmal pro Kampf: Steht nach dem Fallen mit 40 % HP wieder auf." },
-  { lv:25, k:"hStun",   n:"Gravitationswelle",d:"Jede 5. Runde: Alle Gegner setzen eine Runde aus." },
-  { lv:30, k:"hAura",   n:"Vollmond",         d:"Alle Verbündeten erhalten +15 % ATK." },
-  { lv:40, k:"hCrit",   n:"Kometenkern",      d:"+25 % Krit-Chance, kritische Treffer machen 2,5-fachen Schaden." },
-  { lv:50, k:"hNova",   n:"Supernova",        d:"Jede 6. Runde: 300 % ATK Schaden an allen Gegnern." }
+  { lv:1,  n:"Kurierschlag",      d:"Greift jede Runde einen Gegner an." },
+  { lv:5,  k:"hShield", n:"Mondschild",       d:"Zu Kampfbeginn bekommt das ganze Team einen Schild." },
+  { lv:10, k:"hRain",   n:"Sternenregen",     d:"Jede 4. Runde trifft der Held alle Gegner gleichzeitig." },
+  { lv:15, k:"hRegen",  n:"Ausdauer",         d:"Der Held heilt sich jede Runde ein wenig." },
+  { lv:20, k:"hRevive", n:"Zweiter Atem",     d:"Fällt der Held, steht er einmal pro Kampf wieder auf." },
+  { lv:25, k:"hStun",   n:"Gravitationswelle",d:"Jede 5. Runde setzen alle Gegner eine Runde aus." },
+  { lv:30, k:"hAura",   n:"Vollmond",         d:"Das ganze Team macht 15 % mehr Schaden." },
+  { lv:40, k:"hCrit",   n:"Kometenkern",      d:"Der Held trifft viel öfter kritisch, mit 2,5-fachem Schaden." },
+  { lv:50, k:"hNova",   n:"Supernova",        d:"Jede 6. Runde ein gewaltiger Treffer gegen alle Gegner." }
 ];
-const HERO_TITLES = [[1,"Kurierlehrling","var(--r-c)"],[10,"Mondkurier","var(--r-r)"],[20,"Sternenbote","var(--venom)"],[30,"Kometenmeister","var(--r-e)"],[40,"Hüter der Umlaufbahn","var(--shield)"],[50,"Legende des Mondes","var(--r-l)"]];
+const HERO_TITLES = [[1,"Kurierlehrling","var(--r-c)"],[10,"Mondkurier","var(--r-r)"],[20,"Sternenbote","var(--good)"],[30,"Kometenmeister","var(--r-e)"],[40,"Hüter der Umlaufbahn","var(--shield)"],[50,"Legende des Mondes","var(--r-l)"]];
 const heroTitle = L => HERO_TITLES.filter(t => t[0] <= L).pop();
 
 // Talentbaum: Stufe t braucht 5·t Punkte im selben Zweig
 const TALENTS = [
-  { b:"a", id:"a1", t:0, max:5, n:"Scharfe Klingen", d:r => `Team +${r*4} % ATK` },
-  { b:"a", id:"a2", t:0, max:5, n:"Präzision",       d:r => `Team +${r*3} % Krit-Chance` },
-  { b:"a", id:"a3", t:1, max:5, n:"Wucht",           d:r => `Kritische Treffer +${r*15} % Schaden` },
-  { b:"a", id:"a4", t:1, max:5, n:"Erstschlag",      d:r => `+${r*10} % Schaden in den Runden 1 und 2` },
-  { b:"a", id:"a5", t:2, max:5, n:"Kurierzorn",      d:r => `Held +${r*8} % ATK` },
-  { b:"a", id:"a6", t:2, max:5, n:"Bossjäger",       d:r => `+${r*6} % Schaden gegen Bosse` },
-  { b:"a", id:"a7", t:3, max:1, n:"Sternenfall",     d:r => `Der Held trifft jede 3. Runde alle Gegner mit 100 % ATK`, cap:1 },
-  { b:"d", id:"d1", t:0, max:5, n:"Panzerung",       d:r => `Team +${r*5} % HP` },
-  { b:"d", id:"d2", t:0, max:5, n:"Schildgenerator", d:r => `Kampfbeginn: Schild von ${r*4} % Max-HP für alle` },
-  { b:"d", id:"d3", t:1, max:5, n:"Nanoheilung",     d:r => `Team heilt ${(r*1.5).toLocaleString("de-DE")} % Max-HP pro Runde` },
-  { b:"d", id:"d4", t:1, max:5, n:"Ausweichmanöver", d:r => `Team +${r*2} % Ausweichen` },
-  { b:"d", id:"d5", t:2, max:5, n:"Heldenrüstung",   d:r => `Held erleidet ${r*5} % weniger Schaden` },
-  { b:"d", id:"d6", t:2, max:5, n:"Dornenhülle",     d:r => `Team wirft ${r*5} % des Schadens zurück` },
-  { b:"d", id:"d7", t:3, max:1, n:"Unbeugsam",       d:r => `Der Held überlebt einen tödlichen Treffer mit 1 HP und erhält 30 % Schild`, cap:1 },
-  { b:"k", id:"k1", t:0, max:5, n:"Schnelllerner",   d:r => `+${r*6} % Helden-EP` },
-  { b:"k", id:"k2", t:0, max:5, n:"Kartentrainer",   d:r => `+${r*8} % Karten-EP` },
-  { b:"k", id:"k3", t:1, max:5, n:"Goldader",        d:r => `+${r*10} % Münzen` },
-  { b:"k", id:"k4", t:1, max:5, n:"Staubsammler",    d:r => `+${r*10} % Sternenstaub` },
-  { b:"k", id:"k5", t:2, max:5, n:"Glückspilz",      d:r => `+${r*2} % Chance auf Kartenfunde` },
-  { b:"k", id:"k6", t:2, max:5, n:"Mentor",          d:r => `Karten außerhalb des Teams erhalten ${r*10} % der Kampf-EP` },
-  { b:"k", id:"k7", t:3, max:1, n:"Sternenstunde",   d:r => `+25 % EP für Held und alle Karten`, cap:1 }
+  { b:"a", id:"a1", t:0, max:5, n:"Scharfe Klingen", d:r => `Team macht ${r*4} % mehr Schaden` },
+  { b:"a", id:"a2", t:0, max:5, n:"Präzision",       d:r => `Team trifft ${r*3} % öfter kritisch` },
+  { b:"a", id:"a3", t:1, max:5, n:"Wucht",           d:r => `Kritische Treffer machen ${r*15} % mehr Schaden` },
+  { b:"a", id:"a4", t:1, max:5, n:"Erstschlag",      d:r => `${r*10} % mehr Schaden in den ersten 2 Runden` },
+  { b:"a", id:"a5", t:2, max:5, n:"Kurierzorn",      d:r => `Held macht ${r*8} % mehr Schaden` },
+  { b:"a", id:"a6", t:2, max:5, n:"Bossjäger",       d:r => `${r*6} % mehr Schaden gegen Bosse` },
+  { b:"a", id:"a7", t:3, max:1, n:"Sternenfall",     d:r => `Held trifft jede 3. Runde alle Gegner` },
+  { b:"d", id:"d1", t:0, max:5, n:"Panzerung",       d:r => `Team hat ${r*5} % mehr Leben` },
+  { b:"d", id:"d2", t:0, max:5, n:"Schildgenerator", d:r => `Schild zu Kampfbeginn: ${r*4} % der Lebenspunkte` },
+  { b:"d", id:"d3", t:1, max:5, n:"Nanoheilung",     d:r => `Team heilt ${(r*1.5).toLocaleString("de-DE")} % Leben pro Runde` },
+  { b:"d", id:"d4", t:1, max:5, n:"Ausweichmanöver", d:r => `Team weicht ${r*2} % der Angriffe aus` },
+  { b:"d", id:"d5", t:2, max:5, n:"Heldenrüstung",   d:r => `Held nimmt ${r*5} % weniger Schaden` },
+  { b:"d", id:"d6", t:2, max:5, n:"Dornenhülle",     d:r => `Angreifer bekommen ${r*5} % des Schadens zurück` },
+  { b:"d", id:"d7", t:3, max:1, n:"Unbeugsam",       d:r => `Held überlebt einmal pro Kampf einen tödlichen Treffer` },
+  { b:"k", id:"k1", t:0, max:5, n:"Schnelllerner",   d:r => `${r*6} % mehr EP für den Helden` },
+  { b:"k", id:"k2", t:0, max:5, n:"Kartentrainer",   d:r => `${r*8} % mehr EP für Karten` },
+  { b:"k", id:"k3", t:1, max:5, n:"Goldader",        d:r => `${r*10} % mehr Münzen` },
+  { b:"k", id:"k4", t:1, max:5, n:"Trainingsrabatt", d:r => `Training kostet ${r*8} % weniger` },
+  { b:"k", id:"k5", t:2, max:5, n:"Glückspilz",      d:r => `${r*2} % höhere Chance auf Kartenfunde` },
+  { b:"k", id:"k6", t:2, max:5, n:"Mentor",          d:r => `Karten auf der Bank lernen ${r*10} % mit` },
+  { b:"k", id:"k7", t:3, max:1, n:"Sternenstunde",   d:r => `25 % mehr EP für Held und alle Karten` }
 ];
 const TM = Object.fromEntries(TALENTS.map(t => [t.id, t]));
-const BRANCHES = [ { k:"a", n:"Angriff", c:"var(--t-a)" }, { k:"d", n:"Abwehr", c:"var(--t-d)" }, { k:"k", n:"Kurier", c:"var(--t-k)" } ];
+const BRANCHES = [
+  { k:"a", n:"Angriff", c:"var(--t-a)", d:"Mehr Schaden" },
+  { k:"d", n:"Abwehr",  c:"var(--t-d)", d:"Mehr Überleben" },
+  { k:"k", n:"Kurier",  c:"var(--t-k)", d:"Schneller leveln" }
+];
 
 // Gegner je Zone: [Name, Emoji, Rolle, Fähigkeit, Fähigkeitsstufe]
 const ZONES = [
@@ -473,7 +496,7 @@ const ZONES = [
     en:[["Leerenwandler","🌑","krieger","lifesteal",2],["Zeitverzerrer","⌛","support","shieldTeam",2],["Gravitonbestie","🐙","tank","taunt",2],["Schattenjäger","👤","schuetze","double",2]],
     boss:["Ereignishorizont","🕳️","magier","dragon",2], w:{c:10,r:35,e:38,l:17} }
 ];
-// Gegnerstärke je Etappe (per Simulation abgestimmt)
+// Gegnerstärke je Etappe (per Simulation abgestimmt: ca. 70 % Siegchance auf dem empfohlenen Level)
 const EK = [2.88,3.31,1.47,2.44,1.98,1.67,1.82,2.12,1.98,2.31,6.45,8.29,3.85,3.62,4.2,3.17,3.14,3.18,4.21,3.37,13.55,15.66,5.84,7.32,6.49,5.48,4.57,5.43,4.9,2.97,15.84,16.33,9.14,10.52,10.05,7.17,8.86,9.93,8.75,6.13,23.7,22.85,11.14,11.51,11.45,8.79,7.27,8,7.74,4.57];
 
 /* =========================================================
@@ -482,19 +505,27 @@ const EK = [2.88,3.31,1.47,2.44,1.98,1.67,1.82,2.12,1.98,2.31,6.45,8.29,3.85,3.6
 const KEY = "sternenkarten-v2";
 function defSave() {
   const cards = {}; STARTER.forEach(id => cards[id] = { l:1, xp:0, st:0 });
-  return { v:2, lv:1, xp:0, tp:0, tal:{}, co:50, dust:0, cards, team:["kiesel","funkel"], prog:0, zone:0, auto:false,
+  return { v:2, lv:1, xp:0, tp:0, tal:{}, co:50, cards, team:["kiesel","funkel"], prog:0, zone:0, auto:false,
     stats:{ wins:0, losses:0 }, seen:false };
 }
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const o = JSON.parse(raw); if (o && o.v === 2) { const d = defSave(); return { ...d, ...o, stats:{ ...d.stats, ...o.stats } }; } }
+    if (raw) {
+      const o = JSON.parse(raw);
+      if (o && o.v === 2) {
+        const d = defSave(), s = { ...d, ...o, stats:{ ...d.stats, ...o.stats } };
+        if (s.dust) { s.co += s.dust; delete s.dust; }           // alter Sternenstaub wird zu Münzen
+        if (s.tal.k4 && !TM.k4) delete s.tal.k4;
+        return s;
+      }
+    }
   } catch (e) {}
   return defSave();
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 let S = null;
-const UI = { tab:"hero" };
+const UI = { tab:"home", branch:"a", speed:1 };
 let B = null;
 
 /* =========================================================
@@ -507,7 +538,7 @@ function talentFx(st = S) {
   return {
     atk:t("a1")*.04, crit:t("a2")*.03, critDmg:t("a3")*.15, first:t("a4")*.1, heroAtk:t("a5")*.08, boss:t("a6")*.06, fall:t("a7"),
     hp:t("d1")*.05, shield:t("d2")*.04, regen:t("d3")*.015, dodge:t("d4")*.02, heroDr:t("d5")*.05, thorns:t("d6")*.05, unb:t("d7"),
-    xp:t("k1")*.06 + t("k7")*.25, cardXp:t("k2")*.08 + t("k7")*.25, coins:t("k3")*.1, dust:t("k4")*.1, drop:t("k5")*.02, mentor:t("k6")*.1
+    xp:t("k1")*.06 + t("k7")*.25, cardXp:t("k2")*.08 + t("k7")*.25, coins:t("k3")*.1, train:t("k4")*.08, drop:t("k5")*.02, mentor:t("k6")*.1
   };
 }
 const heroHas = (k, L = S.lv) => HERO_AB.some(a => a.k === k && a.lv <= L);
@@ -524,8 +555,8 @@ const cardCap = (c, st = S) => Math.min(st.lv, STAGE_CAP[c.st]);
 const form = (id, stg) => CC[id].f[stg];
 const evoCost = (id, toStage) => Math.round(EVO_COST[toStage] * RAR[CC[id].r].cost);
 const packPrice = () => Math.round(100 * Math.pow(1.08, S.lv - 1));
-const dustOffer = () => Math.round(60 * Math.pow(1.09, S.lv - 1));
 const resetPrice = () => Math.round(200 * Math.pow(1.06, S.lv - 1));
+const trainCost = c => Math.max(1, Math.round((cardNeed(c.l) - c.xp) * .7 * (1 - talentFx().train)));
 const unitPower = u => Math.sqrt(u.max * u.atk) * (1 + (u.ab ? .15 : 0));
 
 /* =========================================================
@@ -580,11 +611,11 @@ function simulate(P, E, T) {
   let round = 0;
 
   const addShield = (u, v) => { u.shield += v; ev.push({ t:"sh", ...snap(u), v:Math.round(v) }); };
-  const heal = (u, v) => { if (!u.alive) return; const b = u.hp; u.hp = Math.min(u.max, u.hp + v); const g = Math.round(u.hp - b); if (g > 0) ev.push({ t:"heal", ...snap(u), v:g }); };
+  const heal = (u, v, src) => { if (!u.alive) return; const b = u.hp; u.hp = Math.min(u.max, u.hp + v); const g = Math.round(u.hp - b); if (g > 0) ev.push({ t:"heal", a:src && src.uid, ...snap(u), v:g }); };
   function kill(u) {
     if (u.hp > 0 || !u.alive) return;
-    if (u.hero && T.unb && !u.unbUsed) { u.unbUsed = true; u.hp = 1; u.shield += u.max * .3; ev.push({ t:"save", ...snap(u), msg:"Unbeugsam!" }); return; }
-    if (u.hero && u.habs.includes("hRevive") && !u.revUsed) { u.revUsed = true; u.hp = u.max * .4; ev.push({ t:"revive", ...snap(u), msg:"Zweiter Atem!" }); return; }
+    if (u.hero && T.unb && !u.unbUsed) { u.unbUsed = true; u.hp = 1; u.shield += u.max * .3; ev.push({ t:"save", ...snap(u), msg:"Unbeugsam: Der Held hält durch!" }); return; }
+    if (u.hero && u.habs.includes("hRevive") && !u.revUsed) { u.revUsed = true; u.hp = u.max * .4; ev.push({ t:"revive", ...snap(u), msg:"Zweiter Atem: Der Held steht wieder auf!" }); return; }
     u.alive = false; u.hp = 0; u.dots = []; u.stun = 0; u.shield = 0;
     ev.push({ t:"die", u:u.uid });
     if (u.ab && u.ab.k === "martyr") {
@@ -592,7 +623,7 @@ function simulate(P, E, T) {
       foes(u).forEach(f => directDmg(u, f, u.atk * u.ab.v));
     }
     const ph = mates(u).find(f => f.ab && f.ab.k === "revive" && !f.revGiven);
-    if (ph) { ph.revGiven = true; u.alive = true; u.hp = u.max * ph.ab.v; ev.push({ t:"revive", ...snap(u), msg:`${ph.n}: Wiedergeburt!` }); }
+    if (ph) { ph.revGiven = true; u.alive = true; u.hp = u.max * ph.ab.v; ev.push({ t:"revive", ...snap(u), msg:`${ph.n} holt ${u.n} zurück!` }); }
   }
   function directDmg(src, t, d) {
     if (!t.alive) return;
@@ -617,7 +648,7 @@ function simulate(P, E, T) {
     if (k === "poison") t.dots.push({ d:a.atk * v, r:3 });
     if (k === "shred") t.shred += v;
     if (k === "stun" && t.hp > 0 && Math.random() < v) { t.stun = 1; ev.push({ t:"stun", u:t.uid }); }
-    if (k === "lifesteal") heal(a, d * v);
+    if (k === "lifesteal") heal(a, d * v, a);
     if (t.thorns > 0 && a.alive) {
       const r = Math.max(1, Math.round(d * t.thorns)); a.hp -= r; ev.push({ t:"hit", a:t.uid, ...snap(a), v:r, thorns:true }); kill(a);
     }
@@ -644,8 +675,8 @@ function simulate(P, E, T) {
     }
     if (k === "aoe" && round % 3 === 0) return aoeAll(u, v, AB.aoe.n);
     if (k === "dragon" && round % 3 === 0) { aoeAll(u, v, AB.dragon.n); foes(u).forEach(f => f.dots.push({ d:u.atk * .4, r:3 })); return; }
-    if (k === "divine") { ev.push({ t:"skill", a:u.uid, msg:AB.divine.n, quiet:1 }); mates(u).forEach(f => heal(f, u.atk * v)); return; }
-    if (k === "heal") { const lo = lowest(u); if (lo.hp / lo.max < .75) { ev.push({ t:"skill", a:u.uid, msg:AB.heal.n, quiet:1 }); heal(lo, u.atk * v); return; } }
+    if (k === "divine") { ev.push({ t:"skill", a:u.uid, msg:AB.divine.n, quiet:1 }); mates(u).forEach(f => heal(f, u.atk * v, u)); return; }
+    if (k === "heal") { const lo = lowest(u); if (lo.hp / lo.max < .75) { ev.push({ t:"skill", a:u.uid, msg:AB.heal.n, quiet:1 }); heal(lo, u.atk * v, u); return; } }
     if (k === "barrier" && round % 2 === 0) { ev.push({ t:"skill", a:u.uid, msg:AB.barrier.n, quiet:1 }); addShield(lowest(u), u.atk * v); return; }
     hit(u, target(u), 1 + (k === "snipe" ? v : 0));
     if (k === "rage") u.rage += v;
@@ -724,10 +755,10 @@ function rollCard(w) {
 // Neue Karte oder Duplikat gutschreiben
 function grantCard(id) {
   if (S.cards[id]) {
-    const c = S.cards[id], dust = Math.round(25 * Math.pow(1.08, S.lv - 1) * RAR[CC[id].r].cost);
-    S.dust += dust;
-    const up = addCardXP(id, cardNeed(c.l));
-    return { id, dup:true, dust, up };
+    const coins = Math.round(30 * Math.pow(1.08, S.lv - 1) * RAR[CC[id].r].cost);
+    S.co += coins;
+    const up = addCardXP(id, cardNeed(S.cards[id].l));
+    return { id, dup:true, coins, up };
   }
   const l = Math.min(STAGE_CAP[0], Math.max(1, Math.floor(S.lv * .6)));
   S.cards[id] = { l, xp:0, st:0 };
@@ -744,9 +775,8 @@ function grantRewards(win, s) {
   const hx = Math.round(base * (1 + T.xp + wis));
   const cx = Math.round(base * .8 * (1 + T.cardXp + wis));
   const first = win && s > S.prog;
-  const co = win ? Math.round(6 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 : 1) * (1 + T.coins + luck)) : 0;
-  const du = win ? Math.round(5 * Math.pow(1.1, E - 1) * (boss ? 2 : 1) * (1 + T.dust + luck)) : 0;
-  S.co += co; S.dust += du;
+  const co = win ? Math.round(9 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 : 1) * (1 + T.coins + luck)) : 0;
+  S.co += co;
   if (win) { S.stats.wins++; if (first) S.prog = s; } else S.stats.losses++;
   const team = S.team.slice(0, slotsAt(S.lv)).filter(id => S.cards[id]);
   const cards = team.map(id => { const c = S.cards[id], from = c.l; addCardXP(id, cx); return { id, from, to:c.l }; });
@@ -760,125 +790,7 @@ function grantRewards(win, s) {
     drop = grantCard(rollCard(w));
   }
   save();
-  return { win, s, hx, cx, co, du, first, hero, cards, drop };
-}
-
-/* =========================================================
-   OBERFLÄCHE
-   ========================================================= */
-function toast(html) {
-  const t = document.createElement("div"); t.className = "toast"; t.innerHTML = html;
-  $("#toasts").appendChild(t); setTimeout(() => t.remove(), 2800);
-}
-function modal(html) {
-  $("#modalRoot").innerHTML = html ? `<div class="modal-bg" data-act="closeBg"><div class="modal" role="dialog">${html}</div></div>` : "";
-}
-const bar = (v, n, full) => `<div class="bar ${full ? "full" : ""}"><i style="width:${Math.min(100, n ? v / n * 100 : 100)}%"></i></div>`;
-const stars = st => "★".repeat(st + 1) + `<s>${"★".repeat(2 - st)}</s>`;
-
-const ICONS = {
-  hero: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>',
-  team: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="11" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
-  fight: '<svg viewBox="0 0 24 24"><path d="M5 19 19 5M14 5h5v5M5 5l5 5M15 15l4 4M19 15l-4 4"/></svg>',
-  tal: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M12 7v5M12 12l-5 5M12 12l5 5"/></svg>',
-  shop: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>'
-};
-const canEvolve = () => Object.entries(S.cards).some(([id, c]) => c.st < 2 && c.l >= STAGE_CAP[c.st] && S.co >= evoCost(id, c.st + 1));
-function renderTop() {
-  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
-  $("#top").innerHTML = `<div class="lvl-badge">LV ${S.lv}</div>
-    <div class="xpwrap">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
-      <div class="xptext">${mx ? "Maximales Level" : `${S.xp} / ${n} EP`}</div></div>
-    <div class="res"><span class="coin">${S.co}</span><span class="dust">${S.dust}</span></div>`;
-}
-function renderNav() {
-  const tabs = [["hero","Held"],["team","Team"],["fight","Kampf"],["tal","Talente"],["shop","Shop"]];
-  const dot = { tal:S.tp > 0, team:canEvolve() };
-  $("#nav").innerHTML = tabs.map(([k, n]) =>
-    `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}" aria-label="${n}"><span class="${dot[k] ? "dot" : ""}">${ICONS[k]}</span>${n}</button>`).join("");
-}
-function render() {
-  renderTop(); renderNav();
-  $("#main").innerHTML = ({ hero:screenHero, team:screenTeam, fight:screenFight, tal:screenTal, shop:screenShop })[UI.tab]();
-}
-
-function screenHero() {
-  const h = heroStats(), t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
-  const next = HERO_AB.find(a => a.lv > S.lv), nextSlot = SLOT_LV.find(x => x > S.lv);
-  const stat = (v, l) => `<div><b class="num" style="font-family:var(--f-display);font-size:20px">${v}</b><div class="xptext">${l}</div></div>`;
-  return `<div class="herocard" style="--hc:${t[2]}">
-      <div class="hc-head"><div class="hc-portrait">🧑‍🚀</div>
-        <div><div class="hc-title">${t[1]}</div><div class="hc-name">Der Mondkurier</div><div class="hc-lv">Level ${S.lv} von ${MAX_LV}</div></div></div>
-      <div class="hc-xp">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
-        <div class="xptext"><span>${mx ? "Maximum erreicht" : `${S.xp} / ${n} EP`}</span><span>${mx ? "" : `noch ${n - S.xp} EP`}</span></div></div>
-      <div class="statrow">
-        <div><b>${h.hp}</b><span>HP</span></div><div><b>${h.atk}</b><span>ATK</span></div>
-        <div><b>${Math.round(h.crit * 100)}%</b><span>Krit</span></div><div><b>${slotsAt(S.lv)}</b><span>Begleiter</span></div>
-      </div>
-    </div>
-    ${next || nextSlot ? `<div class="milestone">${next ? `Nächste Fähigkeit auf <b>Level ${next.lv}</b>: ${next.n}. ` : ""}${nextSlot ? `Neuer Teamplatz auf <b>Level ${nextSlot}</b>.` : ""}</div>` : ""}
-    ${S.tp ? `<button class="btn green" style="width:100%;margin-top:12px" data-act="tab" data-k="tal">${S.tp} Talentpunkt${S.tp > 1 ? "e" : ""} verteilen</button>` : ""}
-    <div class="section-label">Fähigkeiten der Heldenkarte</div>
-    <div class="ablist">${HERO_AB.map(a => `<div class="abrow ${a.lv > S.lv ? "locked" : ""}"><span class="lvtag">LV ${a.lv}</span>
-      <div><div class="an">${a.n}</div><div class="ad">${a.d}</div></div></div>`).join("")}</div>
-    <div class="section-label">Statistik</div>
-    <div class="panel" style="display:flex;justify-content:space-around;text-align:center;gap:8px">
-      ${stat(S.stats.wins, "Siege")}${stat(S.stats.losses, "Niederlagen")}${stat(S.prog + "/50", "Etappen")}${stat(Object.keys(S.cards).length + "/" + COMP.length, "Karten")}
-    </div>
-    <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
-      <button class="btn ghost" data-act="help">Spielregeln</button>
-      <button class="btn ghost" data-act="resetAsk" style="color:var(--hp)">Spielstand löschen</button>
-    </div>`;
-}
-
-function screenTeam() {
-  const n = slotsAt(S.lv), P = buildTeam(), order = { l:0, e:1, r:2, c:3 };
-  const owned = Object.keys(S.cards).sort((a, b) => (S.team.includes(b) - S.team.includes(a)) || S.cards[b].l - S.cards[a].l || order[CC[a].r] - order[CC[b].r]);
-  const unknown = COMP.filter(c => !S.cards[c.id]);
-  const slot = i => {
-    if (i >= n) return `<div class="slot locked">🔒<span>ab Level ${SLOT_LV[i]}</span></div>`;
-    const id = S.team[i];
-    if (!id) return `<div class="slot"><span style="font-size:22px">＋</span><span>Freier Platz</span></div>`;
-    const c = S.cards[id], f = form(id, c.st);
-    return `<button class="slot full r-${CC[id].r}" data-act="card" data-id="${id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span><span class="sl">Lv ${c.l}</span></button>`;
-  };
-  return `<div class="screen-title"><h2>Team</h2><small>Held + ${n} Begleiter</small></div>
-    <div class="slots">${[0,1,2,3,4,5].map(slot).join("")}</div>
-    <div class="powerline"><span>Teamstärke inklusive Held</span><b class="num">${sidePower(P)}</b></div>
-    <div class="section-label">Deine Karten · ${owned.length} von ${COMP.length}</div>
-    <div class="clist">${owned.map(id => {
-      const c = S.cards[id], d = CC[id], f = form(id, c.st), cap = cardCap(c), evo = c.l >= STAGE_CAP[c.st] && c.st < 2;
-      return `<button class="crow r-${d.r} ${S.team.includes(id) ? "inteam" : ""}" data-act="card" data-id="${id}">
-        <span class="ce">${f[1]}</span>
-        <span class="ci"><span class="cn">${f[0]} <span class="stars">${stars(c.st)}</span>${S.team.includes(id) ? '<span class="ctag">im Team</span>' : ""}</span>
-          <span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}</span>${bar(c.xp, cardNeed(c.l), c.l >= cap)}</span>
-        <span class="clv">Lv ${c.l}${evo ? '<span class="ready">Entwickeln</span>' : c.l >= cap ? '<span class="ready" style="color:var(--dim)">Max</span>' : ""}</span></button>`;
-    }).join("")}
-    ${unknown.map(d => `<div class="crow unknown r-${d.r}"><span class="ce">${d.f[0][1]}</span><span class="ci"><span class="cn">???</span>
-      <span class="cm">${RAR[d.r].n} · ${ROLES[d.role].n}</span></span></div>`).join("")}</div>`;
-}
-function cardModal(id) {
-  const c = S.cards[id], d = CC[id], f = form(id, c.st), s = cardStats(id, c.l, c.st), cap = cardCap(c), inTeam = S.team.includes(id);
-  const need = cardNeed(c.l), atStageCap = c.l >= STAGE_CAP[c.st];
-  const trainCost = Math.max(0, need - c.xp), canTrain = c.l < cap;
-  const evoOK = atStageCap && c.st < 2, ec = c.st < 2 ? evoCost(id, c.st + 1) : 0;
-  const nf = c.st < 2 ? form(id, c.st + 1) : null, teamFull = S.team.length >= slotsAt(S.lv);
-  const capText = atStageCap ? (c.st < 2 ? "Stufenmaximum erreicht. Entwickle die Karte, um weiterzuleveln." : "Maximales Level") : "Karten können nicht über dein Heldenlevel steigen.";
-  modal(`<div class="bigc r-${d.r}">
-      <div class="bm">${RAR[d.r].n} · ${ROLES[d.role].n}</div>
-      <div class="be">${f[1]}</div><div class="bn">${f[0]}</div><div class="stars" style="font-size:16px">${stars(c.st)}</div>
-      <div class="statrow"><div><b>${s.hp}</b><span>HP</span></div><div><b>${s.atk}</b><span>ATK</span></div><div><b>${c.l}</b><span>Level</span></div></div>
-      <div>${bar(c.xp, need, c.l >= cap)}<div class="xptext" style="margin-top:4px">${c.l >= cap ? capText : `${c.xp} / ${need} EP`}</div></div>
-    </div>
-    <div class="abbox"><b>${AB[d.ab].n}:</b> ${AB[d.ab].d(AB[d.ab].v[c.st])}
-      ${nf ? `<div class="nx" style="margin-top:6px">Entwicklung ab Level ${STAGE_CAP[c.st]} zu ${nf[0]}: ${AB[d.ab].d(AB[d.ab].v[c.st + 1])}</div>` : ""}</div>
-    <div class="evo">${d.f.map((x, i) => `<span class="${i <= c.st ? "on" : ""}" title="${x[0]}">${x[1]}</span>${i < 2 ? "<i>›</i>" : ""}`).join("")}</div>
-    ${evoOK ? `<button class="btn" data-act="evolve" data-id="${id}" ${S.co < ec ? "disabled" : ""}>Zu ${nf[0]} entwickeln · <span class="coin">${ec}</span></button>` : ""}
-    <div class="row">
-      <button class="btn ghost" data-act="train" data-id="${id}" ${!canTrain || S.dust < trainCost ? "disabled" : ""}>${canTrain ? `1 Level trainieren · <span class="dust">${trainCost}</span>` : "Training nicht möglich"}</button>
-      <button class="btn ${inTeam ? "ghost" : "green"}" data-act="toggleTeam" data-id="${id}" ${!inTeam && teamFull ? "disabled" : ""}>${inTeam ? "Aus dem Team" : teamFull ? "Team ist voll" : "Ins Team"}</button>
-    </div>
-    <button class="btn ghost" data-act="close">Schließen</button>`);
+  return { win, s, hx, cx, co, first, hero, cards, drop };
 }
 
 // Siegchance per Probekämpfen schätzen (zwischengespeichert, solange sich das Team nicht ändert)
@@ -892,86 +804,242 @@ function winChance(s) {
   }
   return oddsCache[key];
 }
-function oddsOf(s) {
+function chanceHTML(s) {
   const c = winChance(s), p = Math.round(c * 100) + " %";
-  if (c >= .8) return ["easy", `Leicht · ${p}`];
-  if (c >= .4) return ["even", `Knapp · ${p}`];
-  return ["hard", `Gefährlich · ${p}`];
+  if (c >= .8) return `<span class="chance easy">${p} · Leicht</span>`;
+  if (c >= .4) return `<span class="chance even">${p} · Knapp</span>`;
+  return `<span class="chance hard">${p} · Zu schwer</span>`;
 }
-function screenFight() {
-  const z = S.zone, Z = ZONES[z], zOpen = i => i === 0 || S.prog >= i * 10, tp = sidePower(buildTeam());
+// Beste Etappe zum EP-Sammeln: die höchste mit mindestens 80 % Siegchance
+function farmStage() {
+  for (let s = S.prog; s >= 1; s--) if (winChance(s) >= .8) return s;
+  return S.prog >= 1 ? 1 : 0;
+}
+
+/* =========================================================
+   OBERFLÄCHE
+   ========================================================= */
+function toast(html) {
+  const t = document.createElement("div"); t.className = "toast"; t.innerHTML = html;
+  $("#toasts").appendChild(t); setTimeout(() => t.remove(), 2800);
+}
+function modal(html) {
+  $("#modalRoot").innerHTML = html ? `<div class="modal-bg" data-act="closeBg"><div class="modal" role="dialog">${html}</div></div>` : "";
+}
+const bar = (v, n, cls = "") => `<div class="bar ${cls}"><i style="width:${Math.min(100, n ? v / n * 100 : 100)}%"></i></div>`;
+const stars = st => "★".repeat(st + 1) + "☆".repeat(2 - st);
+
+const ICONS = {
+  home: '<svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
+  map: '<svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
+  team: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="11" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
+  tal: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M12 7v5M12 12l-5 5M12 12l5 5"/></svg>',
+  shop: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>'
+};
+const evolvable = () => Object.keys(S.cards).filter(id => { const c = S.cards[id]; return c.st < 2 && c.l >= STAGE_CAP[c.st]; });
+const freeSlots = () => Math.max(0, Math.min(slotsAt(S.lv), Object.keys(S.cards).length) - S.team.length);
+
+function renderTop() {
+  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
+  $("#top").innerHTML = `<div class="lvl-badge">Level ${S.lv}</div>
+    <div class="xpwrap">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
+      <div class="xptext">${mx ? "Maximales Level erreicht" : `${S.xp} / ${n} EP bis Level ${S.lv + 1}`}</div></div>
+    <div class="coins"><span class="coin">${S.co}</span></div>`;
+}
+function renderNav() {
+  const tabs = [["home","Start"],["map","Etappen"],["team","Team"],["tal","Talente"],["shop","Shop"]];
+  const badge = { tal:S.tp, team:evolvable().length + freeSlots() };
+  $("#nav").innerHTML = tabs.map(([k, n]) =>
+    `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}"><span class="badge">${ICONS[k]}${badge[k] ? `<b>${badge[k]}</b>` : ""}</span>${n}</button>`).join("");
+}
+function render() {
+  renderTop(); renderNav();
+  $("#main").innerHTML = ({ home:screenHome, map:screenMap, team:screenTeam, tal:screenTal, shop:screenShop })[UI.tab]();
+}
+
+/* ---------- Start ---------- */
+function screenHome() {
+  const t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV, h = heroStats();
+  const s = Math.min(50, S.prog + 1), Z = ZONES[zoneOf(s)], c = winChance(s), done = S.prog >= 50;
+  const fs = farmStage();
+  const next = HERO_AB.find(a => a.lv > S.lv), nextSlot = SLOT_LV.find(x => x > S.lv);
+  // Was gibt es gerade zu tun?
+  const todos = [];
+  if (S.tp) todos.push({ i:"✦", b:`${S.tp} Talentpunkt${S.tp > 1 ? "e" : ""} verteilen`, s:"Macht dein ganzes Team stärker.", act:'data-act="tab" data-k="tal"' });
+  evolvable().forEach(id => { const c2 = S.cards[id], nf = form(id, c2.st + 1), cost = evoCost(id, c2.st + 1);
+    todos.push({ i:nf[1], b:`${form(id, c2.st)[0]} kann sich entwickeln`, s:S.co >= cost ? `Wird zu ${nf[0]} · kostet ${cost} Münzen` : `Dir fehlen noch ${cost - S.co} Münzen`, act:`data-act="card" data-id="${id}"`, hot:S.co >= cost }); });
+  if (freeSlots()) todos.push({ i:"＋", b:"Freier Platz im Team", s:"Setze eine weitere Karte ein.", act:'data-act="tab" data-k="team"' });
+  if (S.co >= packPrice() && Object.keys(S.cards).length < COMP.length) todos.push({ i:"🎁", b:"Sternenpack kaufen", s:`Neue Karte für ${packPrice()} Münzen`, act:'data-act="tab" data-k="shop"' });
+
+  return `<button class="herobar" data-act="heroInfo" style="--hc:${t[2]}">
+      <span class="portrait">🧑‍🚀</span>
+      <span class="hb"><span class="ht">${t[1]}</span><span class="hn">Mondkurier · Level ${S.lv}</span>
+        ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${h.hp} Leben · ${h.atk} Angriff · Fähigkeiten ansehen</span></span>
+      <span class="chev">›</span></button>
+
+    ${done ? `<div class="nextfight" style="--zbg:${Z.bg}"><div class="nf-kicker">Geschafft</div>
+        <div class="nf-title">Alle 50 Etappen bestanden!</div>
+        <p class="muted">Du kannst jede Etappe erneut spielen, um weiter zu leveln und alle Karten zu sammeln.</p>
+        <button class="btn big" data-act="tab" data-k="map">Etappen ansehen</button></div>`
+    : `<div class="nextfight" style="--zbg:${Z.bg}">
+      <div class="nf-top"><div><div class="nf-kicker">${isBoss(s) ? "Bosskampf" : "Nächster Kampf"}</div>
+        <div class="nf-title">${Z.n} · Etappe ${stageNo(s)}</div></div>${chanceHTML(s)}</div>
+      <div class="nf-foes">${waveIds(s).map(d => d[1]).join("")}</div>
+      <button class="btn big" data-act="fight" data-s="${s}">Kämpfen</button>
+      ${c < .4 && fs ? `<div class="nf-hint">Dein Team ist hier noch zu schwach. Sammle erst EP in <b>Etappe ${stageNo(fs)}</b> von ${ZONES[zoneOf(fs)].n}, dort gewinnst du sicher.</div>
+        <button class="btn ghost wide" data-act="fight" data-s="${fs}">EP sammeln in Etappe ${stageNo(fs)} · ${Math.round(winChance(fs) * 100)} %</button>` : ""}
+      <button class="switchrow" data-act="auto"><span><b>Automatisch wiederholen</b><br>Nach jedem Sieg startet derselbe Kampf neu.</span><span class="sw ${S.auto ? "on" : ""}"></span></button>
+    </div>`}
+
+    <div class="label">Das kannst du jetzt tun</div>
+    <div class="todos">${todos.length ? todos.map(x => `<button class="todo ${x.hot !== false ? "hot" : ""}" ${x.act}>
+        <span class="ti">${x.i}</span><span class="tt"><b>${x.b}</b><span>${x.s}</span></span><span class="chev">›</span></button>`).join("")
+      : `<div class="todo" style="cursor:default"><span class="ti">✓</span><span class="tt"><b>Alles erledigt</b><span>Kämpfe weiter, um EP für das nächste Level zu sammeln.</span></span></div>`}</div>
+
+    ${next || nextSlot ? `<div class="label">Nächste Belohnungen</div><div class="panel goal">
+      ${next ? `<div>Level <b>${next.lv}</b>: neue Heldenfähigkeit <b>${next.n}</b></div>` : ""}
+      ${nextSlot ? `<div>Level <b>${nextSlot}</b>: neuer Platz im Team</div>` : ""}
+      <div>Jedes Level: <b>1 Talentpunkt</b> und mehr Leben und Angriff</div></div>` : ""}`;
+}
+function heroModal() {
+  const h = heroStats(), t = heroTitle(S.lv);
+  modal(`<div class="mhead" style="--rc:${t[2]}"><span class="me" style="border-radius:50%">🧑‍🚀</span>
+      <div class="mt"><h2>Der Mondkurier</h2><p>${t[1]} · Level ${S.lv} von ${MAX_LV}</p></div></div>
+    <div class="stats3"><div><b>${h.hp}</b><span>Leben</span></div><div><b>${h.atk}</b><span>Angriff</span></div><div><b>${Math.round(h.crit * 100)} %</b><span>Krit</span></div></div>
+    <p>Die Heldenkarte kämpft immer mit. Mit jedem Level steigen Leben und Angriff automatisch, und auf bestimmten Leveln lernt sie neue Fähigkeiten:</p>
+    <div class="ablist">${HERO_AB.map(a => `<div class="abrow ${a.lv > S.lv ? "locked" : ""}"><span class="lvtag">${a.lv > S.lv ? "LV " + a.lv : "✓ LV " + a.lv}</span>
+      <div><div class="an">${a.n}</div><div class="ad">${a.d}</div></div></div>`).join("")}</div>
+    <p style="font-size:14px">Bisher: ${S.stats.wins} Siege, ${S.stats.losses} Niederlagen, ${S.prog} von 50 Etappen.</p>
+    <div class="row"><button class="btn ghost" data-act="help">Spielregeln</button><button class="btn ghost" data-act="resetAsk" style="color:var(--hp)">Neu starten</button></div>
+    <button class="btn" data-act="close">Schließen</button>`);
+}
+
+/* ---------- Etappen ---------- */
+function screenMap() {
+  const z = S.zone, Z = ZONES[z], zOpen = i => i === 0 || S.prog >= i * 10;
   const stages = Array.from({ length:10 }, (_, i) => z * 10 + i + 1);
-  return `<div class="screen-title"><h2>Kampf</h2><small>${S.prog} von 50 Etappen geschafft</small></div>
-    <button class="toggle" data-act="auto"><span><span class="tt">Automatisch weiterkämpfen</span><br>
-      <span class="td">Startet nach jedem Sieg denselben Kampf neu und sammelt so EP. Stoppt bei einer Niederlage.</span></span><span class="sw ${S.auto ? "on" : ""}"></span></button>
-    <div class="chips" style="margin-top:12px">${ZONES.map((x, i) => `<button class="chip ${i === z ? "on" : ""} ${zOpen(i) ? "" : "lock"}" data-act="zone" data-z="${i}">${zOpen(i) ? "" : "🔒 "}Zone ${i + 1}</button>`).join("")}</div>
+  return `<div class="screen-title"><h2>Etappen</h2><p>Die Prozentzahl ist deine Siegchance mit dem jetzigen Team.</p></div>
+    <div class="zonetabs">${ZONES.map((x, i) => `<button class="ztab ${i === z ? "on" : ""} ${zOpen(i) ? "" : "lock"}" data-act="zone" data-z="${i}">
+      <b>${zOpen(i) ? "" : "🔒 "}Zone ${i + 1}</b><span>${x.n}</span></button>`).join("")}</div>
     <div class="zonehead" style="--zbg:${Z.bg}"><h3>${Z.n}</h3><p>${Z.sub}</p></div>
     <div class="stages">${stages.map(s => {
-      const open = s <= S.prog + 1, cleared = s <= S.prog, boss = isBoss(s), o = open ? oddsOf(s) : null;
+      const open = s <= S.prog + 1, cleared = s <= S.prog, boss = isBoss(s);
       return `<button class="stage ${boss ? "boss" : ""} ${cleared ? "cleared" : ""} ${open ? "" : "locked"} ${s === S.prog + 1 ? "next" : ""}" data-act="${open ? "fight" : "noop"}" data-s="${s}">
-        <span class="sn">${boss ? "👑" : stageNo(s)}</span>
-        <span class="si"><span class="sfoes">${waveIds(s).map(d => d[1]).join("")}</span><span class="sm" style="display:block">${boss ? "Boss · " : ""}Empfohlen ab Level ${recLv(s)} · Stärke ${sidePower(makeWave(s))}</span></span>
-        <span class="ss">${cleared ? "✓ geschafft" : open ? "Neu" : "🔒"}${o ? `<br><span class="odds ${o[0]}">${o[1]}</span>` : ""}</span></button>`;
-    }).join("")}</div>
-    <p style="font-size:13px;color:var(--dim);line-height:1.45;margin-top:12px">Die Prozentzahl ist deine geschätzte Siegchance mit dem aktuellen Team (Teamstärke ${tp}). Ist sie zu niedrig, kämpfe leichtere Etappen erneut, verteile Talentpunkte oder entwickle deine Karten.</p>`;
+        <span class="sn">${cleared ? "✓" : boss ? "👑" : stageNo(s)}</span>
+        <span class="sf">${waveIds(s).map(d => d[1]).join("")}<small>${boss ? "Boss · " : ""}Etappe ${stageNo(s)}${s === S.prog + 1 ? " · als Nächstes" : cleared ? " · geschafft" : ""}</small></span>
+        ${open ? chanceHTML(s) : `<span class="muted">🔒</span>`}</button>`;
+    }).join("")}</div>`;
 }
 
+/* ---------- Team ---------- */
+function screenTeam() {
+  const n = slotsAt(S.lv), order = { l:0, e:1, r:2, c:3 };
+  const bench = Object.keys(S.cards).filter(id => !S.team.includes(id)).sort((a, b) => S.cards[b].l - S.cards[a].l || order[CC[a].r] - order[CC[b].r]);
+  const missing = COMP.length - Object.keys(S.cards).length;
+  const slot = i => {
+    if (i >= n) return `<div class="slot locked">🔒<span>Frei ab Level ${SLOT_LV[i]}</span></div>`;
+    const id = S.team[i];
+    if (!id) return `<button class="slot empty" data-act="pick"><span style="font-size:26px">＋</span><span>Karte einsetzen</span></button>`;
+    const c = S.cards[id], f = form(id, c.st), ev = c.st < 2 && c.l >= STAGE_CAP[c.st];
+    return `<button class="slot full r-${CC[id].r}" data-act="card" data-id="${id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span>
+      <span class="sl">Level ${c.l}</span>${ev ? '<span class="flag">Entwickeln</span>' : `<span class="sa">${AB[CC[id].ab].n}</span>`}</button>`;
+  };
+  const row = id => {
+    const c = S.cards[id], d = CC[id], f = form(id, c.st), ev = c.st < 2 && c.l >= STAGE_CAP[c.st];
+    return `<button class="crow r-${d.r}" data-act="card" data-id="${id}"><span class="ce">${f[1]}</span>
+      <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${AB[d.ab].n}: ${AB[d.ab].d(AB[d.ab].v[c.st])}</span>${ev ? '<span><span class="flag">Kann sich entwickeln</span></span>' : ""}</span>
+      <span class="clv">Lv ${c.l}</span></button>`;
+  };
+  return `<div class="screen-title"><h2>Team</h2><p>Der Held kämpft immer. Dazu kommen bis zu ${n} Karten. Tippe eine Karte an für Details.</p></div>
+    <div class="label">Im Kampf · ${S.team.length} von ${n}</div>
+    <div class="slots">${[0,1,2,3,4,5].map(slot).join("")}</div>
+    <div class="label">Auf der Bank · ${bench.length}</div>
+    ${bench.length ? `<div class="clist">${bench.map(row).join("")}</div>` : `<p class="muted" style="font-size:14px">Keine weiteren Karten. Neue Karten findest du in Kämpfen und im Shop.</p>`}
+    ${missing ? `<div class="panel" style="font-size:14px;color:var(--dim)">Noch <b style="color:var(--moon)">${missing} von ${COMP.length}</b> Karten unentdeckt. Du findest sie nach Siegen (Bosse geben immer eine) und im Shop.</div>` : ""}`;
+}
+function pickModal() {
+  const bench = Object.keys(S.cards).filter(id => !S.team.includes(id)).sort((a, b) => S.cards[b].l - S.cards[a].l);
+  modal(`<h2>Karte einsetzen</h2>
+    ${bench.length ? `<div class="clist">${bench.map(id => { const c = S.cards[id], d = CC[id], f = form(id, c.st);
+      return `<button class="crow r-${d.r}" data-act="putIn" data-id="${id}"><span class="ce">${f[1]}</span>
+        <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}</span></span><span class="clv">Lv ${c.l}</span></button>`; }).join("")}</div>`
+    : `<p>Du hast gerade keine Karte auf der Bank. Neue Karten findest du in Kämpfen und im Shop.</p>`}
+    <button class="btn ghost" data-act="close">Schließen</button>`);
+}
+function cardModal(id) {
+  const c = S.cards[id], d = CC[id], f = form(id, c.st), s = cardStats(id, c.l, c.st), cap = cardCap(c), inTeam = S.team.includes(id);
+  const need = cardNeed(c.l), atStageCap = c.l >= STAGE_CAP[c.st], canTrain = c.l < cap, tc = trainCost(c);
+  const evoOK = atStageCap && c.st < 2, ec = c.st < 2 ? evoCost(id, c.st + 1) : 0, nf = c.st < 2 ? form(id, c.st + 1) : null;
+  const teamFull = S.team.length >= slotsAt(S.lv);
+  let prog;
+  if (evoOK) prog = `<div class="bb">Diese Stufe ist voll. <b>Entwickle die Karte</b>, damit sie weiter leveln kann.</div>`;
+  else if (c.l >= MAX_LV) prog = `<div class="bb">Maximales Level erreicht.</div>`;
+  else if (!canTrain) prog = `<div class="bb">Karten können nicht über dein Heldenlevel (${S.lv}) steigen. Level zuerst den Helden.</div>`;
+  else prog = `${bar(c.xp, need)}<div class="bb">${c.xp} / ${need} EP bis Level ${c.l + 1}. Karten im Team bekommen nach jedem Kampf EP.</div>`;
+  modal(`<div class="mhead r-${d.r}"><span class="me">${f[1]}</span>
+      <div class="mt"><h2>${f[0]}</h2><p><span class="rar">${RAR[d.r].n}</span> · ${ROLES[d.role].n} · Level ${c.l}</p></div></div>
+    <div class="box"><div class="bt">Fähigkeit: ${AB[d.ab].n}</div><div class="bb">${AB[d.ab].d(AB[d.ab].v[c.st])}</div></div>
+    <div class="stats3"><div><b>${s.hp}</b><span>Leben</span></div><div><b>${s.atk}</b><span>Angriff</span></div><div><b>${stars(c.st)}</b><span>Stufe</span></div></div>
+    <div class="box"><div class="bt">Fortschritt</div>${prog}</div>
+    <div class="row">
+      ${canTrain ? `<button class="btn ghost" data-act="train" data-id="${id}" ${S.co < tc ? "disabled" : ""}>+1 Level · <span class="coin">${tc}</span></button>` : ""}
+      <button class="btn ${inTeam ? "ghost" : "green"}" data-act="toggleTeam" data-id="${id}" ${!inTeam && teamFull ? "disabled" : ""}>${inTeam ? "Auf die Bank" : teamFull ? "Team ist voll" : "Ins Team"}</button>
+    </div>
+    <div class="box"><div class="bt">Entwicklung</div>
+      <div class="evorow r-${d.r}">${d.f.map((x, i) => `<div class="${i === c.st ? "on" : ""}"><div class="ee">${x[1]}</div><div class="en">${x[0]}</div><div class="el">${i === 0 ? "Start" : "ab Level " + STAGE_CAP[i - 1]}</div></div>`).join("")}</div>
+      ${nf ? `<div class="bb" style="font-size:14px;color:var(--dim)">Als ${nf[0]}: ${AB[d.ab].d(AB[d.ab].v[c.st + 1])}</div>` : ""}
+      ${evoOK ? `<button class="btn wide" data-act="evolve" data-id="${id}" ${S.co < ec ? "disabled" : ""}>Jetzt entwickeln · <span class="coin">${ec}</span></button>` : ""}
+    </div>
+    <button class="btn ghost" data-act="close">Schließen</button>`);
+}
+
+/* ---------- Talente ---------- */
+const spentIn = b => TALENTS.filter(t => t.b === b).reduce((a, t) => a + (S.tal[t.id] || 0), 0);
 function screenTal() {
-  const spent = b => TALENTS.filter(t => t.b === b).reduce((a, t) => a + (S.tal[t.id] || 0), 0);
-  return `<div class="screen-title"><h2>Talente</h2><small><span class="tp">${S.tp} Punkt${S.tp === 1 ? "" : "e"}</span> frei · 1 pro Level</small></div>
-    <div class="tree">${BRANCHES.map(br => {
-      const sp = spent(br.k);
-      let html = `<div class="branch" style="--bc:${br.c}"><h3>${br.n}</h3><div class="bp">${sp} Punkte</div>`;
-      [0,1,2,3].forEach(tier => {
-        if (tier) html += `<div class="tier-lbl">ab ${tier * 5} Punkten</div>`;
-        TALENTS.filter(t => t.b === br.k && t.t === tier).forEach(t => {
-          const r = S.tal[t.id] || 0, locked = sp < tier * 5, can = !locked && r < t.max && S.tp > 0;
-          html += `<button class="tnode ${r ? "some" : ""} ${r >= t.max ? "max" : ""} ${locked ? "locked" : ""} ${t.cap ? "cap" : ""} ${can ? "can" : ""}" data-act="talent" data-id="${t.id}">
-            <span class="tn">${t.n}</span><span class="tr">${r}/${t.max}</span></button>`;
-        });
-      });
-      return html + "</div>";
-    }).join("")}</div>
-    <button class="btn ghost" style="width:100%;margin-top:16px" data-act="talReset" ${Object.keys(S.tal).length && S.co >= resetPrice() ? "" : "disabled"}>Talente zurücksetzen · <span class="coin">${resetPrice()}</span></button>`;
-}
-function talentModal(id) {
-  const t = TM[id], r = S.tal[id] || 0, sp = TALENTS.filter(x => x.b === t.b).reduce((a, x) => a + (S.tal[x.id] || 0), 0);
-  const locked = sp < t.t * 5, max = r >= t.max;
-  modal(`<h2>${t.n}</h2>
-    <p>${BRANCHES.find(b => b.k === t.b).n} · Rang ${r} von ${t.max}</p>
-    <div class="abbox">${r ? `<b>Jetzt:</b> ${t.d(r)}<br>` : ""}${max ? "Voll ausgebaut." : `<span class="nx">Nächster Rang: ${t.d(r + 1)}</span>`}</div>
-    ${locked ? `<p>Gesperrt. Setze zuerst ${t.t * 5} Punkte in diesen Zweig (aktuell ${sp}).</p>` : ""}
-    <div class="row"><button class="btn ghost" data-act="close">Schließen</button>
-      <button class="btn green" data-act="learn" data-id="${id}" ${locked || max || S.tp < 1 ? "disabled" : ""}>Punkt setzen</button></div>`);
+  const br = BRANCHES.find(b => b.k === UI.branch), sp = spentIn(br.k);
+  const tiers = [0, 1, 2, 3].map(tier => {
+    const locked = sp < tier * 5;
+    const head = tier === 0 ? "Grundlagen" : `Stufe ${tier + 1} · ${locked ? `frei ab ${tier * 5} Punkten in ${br.n} (noch ${tier * 5 - sp})` : "freigeschaltet"}`;
+    return `<div class="tier">${head}</div>` + TALENTS.filter(t => t.b === br.k && t.t === tier).map(t => {
+      const r = S.tal[t.id] || 0, max = r >= t.max;
+      const desc = r ? `${t.d(r)}${max ? "" : ` <em>→ nächster Rang: ${t.d(r + 1)}</em>`}` : `<em>${t.d(1)}</em>`;
+      return `<div class="trow ${locked ? "locked" : ""} ${max ? "maxed" : ""}" style="--bc:${br.c}">
+        <div class="tinfo"><span class="tname">${t.n}</span><span class="tdesc">${desc}</span>
+          <span class="pips">${Array.from({ length:t.max }, (_, i) => `<i class="${i < r ? "on" : ""}"></i>`).join("")}</span></div>
+        <button class="plus" data-act="learn" data-id="${t.id}" aria-label="${t.n} verbessern" ${locked || max || S.tp < 1 ? "disabled" : ""}>${max ? "✓" : "+"}</button></div>`;
+    }).join("");
+  }).join("");
+  return `<div class="screen-title"><h2>Talente</h2><p>${S.tp ? `Du hast <b style="color:var(--good)">${S.tp} Punkt${S.tp > 1 ? "e" : ""}</b> zum Verteilen. Tippe auf +.` : "Jedes Level gibt dir 1 Talentpunkt."}</p></div>
+    <div class="btabs">${BRANCHES.map(b => `<button class="btab ${b.k === UI.branch ? "on" : ""}" style="--bc:${b.c}" data-act="branch" data-k="${b.k}"><b>${b.n}</b><span>${b.d} · ${spentIn(b.k)}</span></button>`).join("")}</div>
+    ${tiers}
+    <button class="btn ghost wide" data-act="talReset" ${Object.keys(S.tal).length && S.co >= resetPrice() ? "" : "disabled"}>Alle Talente zurücksetzen · <span class="coin">${resetPrice()}</span></button>`;
 }
 
+/* ---------- Shop ---------- */
 function screenShop() {
-  const p = packPrice(), w = ZONES[Math.min(4, Math.floor(S.prog / 10))].w, dz = dustOffer();
-  return `<div class="screen-title"><h2>Shop</h2><small>Preise steigen mit deinem Level</small></div>
+  const p = packPrice(), w = ZONES[Math.min(4, Math.floor(S.prog / 10))].w;
+  return `<div class="screen-title"><h2>Shop</h2><p>Hier gibst du Münzen für neue Karten aus. Training und Entwicklung bezahlst du direkt bei der Karte.</p></div>
     <div class="panel">
       <div class="offer"><div class="packart">✦</div><div class="oi"><h3>Sternenpack</h3>
-        <p>1 Begleiter-Karte. Doppelte Karten geben 1 Level und Sternenstaub.</p>
-        <button class="btn sm" data-act="pack" data-n="1" ${S.co < p ? "disabled" : ""}><span class="coin">${p}</span></button></div></div>
+        <p>1 zufällige Karte. Hast du sie schon, steigt sie 1 Level und du bekommst Münzen zurück.</p>
+        <button class="btn sm" data-act="pack" data-n="1" ${S.co < p ? "disabled" : ""}>Kaufen · <span class="coin">${p}</span></button></div></div>
       <div class="offer"><div class="packart big">✦✦</div><div class="oi"><h3>Großes Sternenpack</h3>
         <p>3 Karten, mindestens eine davon selten oder besser.</p>
-        <button class="btn sm" data-act="pack" data-n="3" ${S.co < Math.round(p * 2.5) ? "disabled" : ""}><span class="coin">${Math.round(p * 2.5)}</span></button></div></div>
-      <div class="offer"><div class="packart dustart">✧</div><div class="oi"><h3>Sternenstaub</h3>
-        <p>${dz} Staub, um Karten gezielt zu trainieren.</p>
-        <button class="btn sm" data-act="buyDust" ${S.co < dz ? "disabled" : ""}><span class="coin">${dz}</span></button></div></div>
+        <button class="btn sm" data-act="pack" data-n="3" ${S.co < Math.round(p * 2.5) ? "disabled" : ""}>Kaufen · <span class="coin">${Math.round(p * 2.5)}</span></button></div></div>
     </div>
-    <div class="section-label">Chancen im Pack</div>
-    <div class="panel" style="font-size:13px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      ${Object.entries(w).map(([k, v]) => `<span><b style="color:var(--r-${k})">${RAR[k].n}</b> ${v} %</span>`).join("")}
-    </div>
-    <p style="font-size:13px;color:var(--dim);line-height:1.45">Seltene Karten werden häufiger, je weiter du in den Zonen kommst. Neue Karten starten mit 60 % deines Heldenlevels, gerade also auf Level ${Math.max(1, Math.min(20, Math.floor(S.lv * .6)))}.</p>`;
+    <div class="label">Chancen im Pack</div>
+    <div class="panel oddsline">${Object.entries(w).map(([k, v]) => `<span class="r-${k}"><span class="rar">${RAR[k].n}</span> ${v} %</span>`).join("")}</div>
+    <p class="muted" style="font-size:14px;line-height:1.45">Je weiter du in den Zonen kommst, desto häufiger sind seltene Karten. Neue Karten starten auf Level ${Math.max(1, Math.min(20, Math.floor(S.lv * .6)))}.</p>`;
 }
 
 function helpModal() {
-  modal(`<h2>Der Mondkurier</h2>
-    <p>Dein Held ist eine Karte, die immer mitkämpft. Mit jedem Level wird sie stärker und lernt neue Fähigkeiten.</p>
-    <p>Kämpfe laufen automatisch. Ob du gewinnst, entscheidet allein deine Entwicklung: Heldenlevel, Talente, Kartenlevel und Entwicklungsstufen.</p>
-    <p>Jede Begleiter-Karte hat eine eigene Fähigkeit, sammelt eigene EP und entwickelt sich auf Level 20 und 40 in eine stärkere Form.</p>
-    <p>Kommst du nicht weiter, kämpfe frühere Etappen erneut. Auch Niederlagen geben ein wenig EP.</p>
+  modal(`<h2>So spielst du</h2>
+    <div class="steps">
+      <div><i>1</i><p>Kämpfen<span>Kämpfe laufen von allein. Tippe auf „Kämpfen“ und schau zu, oder spule vor.</span></p></div>
+      <div><i>2</i><p>Leveln<span>Jeder Kampf gibt EP. Neue Level machen deinen Helden stärker und bringen Talentpunkte und neue Fähigkeiten.</span></p></div>
+      <div><i>3</i><p>Karten verbessern<span>Karten im Team leveln mit. Auf Level 20 und 40 entwickeln sie sich in eine stärkere Form.</span></p></div>
+    </div>
+    <p>Ist ein Kampf zu schwer, sammle erst EP in einer leichteren Etappe. Die Siegchance zeigt dir, wo du stehst.</p>
     <button class="btn" data-act="close">Los geht's</button>`);
 }
 
@@ -982,28 +1050,29 @@ function startBattle(s) {
   UID = 1;
   const P = buildTeam(), E = makeWave(s), units = P.concat(E).map(u => ({ ...u }));
   const res = simulate(P, E, talentFx());
-  const speed = B ? B.speed : (UI.speed || 1);
-  B = { s, res, units:Object.fromEntries(units.map(u => [u.uid, u])), i:0, speed, timer:null, done:false };
+  const speed = UI.speed;
+  B = { s, res, units:Object.fromEntries(units.map(u => [u.uid, u])), i:0, timer:null, done:false };
   const tile = u => `<div class="unit ${u.hero ? "hero" : ""} ${u.boss ? "boss" : ""}" id="u${u.uid}">
       <span class="ust" id="st${u.uid}"></span><span class="ue">${u.e}</span><span class="un">${u.n}</span>
       <span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${u.hp}</span></div>`;
   const bt = $("#battle");
   bt.style.setProperty("--zbg", ZONES[zoneOf(s)].bg);
   bt.innerHTML = `<div class="bwrap">
-    <div class="b-top"><div><div class="bz">${ZONES[zoneOf(s)].n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Bereit</div></div>
-      <div class="speeds">${[1,2,4].map(x => `<button data-act="speed" data-x="${x}" class="${speed === x ? "on" : ""}">${x}×</button>`).join("")}<button data-act="skip">Ende ⏭</button></div></div>
-    <div class="b-enemies"><div class="side">${units.filter(u => u.side === "e").map(tile).join("")}</div></div>
-    <div class="b-mid" id="bMid">${S.auto ? "Automatisch weiterkämpfen ist an" : ""}</div>
-    <div class="b-team"><div class="side">${units.filter(u => u.side === "p").map(tile).join("")}</div></div>
+    <div class="b-top"><div><div class="bz">${ZONES[zoneOf(s)].n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Kampf beginnt</div></div>
+      <div class="speeds">${[1,2,4].map(x => `<button data-act="speed" data-x="${x}" class="${speed === x ? "on" : ""}">${x}×</button>`).join("")}<button data-act="skip">Ergebnis</button></div></div>
+    <div class="b-enemies"><div class="sidelabel foe">Gegner</div><div class="side">${units.filter(u => u.side === "e").map(tile).join("")}</div></div>
+    <div class="b-log" id="bLog"><span>${S.auto ? "Automatisch wiederholen ist an" : "Dein Team kämpft von allein."}</span></div>
+    <div class="b-team"><div class="sidelabel own">Dein Team</div><div class="side">${units.filter(u => u.side === "p").map(tile).join("")}</div>
+      <div class="legend"><span><i style="background:var(--hp)"></i>Leben</span><span><i style="background:var(--shield)"></i>Schild</span><span>❄ eingefroren</span></div></div>
     <div id="fx"></div></div>`;
   bt.hidden = false;
-  B.timer = setTimeout(step, 500 / speed);
+  B.timer = setTimeout(step, 600 / speed);
 }
 function setHP(uid, hp, sh) {
   const u = B.units[uid], el = $("#u" + uid); if (!el) return;
   el.querySelector(".uhp i").style.width = Math.max(0, hp / u.max * 100) + "%";
   el.querySelector(".ush").style.width = Math.min(100, sh / u.max * 100) + "%";
-  $("#hv" + uid).textContent = sh > 0 ? `${hp} +${sh}` : hp;
+  $("#hv" + uid).textContent = sh > 0 ? `${hp} + ${sh} Schild` : hp;
 }
 function floatAt(uid, text, cls) {
   const layer = $("#fx"), el = $("#u" + uid); if (!layer || !el) return;
@@ -1013,29 +1082,27 @@ function floatAt(uid, text, cls) {
   f.style.top = (r.top - lr.top + r.height * .25) + "px";
   layer.appendChild(f); setTimeout(() => f.remove(), 900);
 }
-function banner(msg) {
-  const layer = $("#fx"); if (!layer) return;
-  const b = document.createElement("div"); b.className = "banner"; b.textContent = msg;
-  layer.appendChild(b); setTimeout(() => b.remove(), 1100);
-}
+const say = html => { const l = $("#bLog"); if (l) l.innerHTML = `<span>${html}</span>`; };
 function flash(uid, cls) { const el = $("#u" + uid); if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
 // Ein Ereignis anzeigen; gibt die Wartezeit in ms zurück
 function applyEv(e, quiet) {
-  const U = B.units;
+  const U = B.units, nm = id => U[id] ? U[id].n : "";
   switch (e.t) {
     case "round": $("#bRound").textContent = `Runde ${e.n}`; return 150;
     case "act": if (!quiet) { document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act")); const el = $("#u" + e.u); if (el) el.classList.add("act"); } return 40;
-    case "hit": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, (e.crit ? "✦" : "") + e.v, e.crit ? "crit" : "dmg"); flash(e.u, "hurt"); } return e.aoe ? 110 : e.thorns ? 150 : 330;
-    case "miss": if (!quiet) floatAt(e.u, "verfehlt", "miss"); return e.aoe ? 110 : 260;
-    case "heal": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "+" + e.v, "heal"); return 200;
-    case "sh": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "⛨" + e.v, "sh"); return 110;
-    case "dot": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "☠" + e.v, "dot"); return 160;
+    case "hit": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, (e.crit ? "Krit! " : "") + e.v, e.crit ? "crit" : "dmg"); flash(e.u, "hurt");
+      if (!e.aoe) say(e.thorns ? `${nm(e.u)} sticht sich an ${nm(e.a)}: ${e.v} Schaden` : `${nm(e.a)} trifft ${nm(e.u)}: <b>${e.v}</b> Schaden${e.crit ? " (kritisch)" : ""}`); }
+      return e.aoe ? 110 : e.thorns ? 150 : 340;
+    case "miss": if (!quiet) { floatAt(e.u, "ausgewichen", "miss"); if (!e.aoe) say(`${nm(e.u)} weicht ${nm(e.a)} aus`); } return e.aoe ? 110 : 260;
+    case "heal": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, "+" + e.v, "heal"); if (e.a && e.a !== e.u) say(`${nm(e.a)} heilt ${nm(e.u)} um ${e.v}`); } return 200;
+    case "sh": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "Schild " + e.v, "sh"); return 110;
+    case "dot": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, "Gift " + e.v, "dot"); say(`${nm(e.u)} leidet unter Gift oder Brand: ${e.v}`); } return 170;
     case "stun": { const s = $("#st" + e.u); if (s) s.textContent = "❄"; if (!quiet) floatAt(e.u, "eingefroren", "info"); return 140; }
-    case "frozen": { const s = $("#st" + e.u); if (s) s.textContent = ""; if (!quiet) floatAt(e.u, "setzt aus", "miss"); return 220; }
-    case "skill": if (quiet) return 0; if (e.quiet) { floatAt(e.a, e.msg, "info"); return 120; } banner(`${U[e.a].n}: ${e.msg}`); return 650;
-    case "die": { const el = $("#u" + e.u); if (el) el.classList.add("dead"); const s = $("#st" + e.u); if (s) s.textContent = ""; setHP(e.u, 0, 0); return 300; }
-    case "revive": case "save": { const el = $("#u" + e.u); if (el) { el.classList.remove("dead"); if (!quiet) flash(e.u, "revive"); } setHP(e.u, e.hp, e.sh); if (!quiet) banner(e.msg); return 700; }
-    case "banner": if (!quiet) banner(e.msg); return 600;
+    case "frozen": { const s = $("#st" + e.u); if (s) s.textContent = ""; if (!quiet) { floatAt(e.u, "setzt aus", "miss"); say(`${nm(e.u)} ist eingefroren und setzt aus`); } return 240; }
+    case "skill": if (quiet) return 0; say(`<b>${nm(e.a)}</b> setzt <b>${e.msg}</b> ein`); return e.quiet ? 160 : 650;
+    case "die": { const el = $("#u" + e.u); if (el) el.classList.add("dead"); const s = $("#st" + e.u); if (s) s.textContent = ""; setHP(e.u, 0, 0); if (!quiet) say(`${nm(e.u)} ist besiegt`); return 320; }
+    case "revive": case "save": { const el = $("#u" + e.u); if (el) { el.classList.remove("dead"); if (!quiet) flash(e.u, "revive"); } setHP(e.u, e.hp, e.sh); if (!quiet) say(`<b>${e.msg}</b>`); return 750; }
+    case "banner": if (!quiet) say(`<b>${e.msg}</b>`); return 600;
   }
   return 0;
 }
@@ -1043,7 +1110,7 @@ function step() {
   if (!B || B.done) return;
   if (B.i >= B.res.ev.length) return finishBattle();
   const d = applyEv(B.res.ev[B.i++], false);
-  B.timer = setTimeout(step, d / B.speed);
+  B.timer = setTimeout(step, d / UI.speed);
 }
 function skipBattle() {
   if (!B || B.done) return;
@@ -1055,44 +1122,45 @@ function finishBattle() {
   if (B.done) return;
   B.done = true;
   document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act"));
+  say(B.res.win ? "<b>Sieg!</b>" : "<b>Niederlage</b>");
   const R = grantRewards(B.res.win, B.s);
-  setTimeout(() => { if (B) showResult(R); }, 450);
+  setTimeout(() => { if (B) showResult(R); }, 500);
 }
 function showResult(R) {
   const n = heroNeed(S.lv), mx = S.lv >= MAX_LV, auto = S.auto && R.win, lvUp = R.hero.lv.length;
   const cardLines = R.cards.map(c => {
     const st = S.cards[c.id], f = form(c.id, st.st), up = c.to > c.from;
-    return `<div class="cg"><span class="ge">${f[1]}</span><span class="gb">${bar(st.xp, cardNeed(st.l), st.l >= cardCap(st))}</span>
-      <span class="gl ${up ? "up" : ""}">${up ? `Lv ${c.from} → ${c.to}` : `Lv ${c.to}`}</span></div>`;
+    return `<div class="cg"><span class="ge">${f[1]}</span><span class="gn">${f[0]}</span>
+      <span class="gl ${up ? "up" : ""}">${up ? `Level ${c.from} → ${c.to}` : `Level ${c.to}`}</span>${bar(st.xp, cardNeed(st.l), st.l >= cardCap(st) ? "gold" : "")}</div>`;
   }).join("");
   let drop = "";
   if (R.drop) {
     const d = CC[R.drop.id], f = form(R.drop.id, S.cards[R.drop.id].st);
-    drop = `<div class="drop r-${d.r}"><div class="dm">${R.drop.dup ? "Doppelte Karte" : "Neue Karte gefunden!"}</div><div class="de">${f[1]}</div><div class="dn">${f[0]}</div>
-      <div class="dm">${RAR[d.r].n} · ${AB[d.ab].n}${R.drop.dup ? ` · +${R.drop.dust} Staub${R.drop.up ? ", +1 Level" : ""}` : ` · startet auf Level ${R.drop.l}`}</div></div>`;
+    drop = `<div class="drop r-${d.r}"><div class="dm">${R.drop.dup ? "Karte doppelt gefunden" : "Neue Karte gefunden!"}</div><div class="de">${f[1]}</div><div class="dn">${f[0]}</div>
+      <div class="dm"><span class="rar">${RAR[d.r].n}</span> · ${AB[d.ab].n} · ${R.drop.dup ? `+1 Level und ${R.drop.coins} Münzen` : `startet auf Level ${R.drop.l}`}</div></div>`;
   }
-  const nextOpen = R.win && R.s < 50;
-  const loseMsg = B.res.timeout ? "Nach 30 Runden ist die Zeit abgelaufen. Dein Team macht noch zu wenig Schaden." : "Dein Team ist gefallen. Werde stärker und versuch es nochmal.";
-  modal(`<div class="result-head ${R.win ? "win" : "lose"}"><h2>${R.win ? "Sieg" : "Niederlage"}</h2>
-      <p>${R.win ? (R.first ? "Etappe zum ersten Mal geschafft: doppelte Münzen." : `Gewonnen in ${B.res.rounds} Runden.`) : loseMsg}</p></div>
-    <div class="gains"><span class="x">+${R.hx} EP</span>${R.co ? `<span class="coin">+${R.co}</span>` : ""}${R.du ? `<span class="dust">+${R.du}</span>` : ""}</div>
-    <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${mx ? "Maximum" : `${S.xp} / ${n} EP`}</div></div>
-    ${lvUp ? `<div class="lvup"><b>Level ${S.lv}!</b><span>+${lvUp} Talentpunkt${lvUp > 1 ? "e" : ""}</span>
-      ${R.hero.abs.map(a => `<span>Neue Fähigkeit: ${a}</span>`).join("")}${R.hero.slots.length ? "<span>Neuer Platz im Team frei</span>" : ""}</div>` : ""}
-    ${cardLines ? `<div class="cgain"><div class="xptext">+${R.cx} EP für jeden Begleiter</div>${cardLines}</div>` : ""}
+  const nextOpen = R.win && R.s < 50 && R.s === S.prog;
+  const loseMsg = B.res.timeout ? "Nach 30 Runden ist die Zeit abgelaufen. Dein Team macht noch zu wenig Schaden." : "Dein Team ist gefallen.";
+  modal(`<div class="result-head ${R.win ? "win" : "lose"}"><h2>${R.win ? "Sieg!" : "Niederlage"}</h2>
+      <p>${R.win ? (R.first ? "Neue Etappe geschafft! Dafür gibt es doppelte Münzen." : `Gewonnen in ${B.res.rounds} Runden.`) : `${loseMsg} Du bekommst trotzdem ein paar EP. Werde stärker und versuch es erneut.`}</p></div>
+    <div class="gains"><span class="x">+${R.hx} EP</span>${R.co ? `<span class="coin">+${R.co}</span>` : ""}</div>
+    <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${mx ? "Maximum" : `${S.xp} / ${n} EP bis Level ${S.lv + 1}`}</div></div>
+    ${lvUp ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${lvUp} Talentpunkt${lvUp > 1 ? "e" : ""} · mehr Leben und Angriff</span>
+      ${R.hero.abs.map(a => `<span>Neue Heldenfähigkeit: <b style="display:inline;font-size:inherit">${a}</b></span>`).join("")}${R.hero.slots.length ? "<span>Ein neuer Platz im Team ist frei</span>" : ""}</div>` : ""}
+    ${cardLines ? `<div class="label" style="margin:0">Deine Karten · je +${R.cx} EP</div>${cardLines}` : ""}
     ${drop}
-    ${auto ? `<div class="autoline" id="autoLine">Nächster Kampf in 2 Sekunden …</div>` : ""}
+    ${auto ? `<div class="autoline" id="autoLine">Nächster Kampf startet gleich …</div>` : ""}
+    ${nextOpen && !auto ? `<button class="btn big" data-act="again" data-s="${R.s + 1}">Weiter zu Etappe ${stageNo(R.s + 1)}</button>` : ""}
     <div class="row">
-      <button class="btn ghost" data-act="leave">Zurück</button>
-      ${nextOpen && !auto ? `<button class="btn" data-act="again" data-s="${R.s + 1}">Nächste Etappe</button>` : ""}
-      <button class="btn ${nextOpen && !auto ? "ghost" : ""}" data-act="again" data-s="${R.s}">${auto ? "Sofort" : "Nochmal"}</button>
+      <button class="btn ghost" data-act="leave">Zum Start</button>
+      <button class="btn ${nextOpen && !auto ? "ghost" : ""}" data-act="again" data-s="${R.s}">${auto ? "Sofort weiter" : R.win ? "Nochmal" : "Erneut versuchen"}</button>
     </div>
-    ${auto ? `<button class="btn ghost sm" data-act="autoOff">Automatik stoppen</button>` : ""}`);
-  if (auto) B.autoT = setTimeout(() => { if (B && B.done && S.auto) { modal(""); startBattle(R.s); } }, 2000);
+    ${auto ? `<button class="btn ghost sm" data-act="autoOff">Automatisch wiederholen stoppen</button>` : ""}`);
+  if (auto) B.autoT = setTimeout(() => { if (B && B.done && S.auto) { modal(""); startBattle(R.s); } }, 2200);
   if (!R.win && S.auto) { S.auto = false; save(); }
 }
 function leaveBattle() {
-  if (B) { clearTimeout(B.timer); clearTimeout(B.autoT); UI.speed = B.speed; }
+  if (B) { clearTimeout(B.timer); clearTimeout(B.autoT); }
   B = null; modal("");
   $("#battle").hidden = true; $("#battle").innerHTML = "";
   render();
@@ -1105,7 +1173,10 @@ function act(el, ev) {
   const a = el.dataset.act, id = el.dataset.id;
   switch (a) {
     case "tab": UI.tab = el.dataset.k; modal(""); render(); $("#main").scrollTop = 0; break;
+    case "heroInfo": heroModal(); break;
     case "card": cardModal(id); break;
+    case "pick": pickModal(); break;
+    case "putIn": if (S.team.length < slotsAt(S.lv) && !S.team.includes(id)) { S.team.push(id); save(); } modal(""); render(); break;
     case "close": modal(""); break;
     case "closeBg": if (ev.target === el && !B) modal(""); break;
     case "toggleTeam": {
@@ -1114,9 +1185,9 @@ function act(el, ev) {
       save(); render(); cardModal(id); break;
     }
     case "train": {
-      const c = S.cards[id], cost = Math.max(0, cardNeed(c.l) - c.xp);
-      if (c.l >= cardCap(c) || S.dust < cost) return;
-      S.dust -= cost; addCardXP(id, cost); save(); render(); cardModal(id);
+      const c = S.cards[id], cost = trainCost(c);
+      if (c.l >= cardCap(c) || S.co < cost) return;
+      S.co -= cost; addCardXP(id, cardNeed(c.l) - c.xp); save(); render(); cardModal(id);
       toast(`${form(id, c.st)[0]} ist jetzt Level ${c.l}`); break;
     }
     case "evolve": {
@@ -1129,20 +1200,21 @@ function act(el, ev) {
     case "fight": startBattle(+el.dataset.s); break;
     case "noop": toast("Schaffe zuerst die Etappe davor."); break;
     case "auto": S.auto = !S.auto; save(); render(); break;
-    case "speed": B.speed = +el.dataset.x; document.querySelectorAll(".speeds [data-x]").forEach(b => b.classList.toggle("on", +b.dataset.x === B.speed)); break;
+    case "speed": UI.speed = +el.dataset.x; document.querySelectorAll(".speeds [data-x]").forEach(b => b.classList.toggle("on", +b.dataset.x === UI.speed)); break;
     case "skip": skipBattle(); break;
     case "again": { const s = +el.dataset.s; if (B) clearTimeout(B.autoT); modal(""); S.zone = zoneOf(s); startBattle(s); break; }
-    case "autoOff": { S.auto = false; save(); if (B) clearTimeout(B.autoT); const l = $("#autoLine"); if (l) l.textContent = "Automatik gestoppt."; el.hidden = true; break; }
-    case "leave": leaveBattle(); break;
-    case "talent": talentModal(id); break;
+    case "autoOff": { S.auto = false; save(); if (B) clearTimeout(B.autoT); const l = $("#autoLine"); if (l) l.textContent = "Automatisch wiederholen ist aus."; el.hidden = true; break; }
+    case "leave": UI.tab = "home"; leaveBattle(); break;
+    case "branch": UI.branch = el.dataset.k; render(); break;
     case "learn": {
-      const t = TM[id], r = S.tal[id] || 0, sp = TALENTS.filter(x => x.b === t.b).reduce((s2, x) => s2 + (S.tal[x.id] || 0), 0);
-      if (S.tp < 1 || r >= t.max || sp < t.t * 5) return;
-      S.tp--; S.tal[id] = r + 1; save(); render(); talentModal(id); break;
+      const t = TM[id], r = S.tal[id] || 0;
+      if (S.tp < 1 || r >= t.max || spentIn(t.b) < t.t * 5) return;
+      S.tp--; S.tal[id] = r + 1; save();
+      const sc = $("#main").scrollTop; render(); $("#main").scrollTop = sc; break;
     }
     case "talReset": {
       const p = resetPrice(); if (S.co < p) return;
-      modal(`<h2>Talente zurücksetzen?</h2><p>Du bekommst alle ${Object.values(S.tal).reduce((x, y) => x + y, 0)} Punkte zurück und kannst sie neu verteilen. Kosten: ${p} Münzen.</p>
+      modal(`<h2>Talente zurücksetzen?</h2><p>Du bekommst alle ${Object.values(S.tal).reduce((x, y) => x + y, 0)} Punkte zurück und kannst sie neu verteilen. Das kostet ${p} Münzen.</p>
         <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn" data-act="talResetOk">Zurücksetzen</button></div>`); break;
     }
     case "talResetOk": {
@@ -1158,17 +1230,16 @@ function act(el, ev) {
       save(); render();
       modal(`<h2>${n === 1 ? "Sternenpack" : "Großes Sternenpack"}</h2>${got.map(g => {
         const d = CC[g.id], f = form(g.id, S.cards[g.id].st);
-        return `<div class="drop r-${d.r}"><div class="dm">${g.dup ? "Doppelt" : "Neu!"}</div><div class="de">${f[1]}</div><div class="dn">${f[0]}</div>
-          <div class="dm">${RAR[d.r].n} · ${AB[d.ab].n}${g.dup ? ` · +${g.dust} Staub${g.up ? ", +1 Level" : ""}` : ` · Level ${g.l}`}</div></div>`;
+        return `<div class="drop r-${d.r}"><div class="dm">${g.dup ? "Schon vorhanden" : "Neu!"}</div><div class="de">${f[1]}</div><div class="dn">${f[0]}</div>
+          <div class="dm"><span class="rar">${RAR[d.r].n}</span> · ${AB[d.ab].n} · ${g.dup ? `+1 Level und ${g.coins} Münzen` : `Level ${g.l}`}</div></div>`;
       }).join("")}<button class="btn" data-act="close">Super</button>`);
       break;
     }
-    case "buyDust": { const p = dustOffer(); if (S.co < p) return; S.co -= p; S.dust += p; save(); render(); toast(`+${p} Sternenstaub`); break; }
     case "help": helpModal(); break;
     case "resetAsk":
-      modal(`<h2>Spielstand löschen?</h2><p>Level, Karten, Talente und Münzen gehen verloren. Das lässt sich nicht rückgängig machen.</p>
-        <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn danger" data-act="reset">Löschen</button></div>`); break;
-    case "reset": S = defSave(); S.seen = true; save(); modal(""); UI.tab = "hero"; render(); toast("Neues Spiel gestartet"); break;
+      modal(`<h2>Neu starten?</h2><p>Level, Karten, Talente und Münzen gehen verloren. Das lässt sich nicht rückgängig machen.</p>
+        <div class="row"><button class="btn ghost" data-act="close">Abbrechen</button><button class="btn danger" data-act="reset">Alles löschen</button></div>`); break;
+    case "reset": S = defSave(); S.seen = true; save(); modal(""); UI.tab = "home"; render(); toast("Neues Spiel gestartet"); break;
   }
 }
 document.addEventListener("click", ev => { const el = ev.target.closest("[data-act]"); if (el) act(el, ev); });
@@ -1178,6 +1249,7 @@ document.addEventListener("click", ev => { const el = ev.target.closest("[data-a
    ========================================================= */
 function start(data) {
   S = (data && data.S && data.S.v === 2) ? data.S : load();
+  if (S.dust != null) { S.co += S.dust || 0; delete S.dust; }
   render();
   if (!S.seen) { S.seen = true; save(); helpModal(); }
 }
