@@ -459,6 +459,21 @@ p { margin: 0; }
 .dchip .dl { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
 .dchip .bar, .slot .bar { width: 82%; height: 5px; margin-top: 2px; }
 .lineup.five .slot .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
+.flag.bo { background: var(--good); color: var(--night); }
+.bolist { display: flex; flex-direction: column; gap: 4px; }
+.borow { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 7px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--deck); color: var(--moon); font-size: 13.5px; }
+.borow.big { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
+.borow.new { border-color: var(--good); }
+.borow .bl { font-family: var(--f-display); font-weight: 700; font-size: 12px; color: var(--dim); width: 44px; flex: none; }
+.borow .bi { width: 20px; text-align: center; flex: none; }
+.borow .bx { flex: 1; min-width: 0; }
+.borow .bc { font-size: 11px; font-weight: 700; color: var(--dim); }
+.borow.new .bc { color: var(--good); }
+.boopts { display: flex; flex-direction: column; gap: 8px; }
+.boopt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--deck-2); color: var(--moon); font-size: 15px; font-weight: 600; }
+.boopt .bi { font-size: 24px; flex: none; }
+.boopt .bx { flex: 1; }
+.boopt.on { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 16%, var(--deck-2)); }
 .slot.indeck { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 55%, transparent); }
 .flag.rk { background: var(--good); color: var(--night); }
 .swapgrid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
@@ -559,6 +574,7 @@ const FORM_LV = [1, 10, 25];    // ab diesem Kartenlevel entwickeln sich die Kar
 const TROPHY = 30, ARENA_STEP = 300, DECK_SIZE = 4;
 const EN_START = 4, EN_ROUND = 3, EN_MAX = 10;   // Sternenenergie für Sonderattacken
 const HP_MUL = 1.5;             // Leben im Kampf, damit Kämpfe mehrere Runden dauern
+const hpLv = L => HP_MUL * (.75 + Math.min(L, 200) / 40);   // mit dem Level etwas mehr, sonst werden späte Kämpfe zu kurz
 const STORM = 8;                // ab dieser Runde zieht ein Sternensturm auf: jeder Treffer wird stärker, damit Kämpfe nicht ewig dauern
 const heroNeed = L => Math.round(12 * Math.pow(1.1, L - 1) * (3 + .35 * Math.min(L, 60) + .1 * Math.max(0, L - 60)));
 const cardNeed = L => Math.round(20 * Math.pow(1.1, L - 1) * (1 + .25 * Math.min(L, 60) + .08 * Math.max(0, L - 60)));
@@ -698,6 +714,44 @@ const spCost = (id, L) => Math.max(1, CC[id].sp.e - (L >= 10 ? 1 : 0));
 const spCd = (id, L) => Math.max(1, CC[id].sp.cd - (L >= 20 ? 1 : 0));
 const spVal = (id, L) => CC[id].sp.v * spPow(L);
 const spDesc = (id, L) => SPK[CC[id].sp.k](spVal(id, L)) + (L >= 15 ? ` Außerdem ${SPX[CC[id].sp.x]}.` : "");
+
+// Level-Boosts: Jedes Kartenlevel ab 2 gibt einen Boost. Du wählst aus 3 Möglichkeiten und kannst die Wahl später auf der Karte ändern.
+// Normale Level bieten Steigerungen, jedes 5. Level einen besonderen Effekt. Ohne Wahl gilt die erste Möglichkeit.
+const BOOST_S = [
+  { k:"hp",    v:.03, i:"❤️", t:v => `+${pct(v)} Leben` },
+  { k:"atk",   v:.03, i:"⚔️", t:v => `+${pct(v)} Angriff` },
+  { k:"sp",    v:.04, i:"✦",  t:v => `+${pct(v)} Sonderattacke` },
+  { k:"crit",  v:.02, i:"🎯", t:v => `+${pct(v)} Krit-Chance` },
+  { k:"dodge", v:.01, i:"💨", t:v => `+${pct(v)} Ausweichen` },
+  { k:"dr",    v:.01, i:"🧱", t:v => `${pct(v)} weniger Schaden` },
+  { k:"heal",  v:.04, i:"💚", t:v => `+${pct(v)} Heilung und Schilde` }
+];
+const BOOST_B = [
+  { k:"shield", v:.08, i:"🔵", t:v => `Startschild: ${pct(v)} der Leben` },
+  { k:"life",   v:.06, i:"🩸", t:v => `Lebensraub: heilt ${pct(v)} des Schadens` },
+  { k:"thorns", v:.08, i:"🌵", t:v => `Stacheln: ${pct(v)} des Schadens zurück` },
+  { k:"first",  v:.15, i:"⚡", t:v => `Erstschlag: +${pct(v)} Schaden in Runde 1 und 2` },
+  { k:"exec",   v:.2,  i:"🪓", t:v => `Gnadenstoß: +${pct(v)} gegen fast Besiegte` },
+  { k:"regen",  v:.03, i:"🌿", t:v => `Regeneration: heilt sich jede Runde um ${pct(v)}` },
+  { k:"last",   v:.8,  i:"💥", t:v => `Letzter Funke: trifft beim Fallen alle Gegner mit ${pct(v)} Angriff` },
+  { k:"energy", v:1,   i:"🔋", t:v => `+${v} ⚡ Sternenenergie zu Kampfbeginn` }
+];
+const BOOST_ALL = Object.fromEntries(BOOST_S.concat(BOOST_B).map(b => [b.k, b]));
+// Die 3 Möglichkeiten je Karte und Level sind fest, damit eine Wahl auch später noch gilt
+function boostOpts(id, L) {
+  const pool = L % 5 === 0 ? BOOST_B : BOOST_S, idx = pool.map((_, i) => i);
+  let h = 7; for (const ch of id + ":" + L) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  for (let i = idx.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = (h >>> 8) % (i + 1); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  return idx.slice(0, 3).map(i => pool[i]);
+}
+// bo: gewählte Möglichkeit je Level; eine Zahl statt eines Objekts steht für zufällige Wahl (Computer-Gegner)
+const boostPick = (bo, l) => typeof bo === "number" ? ((bo + l * 2654435761) >>> 0) % 3 : (bo && bo[l]) || 0;
+function boostFx(id, L, bo) {
+  const fx = {};
+  for (let l = 2; l <= L; l++) { const b = boostOpts(id, l)[boostPick(bo, l)]; fx[b.k] = (fx[b.k] || 0) + b.v; }
+  return fx;
+}
+const boostSum = fx => Object.keys(BOOST_ALL).filter(k => fx[k]).map(k => `${BOOST_ALL[k].i} ${BOOST_ALL[k].t(k === "energy" ? fx[k] : Math.round(fx[k] * 100) / 100)}`);
 
 // Fähigkeiten der Hauptkarte, kommen mit dem Level automatisch dazu
 const HERO_AB = [
@@ -925,6 +979,7 @@ function fixSave(o) {
   const d = defSave(), S2 = { ...d, ...o, stats:{ ...d.stats, ...o.stats } };
   S2.cards = o.cards || d.cards;
   START_CARDS.forEach(id => { if (!S2.cards[id]) S2.cards[id] = { lv:1, xp:0 }; });
+  Object.values(S2.cards).forEach(c => { if (c.seen == null) c.seen = c.lv; if (!c.bo) c.bo = {}; });
   S2.deck = (o.deck || []).filter(id => S2.cards[id]).slice(0, DECK_SIZE);
   Object.keys(S2.cards).forEach(id => { if (S2.deck.length < DECK_SIZE && !S2.deck.includes(id)) S2.deck.push(id); });
   return S2;
@@ -1008,28 +1063,29 @@ const unitPower = u => Math.sqrt(u.max * u.atk) * (1 + (u.ab ? .15 : 0)) * (u.sp
 let UID = 1;
 function mkUnit(o) {
   return Object.assign({ uid:UID++, shield:0, dots:[], stun:0, rage:0, shred:0, weaken:0, mark:0, cnt:0, alive:true, dr:0, dodge:0, crit:.05, critDmg:2, thorns:0, healMul:1, habs:[],
-    spCd:0, buff:0, buffR:0, st:{ dmg:0, sup:0, tank:0, sp:0, kills:0, alive:0 } }, o);
+    spCd:0, buff:0, buffR:0, fx:{}, st:{ dmg:0, sup:0, tank:0, sp:0, kills:0, alive:0 } }, o);
 }
 // Eine Seite bauen. who = { name, lv, eq, tree, cards:[{ id, lv, rank }] }
 function buildSide(side, who) {
   const tree = who.tree || {}, T = treeFx({ tree }), L = who.lv, eq = who.eq || { w:0, a:0, h:0, c:0 }, h = heroStats({ lv:L, eq, tree });
-  const U = [mkUnit({ side, hero:true, n:who.name, e:"🧑‍🚀", hp:h.hp * HP_MUL, max:h.hp * HP_MUL, atk:h.atk, spd:h.spd, crit:h.crit, critDmg:h.critDmg,
+  const U = [mkUnit({ side, hero:true, n:who.name, e:"🧑‍🚀", hp:Math.round(h.hp * hpLv(L)), max:Math.round(h.hp * hpLv(L)), atk:h.atk, spd:h.spd, crit:h.crit, critDmg:h.critDmg,
     dodge:T.dodge, dr:Math.min(.75, T.dr + T.heroDr), thorns:T.thorns, habs:HERO_AB.filter(a => a.k && a.lv <= L).map(a => a.k),
     en:h.startEn, charge:h.charge, ultMul:h.ultMul, ult:ultAt(L), lv:L, eqs:{ ...eq } })];
   who.cards.forEach(c => {
     const id = c.id, d = CC[id], Lc = c.lv, s = cardStats(id, Lc, T, c.rank), ab = { k:d.ab, v:abVal(d.ab, formOf(Lc), T) }, f = d.f[formOf(Lc)];
-    const hp = Math.round(s.hp * (1 + T.hp) * HP_MUL);
-    U.push(mkUnit({ side, cid:id, lv:Lc, r:d.r, n:f[0], e:f[1], hp, max:hp, atk:s.atk, spd:s.spd, ab,
-      crit:.05 + T.crit + (ab.k === "crit" ? ab.v : 0), critDmg:2 + T.critDmg,
-      dodge:Math.min(.6, T.dodge + (ab.k === "dodge" ? ab.v : 0)), dr:Math.min(.75, T.dr + (ab.k === "taunt" ? ab.v : 0)),
-      thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0), healMul:1 + (ROLES[d.role].key === "healer" ? T.healer : 0),
-      sp:{ n:d.sp.n, k:d.sp.k, x:Lc >= 15 ? d.sp.x : null, v:spVal(id, Lc) * (1 + T.abil * .5), cost:spCost(id, Lc), cd:spCd(id, Lc) } }));
+    const fx = boostFx(id, Lc, c.bo), b = k => fx[k] || 0;
+    const hp = Math.round(s.hp * (1 + T.hp) * (1 + b("hp")) * hpLv(Lc));
+    U.push(mkUnit({ side, cid:id, lv:Lc, r:d.r, n:f[0], e:f[1], hp, max:hp, atk:Math.round(s.atk * (1 + b("atk"))), spd:s.spd, ab, fx,
+      crit:.05 + T.crit + (ab.k === "crit" ? ab.v : 0) + b("crit"), critDmg:2 + T.critDmg,
+      dodge:Math.min(.6, T.dodge + (ab.k === "dodge" ? ab.v : 0) + b("dodge")), dr:Math.min(.75, T.dr + (ab.k === "taunt" ? ab.v : 0) + b("dr")),
+      thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0) + b("thorns"), healMul:1 + (ROLES[d.role].key === "healer" ? T.healer : 0) + b("heal"),
+      sp:{ n:d.sp.n, k:d.sp.k, x:Lc >= 15 ? d.sp.x : null, v:spVal(id, Lc) * (1 + T.abil * .5) * (1 + b("sp")), cost:spCost(id, Lc), cd:spCd(id, Lc) } }));
   });
   const aura = T.atk + (heroHas("hAura", L) ? .15 : 0) + U.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
   U.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
   return U;
 }
-const playerWho = (st = S) => ({ name:"Mondkurier", lv:st.lv, eq:st.eq, tree:st.tree, cards:st.deck.map(id => ({ id, lv:cardLv(id, st), rank:(st.rank || {})[id] || 0 })) });
+const playerWho = (st = S) => ({ name:"Mondkurier", lv:st.lv, eq:st.eq, tree:st.tree, cards:st.deck.map(id => ({ id, lv:cardLv(id, st), rank:(st.rank || {})[id] || 0, bo:st.cards[id].bo || {} })) });
 const buildTeam = (st = S) => buildSide("p", playerWho(st));
 const sidePower = U => U.reduce((a, u) => a + unitPower(u), 0);
 
@@ -1041,7 +1097,7 @@ function makeRival(st = S) {
   const n = Math.min(pool.length, rnd([2, 3, 3, 4, 4, 4, 4])), dl = avgDeckLv(st);
   const rk = st.deck.reduce((a, id) => a + ((st.rank || {})[id] || 0), 0) / st.deck.length;
   const who = { name:rnd(RIVALS), lv:Math.max(1, st.lv + ri(-3, 3)), eq:Object.fromEntries(Object.entries(st.eq).map(([k, l]) => [k, Math.max(0, l + ri(-2, 2))])),
-    cards:shuffle(pool).slice(0, n).map(id => ({ id, lv:Math.max(1, Math.round(dl + ri(-3, 3))), rank:Math.max(0, Math.round(rk + ri(-1, 1))) })) };
+    cards:shuffle(pool).slice(0, n).map(id => ({ id, lv:Math.max(1, Math.round(dl + ri(-3, 3))), rank:Math.max(0, Math.round(rk + ri(-1, 1))), bo:ri(0, 1e6) })) };
   const target = sidePower(buildTeam(st)) * st.mm * (.92 + Math.random() * .16), pow = () => sidePower(buildSide("e", who));
   // Kampfwerte wachsen um 7 % je Level: die Kartenlevel so weit verschieben, bis die Stärke passt (der Held bleibt nah an deinem Level)
   for (let k = 0; k < 5; k++) {
@@ -1098,6 +1154,7 @@ function* battle(P, E, T, ctl) {
     u.alive = false; u.hp = 0; u.dots = []; u.stun = 0; u.shield = 0;
     if (u.last && u.last.side !== u.side) u.last.st.kills++;
     ev.push({ t:"die", u:u.uid });
+    if (u.fx.last) { ev.push({ t:"banner", msg:`${u.n}: Letzter Funke!` }); foes(u).forEach(f => directDmg(u, f, u.atk * u.fx.last)); }
     if (u.ab && u.ab.k === "martyr") { ev.push({ t:"banner", msg:`${u.n} explodiert!` }); foes(u).forEach(f => directDmg(u, f, u.atk * u.ab.v)); }
     const ph = mates(u).find(f => f.ab && f.ab.k === "revive" && !f.revGiven);
     if (ph) { ph.revGiven = true; u.alive = true; u.hp = u.max * ph.ab.v; ph.st.sup += u.hp; ev.push({ t:"revive", ...snap(u), msg:`${ph.n} holt ${u.n} zurück!` }); return; }
@@ -1138,6 +1195,8 @@ function* battle(P, E, T, ctl) {
     if (k === "execute" && t.hp / t.max < .35) d *= 1 + v;
     if (k === "berserk") d *= 1 + v * (1 - a.hp / a.max);
     d *= 1 + t.mark;
+    if (a.fx.first && round <= 2) d *= 1 + a.fx.first;
+    if (a.fx.exec && t.hp / t.max < .35) d *= 1 + a.fx.exec;
     const fc = ctl[a.side].focus;
     if (t.uid === fc) d *= 1.15;
     const crit = Math.random() < a.crit; if (crit) d *= a.critDmg;
@@ -1152,6 +1211,7 @@ function* battle(P, E, T, ctl) {
     if (k === "mark") t.mark = Math.max(t.mark, v);
     if (k === "stun" && t.hp > 0 && Math.random() < v) stunIt(t);
     if (k === "lifesteal") heal(a, d * v, a);
+    if (a.fx.life) heal(a, d * a.fx.life, a);
     if (k === "chain" && !aoe) { const o = foes(a).filter(f => f !== t); if (o.length) directDmg(a, rnd(o), d * v); }
     if (t.thorns > 0 && a.alive) {
       const r = Math.max(1, Math.round(d * t.thorns)); a.hp -= r; t.st.dmg += r; a.last = t; ev.push({ t:"hit", a:t.uid, ...snap(a), v:r, thorns:true }); kill(a);
@@ -1282,6 +1342,8 @@ function* battle(P, E, T, ctl) {
     if (k === "shieldTeam") mates(u).forEach(f => addShield(f, f.max * u.ab.v, u));
     if (k === "burn") foes(u).forEach(f => f.dots.push({ d:u.atk * u.ab.v * dotMul(u), r:4, src:u }));
     if (u.hero && u.habs.includes("hShield")) mates(u).forEach(f => addShield(f, u.max * .12));
+    if (u.fx.shield) addShield(u, u.max * u.fx.shield, u);
+    if (u.fx.energy) ctl[u.side].en = Math.min(EN_MAX, ctl[u.side].en + u.fx.energy);
   }
   if (T.shield) P.forEach(f => addShield(f, f.max * T.shield));
   yield flush();
@@ -1318,6 +1380,7 @@ function* battle(P, E, T, ctl) {
       }
       if (!u.alive) continue;
       if (u.hero && u.habs.includes("hRegen")) heal(u, u.max * .04);
+      if (u.fx.regen) heal(u, u.max * u.fx.regen, u);
       if (isP(u) && T.regen) heal(u, u.max * T.regen);
       if (u.buffR > 0 && --u.buffR === 0) u.buff = 0;
       u.st.alive++;
@@ -1397,7 +1460,7 @@ function grantRewards(win, M) {
     S.arMax++;
     const A = arenaAt(S.arMax), rw = arenaReward(S.arMax);
     let aco = Math.round(rw.co * (1 + T.firstCo)), card = null;
-    if (A.card && !S.cards[A.card.id]) { card = A.card.id; S.cards[card] = { lv:newCardLv(), xp:0 }; S.unseen = true; } else aco *= 2;
+    if (A.card && !S.cards[A.card.id]) { card = A.card.id; const nl = newCardLv(); S.cards[card] = { lv:nl, xp:0, seen:nl, bo:{} }; S.unseen = true; } else aco *= 2;
     S.co += aco; S.sp += rw.sp; newAr.push({ i:S.arMax, co:aco, sp:rw.sp, card });
   }
   const hero = addHeroXP(hx);
@@ -1430,6 +1493,8 @@ const ICONS = {
   tree: '<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="13" r="2"/><circle cx="12" cy="13" r="2"/><circle cx="19" cy="13" r="2"/><circle cx="12" cy="21" r="1.5"/><path d="M12 6v5M11 5 6 11M13 5l5 6M12 15v4"/></svg>'
 };
 const rankable = () => owned().filter(d => S.sp >= rankCost(S.rank[d.id] || 0));
+const newBoosts = id => Math.max(0, S.cards[id].lv - (S.cards[id].seen || 1));
+const boostCards = () => owned().filter(d => newBoosts(d.id) > 0);
 function renderTop() {
   const n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
   $("#top").innerHTML = `<div class="lvl-badge">Level ${S.lv}</div>
@@ -1439,7 +1504,7 @@ function renderTop() {
 }
 function renderNav() {
   const tabs = [["home","Spielen"],["hero","Held"],["arena","Arenen"],["team","Karten"],["tree","Baum"]];
-  const badge = { tree:buyable().length, team:buyable().length ? 0 : rankable().length, hero:eqUpgradable().length };
+  const badge = { tree:buyable().length, team:boostCards().length || (buyable().length ? 0 : rankable().length), hero:eqUpgradable().length };
   $("#nav").innerHTML = tabs.map(([k, n]) =>
     `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}"><span class="badge">${ICONS[k]}${badge[k] ? `<b>${badge[k]}</b>` : ""}</span>${n}</button>`).join("");
 }
@@ -1546,6 +1611,8 @@ function screenHome() {
   if (!nb && rk.length) todos.push({ i:"⬆️", b:"Karten im Rang steigern", s:`${rk.length} Karte${rk.length > 1 ? "n können" : " kann"} mit Sternenpunkten aufsteigen.`, act:'data-act="tab" data-k="team"' });
   const eu = eqUpgradable();
   if (eu.length) todos.unshift({ i:eu[0].i, b:"Ausrüstung des Helden verbessern", s:`${eu.map(e => e.n).join(", ")} ${eu.length > 1 ? "können" : "kann"} eine Stufe höher`, act:'data-act="tab" data-k="hero"' });
+  const bc = boostCards();
+  if (bc.length) todos.unshift({ i:"✨", b:"Neue Level-Boosts wählen", s:`${bc.map(d => form(d.id)[1]).join(" ")} ${bc.length > 1 ? "haben" : "hat"} neue Boosts. Wählst du nichts, gilt die erste Möglichkeit.`, act:`data-act="card" data-id="${bc[0].id}"` });
   const bench = owned().filter(c => !S.deck.includes(c.id));
   if (bench.length && S.unseen) todos.push({ i:"🃏", b:"Neue Karte im Deck einsetzen", s:"Nur Karten im Deck sammeln EP.", act:'data-act="tab" data-k="team"' });
   const modeCard = m => {
@@ -1988,7 +2055,7 @@ function screenTeam() {
     if (!S.cards[d.id]) return `<button class="slot locked" data-act="card" data-id="${d.id}"><span class="se" style="filter:grayscale(1) brightness(.5)">${d.f[0][1]}</span><span class="sn">${d.f[0][0]}</span><span class="sl">Arena ${d.ar + 1}</span></button>`;
     const c = S.cards[d.id], r = S.rank[d.id] || 0, f = form(d.id), inD = S.deck.includes(d.id);
     return `<button class="slot full r-${d.r} ${inD ? "indeck" : ""}" data-act="card" data-id="${d.id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span>
-      <span class="sl">Lv ${c.lv}${r ? ` · Rang ${r}` : ""}</span>${bar(c.xp, cardNeed(c.lv))}${inD ? '<span class="flag">Deck</span>' : S.sp >= rankCost(r) ? '<span class="flag rk">Rang +1</span>' : ""}</button>`;
+      <span class="sl">Lv ${c.lv}${r ? ` · Rang ${r}` : ""}</span>${bar(c.xp, cardNeed(c.lv))}${newBoosts(d.id) ? '<span class="flag bo">Boost neu</span>' : inD ? '<span class="flag">Deck</span>' : S.sp >= rankCost(r) ? '<span class="flag rk">Rang +1</span>' : ""}</button>`;
   };
   return `<div class="screen-title"><h2>Karten</h2><p>Du kämpfst mit dem Helden und ${DECK_SIZE} Karten. Nur Karten im Deck sammeln EP: wer viel Schaden macht, heilt, einsteckt, lange überlebt und Sonderattacken einsetzt, bekommt mehr. ${own.length} von ${COMP.length} Karten freigeschaltet.</p></div>
     <div class="label">Dein Deck</div>
@@ -2010,6 +2077,7 @@ function cardModal(id) {
       <div class="msrow">${ms}</div><div class="bb" style="font-size:13px;color:var(--dim)">Jedes Kartenlevel macht die Sonderattacke 1 % stärker.</div></div>
     <div class="box"><div class="bt">Fähigkeit: ${AB[d.ab].n}</div><div class="bb">${AB[d.ab].d(abVal(d.ab, formOf(L), T))}</div></div>
     <div class="stats3"><div><b>${fmt(s.hp)}</b><span>Leben</span></div><div><b>${fmt(s.atk)}</b><span>Angriff</span></div><div><b>${stars(formOf(L))}</b><span>Form</span></div></div>
+    ${c ? boostBox(id) : ""}
     ${c ? `${inD ? `<div class="box"><div class="bt">Im Deck</div><div class="bb">Diese Karte kämpft mit und sammelt EP. Zum Tauschen tippe eine Karte außerhalb des Decks an.</div></div>`
         : `<button class="btn wide" data-act="deckIn" data-id="${id}">Ins Deck nehmen</button>`}
       <div class="box"><div class="bt">Rang · ohne Obergrenze</div>
@@ -2021,6 +2089,25 @@ function cardModal(id) {
       ${c && nf ? `<div class="bb" style="font-size:14px;color:var(--dim)">Auf Kartenlevel ${nf} entwickelt sich ${f[0]} weiter: ${AB[d.ab].d(abVal(d.ab, formOf(nf), T))}</div>` : ""}
     </div>
     <button class="btn ghost" data-act="close">Schließen</button>`);
+  if (UI.cardScroll != null) { const m = $(".modal"); if (m) m.scrollTop = UI.cardScroll; UI.cardScroll = null; }
+  if (c && (c.seen || 1) < L) { c.seen = L; save(); renderNav(); }
+}
+// Level-Boosts auf der Karte: Übersicht, Liste je Level, antippen zum Ändern
+function boostBox(id) {
+  const c = S.cards[id], L = c.lv, seen = c.seen || 1, sum = boostSum(boostFx(id, L, c.bo));
+  const lv = Array.from({ length:Math.max(0, L - 1) }, (_, i) => L - i), show = UI.boAll ? lv : lv.slice(0, 8), nNew = Math.max(0, L - seen);
+  return `<div class="box"><div class="bt">Level-Boosts · ${lv.length}${nNew ? ` · <span style="color:var(--good)">${nNew} neu</span>` : ""}</div>
+    <div class="bb" style="font-size:14px">${sum.length ? sum.join(" · ") : "Ab Level 2 bekommt die Karte bei jedem Level einen Boost, den du selbst wählst."}</div>
+    ${lv.length ? `<div class="bolist">${show.map(l => { const o = boostOpts(id, l)[boostPick(c.bo, l)];
+      return `<button class="borow ${l % 5 === 0 ? "big" : ""} ${l > seen ? "new" : ""}" data-act="boost" data-id="${id}" data-l="${l}"><span class="bl">Lv ${l}</span><span class="bi">${o.i}</span><span class="bx">${o.t(o.v)}</span><span class="bc">${l > seen ? "neu" : "ändern"}</span></button>`; }).join("")}</div>` : ""}
+    ${lv.length > 8 ? `<button class="btn ghost sm" data-act="boAll" data-id="${id}">${UI.boAll ? "Weniger anzeigen" : `Alle ${lv.length} anzeigen`}</button>` : ""}
+    <div class="bb" style="font-size:13px;color:var(--dim)">Normale Level: eine Steigerung. Jedes 5. Level: ein besonderer Effekt. Deine Wahl kannst du jederzeit ändern.</div></div>`;
+}
+function boostModal(id, l) {
+  const c = S.cards[id], opts = boostOpts(id, l), cur = boostPick(c.bo, l), f = form(id);
+  modal(`<h2>${f[1]} ${f[0]} · Level ${l}</h2><p class="muted">${l % 5 === 0 ? "Jedes 5. Level bringt einen besonderen Effekt." : "Wähle eine Steigerung für diese Karte."} Du kannst sie später jederzeit wieder ändern.</p>
+    <div class="boopts">${opts.map((o, i) => `<button class="boopt ${i === cur ? "on" : ""}" data-act="boostSet" data-id="${id}" data-l="${l}" data-i="${i}"><span class="bi">${o.i}</span><span class="bx">${o.t(o.v)}</span>${i === cur ? '<span class="flag">gewählt</span>' : ""}</button>`).join("")}</div>
+    <button class="btn ghost" data-act="card" data-id="${id}">Zurück zur Karte</button>`);
 }
 function swapModal(id) {
   const f = form(id);
@@ -2261,7 +2348,7 @@ function showResult(R) {
     const d = CC[x.id], c = S.cards[x.id], f = form(x.id), best = Object.entries(x.parts).sort((a, b) => b[1] - a[1]).filter(p => p[1] > .05).slice(0, 2);
     return `<div class="xprow r-${d.r} ${x.n === top ? "mvp" : ""}"><span class="xe">${f[1]}</span>
       <span class="xi"><span class="xn">${f[0]} · Lv ${c.lv}${x.up ? ` <b class="up">+${x.up} Level!</b>` : ""}${x.n === top ? ' <span class="flag">Bester</span>' : ""}</span>
-        ${bar(c.xp, cardNeed(c.lv))}<span class="xr">${best.map(p => XP_PART[p[0]]).join(" · ") || "Dabei gewesen"}${x.forms.length ? " · hat sich weiterentwickelt!" : ""}${x.ms.length ? " · Sonderattacke: " + x.ms.join(", ") : ""}</span></span>
+        ${bar(c.xp, cardNeed(c.lv))}<span class="xr">${best.map(p => XP_PART[p[0]]).join(" · ") || "Dabei gewesen"}${x.up ? ` · ${x.up} neue${x.up > 1 ? "" : "r"} Boost${x.up > 1 ? "s" : ""} wählbar` : ""}${x.forms.length ? " · hat sich weiterentwickelt!" : ""}${x.ms.length ? " · Sonderattacke: " + x.ms.join(", ") : ""}</span></span>
       <span class="xv">+${fmt(x.n)}</span></div>`;
   }).join("");
   const arUp = R.newAr.map(a => { const AA = arenaAt(a.i), d = a.card && CC[a.card];
@@ -2303,6 +2390,13 @@ function act(el, ev) {
       break;
     }
     case "card": cardModal(id); break;
+    case "boost": { const m = $(".modal"); UI.cardScroll = m ? m.scrollTop : null; boostModal(id, +el.dataset.l); break; }
+    case "boostSet": {
+      const c = S.cards[id], l = +el.dataset.l, i = +el.dataset.i; if (!c || l < 2 || l > c.lv) return;
+      c.bo = c.bo || {}; if (i) c.bo[l] = i; else delete c.bo[l];
+      save(); cardModal(id); toast(`Level ${l}: ${boostOpts(id, l)[i].t(boostOpts(id, l)[i].v)}`); break;
+    }
+    case "boAll": { const m = $(".modal"); UI.cardScroll = m ? m.scrollTop : null; UI.boAll = !UI.boAll; cardModal(id); break; }
     case "rankUp": {
       const r = S.rank[id] || 0, cost = rankCost(r);
       if (S.sp < cost || !S.cards[id]) return;
