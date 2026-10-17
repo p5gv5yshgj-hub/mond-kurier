@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Sternenkarten</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="theme-color" content="#0c0f22">
+<meta name="theme-color" content="#14347a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,7 @@
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap">
 <style>
 /* Layout: one phone-sized column. Status bar on top, one screen in the middle, four tabs at the bottom.
    Every screen leads with one clear action; the upgrade tree is a pannable star map. */
@@ -458,7 +458,8 @@ p { margin: 0; }
 .dchip .dn { font-size: 11px; font-weight: 700; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dchip .dl { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
 .dchip .bar, .slot .bar { width: 82%; height: 5px; margin-top: 2px; }
-.lineup.five .slot .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
+.lineup .slot .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lineup.five .slot .sn { font-size: 11px; }
 .flag.bo { background: var(--good); color: var(--night); }
 .bolist { display: flex; flex-direction: column; gap: 4px; }
 .borow { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 7px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--deck); color: var(--moon); font-size: 13.5px; }
@@ -542,6 +543,127 @@ p { margin: 0; }
 .xprow .xn .up { color: var(--good); }
 .xprow .xr { font-size: 12px; color: var(--dim); }
 .xprow .xv { font-family: var(--f-display); font-weight: 700; font-size: 17px; color: var(--xp); white-space: nowrap; }
+
+/* =========================================================
+   SPIELLOOK: knallblauer Hintergrund, dicke umrandete Schrift, Knöpfe mit Kante
+   ========================================================= */
+:root {
+  --night: #102a68; --deck: #2556ae; --deck-2: #183e88; --line: #0a1a44;
+  --moon: #ffffff; --dim: #c8d9ff; --gold: #ffc824; --gold-ink: #4a2600;
+  --hp: #ff4f5e; --shield: #7fe0ff; --good: #5fe07a; --xp: #42c8ff;
+  --f-display: "Lilita One", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --f-body: "Nunito", system-ui, -apple-system, sans-serif;
+  --ol: 0 2px 0 rgba(0,0,0,.35), 1px 1px 0 #0a1a44, -1px -1px 0 #0a1a44, 1px -1px 0 #0a1a44, -1px 1px 0 #0a1a44;
+  --raise: inset 0 2px 0 rgba(255,255,255,.22), 0 3px 0 rgba(4,12,40,.55);
+}
+body { font-weight: 700; background: radial-gradient(130% 75% at 50% 42%, #4596f4 0%, #2a63cf 38%, #163a8c 72%, #0d2560 100%) fixed var(--night); }
+body::after { opacity: .5; background-image:
+    radial-gradient(circle at 10% 20%, rgba(255,255,255,.08) 0 60px, transparent 61px),
+    radial-gradient(circle at 92% 62%, rgba(255,255,255,.06) 0 90px, transparent 91px),
+    radial-gradient(circle at 20% 88%, rgba(255,255,255,.05) 0 70px, transparent 71px),
+    radial-gradient(1.5px 1.5px at 72% 9%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 41% 33%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 63% 92%, #fff 50%, transparent 51%); }
+h1, h2, h3, .screen-title h2, .result-head h2, .modal h2 { font-weight: 400; letter-spacing: .01em; text-shadow: var(--ol); }
+.label { color: #fff; text-shadow: var(--ol); letter-spacing: .08em; }
+.screen-title p, .muted { color: var(--dim); }
+
+/* Knöpfe */
+.btn { color: #fff; font-weight: 400; letter-spacing: .02em; text-shadow: 0 2px 0 rgba(0,0,0,.3), 1px 1px 0 #6b3a00, -1px -1px 0 #6b3a00, 1px -1px 0 #6b3a00, -1px 1px 0 #6b3a00;
+  background: linear-gradient(#ffe56a, #ffc21c 52%, #f4a100); border: 2px solid #6b3a00; border-radius: 14px;
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(0,0,0,.12), 0 4px 0 #6b3a00; }
+.btn:active { transform: translateY(3px); box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 1px 0 #6b3a00; }
+.btn.ghost { background: linear-gradient(#5b95f2, #2f62c8); border-color: #0a1a44; text-shadow: var(--ol); box-shadow: inset 0 3px 0 rgba(255,255,255,.3), 0 4px 0 #0a1a44; }
+.btn.green { background: linear-gradient(#8ff59e, #33bf55); border-color: #0b5220; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.3), 1px 1px 0 #0b5220, -1px -1px 0 #0b5220, 1px -1px 0 #0b5220, -1px 1px 0 #0b5220; box-shadow: inset 0 3px 0 rgba(255,255,255,.45), 0 4px 0 #0b5220; }
+.btn.danger { background: linear-gradient(#ff8a93, #e2303f); border-color: #66080f; color: #fff; text-shadow: var(--ol); box-shadow: inset 0 3px 0 rgba(255,255,255,.4), 0 4px 0 #66080f; }
+.btn[disabled] { filter: grayscale(.7); opacity: .6; }
+
+/* Flächen bekommen eine dunkle Kontur und eine helle Oberkante */
+.panel, .todo, .mode, .slot.full, .slot.hero, .crow, .arow, .stats4 div, .eq, .box, .dchip, .xprow, .borow, .boopt, .abrow, .unit, .tech, .stats3 div, .herocard, .stage-hero, .nextfight {
+  border-color: var(--line); box-shadow: var(--raise); }
+.modal { border: 3px solid var(--line); background: linear-gradient(#2c62bf, #1d4796); box-shadow: 0 6px 0 rgba(4,12,40,.6); }
+.box { background: rgba(10,26,68,.35); }
+.slot.full { border-width: 3px; }
+.bar { background: #0b1f52; border: 1px solid var(--line); }
+.coin::before { background: radial-gradient(circle at 35% 30%, #fff1a0, #f2b100); border: 1px solid #6b3a00; }
+.flag { font-family: var(--f-display); font-weight: 400; text-shadow: none; }
+
+/* Ressourcen-Leiste oben */
+#top { gap: 8px; border-bottom: 0; padding-block: calc(10px + env(safe-area-inset-top, 0px)) 6px; }
+.tp { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px 0 4px; border-radius: 16px; background: rgba(6,18,52,.7); border: 2px solid var(--line);
+  box-shadow: inset 0 -2px 0 rgba(255,255,255,.08); color: #fff; font-family: var(--f-display); font-size: 17px; text-shadow: var(--ol); white-space: nowrap; }
+.tp .tpi { font-size: 22px; margin-left: -6px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.4)); }
+.tplv { flex: 1; min-width: 0; padding-left: 0; }
+.lvstar { flex: none; width: 38px; height: 38px; margin-left: -6px; display: grid; place-items: center; font-size: 16px;
+  background: linear-gradient(#5aa8ff, #2a5fd0); border: 2px solid var(--line); border-radius: 10px; transform: rotate(45deg); }
+.lvstar::after { content: attr(data-l); font-size: 17px; transform: rotate(-45deg); text-shadow: var(--ol); }
+.tpbar { position: relative; flex: 1; min-width: 0; height: 20px; border-radius: 10px; background: #0b1f52; border: 2px solid var(--line); overflow: hidden; display: block; }
+.tpbar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(#7fe2ff, #20a8e8); box-shadow: inset 0 2px 0 rgba(255,255,255,.4); }
+.tpbar span { position: relative; display: block; text-align: center; font-size: 12px; line-height: 16px; font-family: var(--f-display); color: #fff; text-shadow: var(--ol); }
+
+/* Startbildschirm */
+#main.homefill { padding-top: 6px; padding-bottom: 6px; }
+.home { display: flex; flex-direction: column; gap: 8px; min-height: 100%; }
+.hrow { display: flex; gap: 8px; align-items: stretch; }
+.pbanner { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; text-align: left; padding: 4px 10px 4px 4px; border: 3px solid var(--line); border-radius: 14px;
+  background: linear-gradient(100deg, #8a3fd9, #6229b5 60%, #3b2a8c); box-shadow: var(--raise); color: #fff; }
+.pport { flex: none; width: 50px; height: 50px; border-radius: 12px; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 35%, #fff6c8, #f5a623 70%, #b5611a); border: 2px solid var(--line); }
+.pport .hero-svg { margin-top: 10px; }
+.pinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pname { font-family: var(--f-display); font-size: 19px; line-height: 1.05; text-shadow: var(--ol); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ptitle { font-size: 13px; font-weight: 800; color: #e5d7ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ptr { font-family: var(--f-display); font-size: 20px; color: #ffd84a; text-shadow: var(--ol); white-space: nowrap; }
+.sqbtns { display: grid; grid-template-rows: 1fr 1fr; gap: 4px; }
+.sq { width: 40px; border-radius: 9px; border: 2px solid var(--line); background: linear-gradient(#4f8cf0, #2a5cc4); box-shadow: inset 0 2px 0 rgba(255,255,255,.3), 0 2px 0 var(--line); font-size: 16px; padding: 0; }
+.hstage { flex: 1; display: grid; grid-template-columns: 60px minmax(0,1fr) 60px; gap: 4px; align-items: center; }
+.hside { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.rbtn { display: flex; flex-direction: column; align-items: center; gap: 1px; background: none; border: 0; padding: 0; color: #fff; }
+.rbtn .rc { position: relative; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 23px;
+  background: radial-gradient(circle at 35% 28%, #fff1a0, #ffc21c 55%, #e08a00); border: 3px solid var(--line); box-shadow: inset 0 3px 0 rgba(255,255,255,.5), 0 3px 0 var(--line); }
+.rbtn.blue .rc { background: radial-gradient(circle at 35% 28%, #bfe4ff, #4a95f0 55%, #2459c4); }
+.rbtn.purple .rc { background: radial-gradient(circle at 35% 28%, #ecd2ff, #a066f0 55%, #6a2fc4); }
+.rbtn.locked .rc { filter: grayscale(1) brightness(.75); }
+.rbtn .rl { font-family: var(--f-display); font-size: 11px; line-height: 1.1; text-shadow: var(--ol); white-space: nowrap; }
+.nb { position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; background: linear-gradient(#ff6b6b, #e3202f); border: 2px solid #fff;
+  color: #fff; font-family: var(--f-display); font-size: 13px; line-height: 18px; text-align: center; text-shadow: 0 1px 0 rgba(0,0,0,.4); font-style: normal; }
+.island { position: relative; background: none; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #fff; }
+.arena-svg { width: 100%; max-width: min(300px, 30vh); height: auto; filter: drop-shadow(0 8px 14px rgba(0,0,0,.25)); animation: float 4s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-6px); } }
+.aname { font-family: var(--f-display); font-size: 17px; line-height: 1.1; text-shadow: var(--ol); text-align: center; }
+.atrack { display: flex; align-items: center; gap: 4px; width: 82%; }
+.atr { font-size: 20px; }
+.evbanner { position: relative; width: 82%; align-self: center; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 8px 7px; color: #fff;
+  border: 3px solid var(--line); border-radius: 14px; background: linear-gradient(#7d4ad8, #4b2a9e); box-shadow: var(--raise); }
+.evbanner::after { content: ""; position: absolute; bottom: -10px; left: 50%; margin-left: -9px; border: 9px solid transparent; border-top-color: var(--line); border-bottom: 0; }
+.evh { font-family: var(--f-display); font-size: 14px; text-shadow: var(--ol); }
+.evb { display: flex; align-items: center; gap: 8px; width: 100%; padding: 3px 8px; border-radius: 10px; background: rgba(10,26,68,.45); border: 2px solid #f0b11c; }
+.evi { font-size: 26px; }
+.evt { font-family: var(--f-display); font-size: 15px; color: #ffd84a; text-shadow: var(--ol); text-align: left; display: flex; flex-direction: column; line-height: 1.1; }
+.evt small { font-family: var(--f-body); font-size: 12px; color: #fff; font-weight: 800; text-shadow: none; }
+.evbanner { padding: 5px; }
+.fightbar { display: grid; grid-template-columns: 66px 1fr 66px; gap: 8px; align-items: center; padding: 6px; border-radius: 40px;
+  background: linear-gradient(#1f4592, #142f6b); border: 3px solid var(--line); box-shadow: inset 0 2px 0 rgba(255,255,255,.15); margin-top: auto; }
+.fb-side { position: relative; width: 64px; height: 64px; border-radius: 50%; border: 3px solid var(--line); padding: 0; display: grid; place-items: center;
+  background: radial-gradient(circle at 40% 30%, #8bc4ff, #3a74dc 60%, #2251b0); box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 3px 0 var(--line); }
+.fbcard { font-size: 32px; width: 42px; height: 52px; display: grid; place-items: center; border-radius: 8px; background: linear-gradient(#cfe6ff, #7fb2ef); border: 2px solid var(--line); }
+.road .fbcard { background: none; border: 0; font-size: 38px; }
+.fblv { position: absolute; bottom: -4px; right: -4px; min-width: 26px; height: 26px; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(#b07cff, #6a2fc4); border: 2px solid var(--line); font-family: var(--f-display); font-weight: 400; font-size: 14px; text-shadow: var(--ol); }
+.fb-go { height: 68px; border-radius: 18px; border: 3px solid #6b3a00; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  background: linear-gradient(#ffe56a, #ffc21c 50%, #f4a100); box-shadow: inset 0 4px 0 rgba(255,255,255,.55), inset 0 -4px 0 rgba(0,0,0,.12), 0 5px 0 #6b3a00; }
+.fb-go span { font-family: var(--f-display); font-size: 32px; line-height: 1; text-shadow: 0 3px 0 rgba(0,0,0,.25), 2px 2px 0 #6b3a00, -2px -2px 0 #6b3a00, 2px -2px 0 #6b3a00, -2px 2px 0 #6b3a00; }
+.fb-go small { margin-top: 4px; padding: 1px 10px; border-radius: 8px; background: #e08a00; font-family: var(--f-display); font-size: 13px; text-shadow: var(--ol); }
+.fb-go:active, .fb-side:active, .rbtn:active .rc, .sq:active { transform: translateY(3px); }
+
+/* Navigation unten */
+#nav { gap: 4px; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  background: linear-gradient(#24468f, #142f6b); border-top: 3px solid var(--line); align-items: end; }
+#nav button { position: relative; height: 58px; border-radius: 10px; border: 2px solid var(--line); background: linear-gradient(#3a6cd0, #23489a); box-shadow: inset 0 2px 0 rgba(255,255,255,.2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 0; color: #fff; transition: transform .15s, height .15s; }
+#nav .ni { font-size: 28px; line-height: 1; filter: drop-shadow(0 2px 0 rgba(0,0,0,.35)); }
+#nav .nl { display: none; font-family: var(--f-display); font-size: 13px; text-shadow: var(--ol); }
+#nav button.on { height: 70px; background: linear-gradient(#6aa6ff, #3a72dc); transform: translateY(-6px); }
+#nav button.on .nl { display: block; }
+#nav .nb { top: -8px; right: -4px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
@@ -1497,21 +1619,23 @@ const newBoosts = id => Math.max(0, S.cards[id].lv - (S.cards[id].seen || 1));
 const boostCards = () => owned().filter(d => newBoosts(d.id) > 0);
 function renderTop() {
   const n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
-  $("#top").innerHTML = `<div class="lvl-badge">Level ${S.lv}</div>
-    <div class="xpwrap">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
-      <div class="xptext">${mx ? "Maximales Level erreicht" : `${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}`}</div></div>
-    <div class="wallet"><span class="trw" title="Trophäen">${fmt(S.tr)}</span><span class="sp" title="Sternenpunkte">${fmt(S.sp)}</span><span class="coin" title="Münzen">${fmt(S.co)}</span></div>`;
+  $("#top").innerHTML = `<button class="tp tplv" data-act="tab" data-k="hero" aria-label="Heldenlevel ${S.lv}"><span class="lvstar" data-l="${S.lv}"></span>
+      <span class="tpbar"><i style="width:${mx ? 100 : Math.min(100, S.xp / n * 100)}%"></i><span>${mx ? "Max." : `${fmt(S.xp)} / ${fmt(n)}`}</span></span></button>
+    <div class="tp" title="Münzen"><span class="tpi">🪙</span><span class="tpv">${fmt(S.co)}</span></div>
+    <div class="tp" title="Sternenpunkte"><span class="tpi">⭐</span><span class="tpv">${fmt(S.sp)}</span></div>`;
 }
+// Navigation unten: Kacheln, der aktive Tab ist angehoben und beschriftet
+const NAV = [["hero","Held","🧑‍🚀"],["team","Karten","🃏"],["home","Kampf","⚔️"],["arena","Arenen","🏆"],["tree","Baum","🌳"]];
 function renderNav() {
-  const tabs = [["home","Spielen"],["hero","Held"],["arena","Arenen"],["team","Karten"],["tree","Baum"]];
   const badge = { tree:buyable().length, team:boostCards().length || (buyable().length ? 0 : rankable().length), hero:eqUpgradable().length };
-  $("#nav").innerHTML = tabs.map(([k, n]) =>
-    `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}"><span class="badge">${ICONS[k]}${badge[k] ? `<b>${badge[k]}</b>` : ""}</span>${n}</button>`).join("");
+  $("#nav").innerHTML = NAV.map(([k, n, i]) =>
+    `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}" aria-label="${n}"><span class="ni">${i}</span><span class="nl">${n}</span>${badge[k] ? `<b class="nb">${badge[k]}</b>` : ""}</button>`).join("");
 }
 function render() {
   renderTop(); renderNav();
   const m = $("#main");
   m.classList.toggle("fill", UI.tab === "tree");
+  m.classList.toggle("homefill", UI.tab === "home");
   m.innerHTML = ({ home:screenHome, hero:screenHero, arena:screenArena, team:screenTeam, tree:screenTree })[UI.tab]();
   if (UI.tab === "tree") afterTree();
   if (UI.tab === "arena") { const on = $("#arenaNow"); if (on) m.scrollTop = Math.max(0, on.offsetTop - m.clientHeight / 2); }
@@ -1594,6 +1718,36 @@ function screenHero() {
 }
 const eqDots = () => `<span class="eqdots">${EQUIP.map(e => `<span style="--tc:${TIER_COL[eqTier(S.eq[e.k])]}">${e.i} ${S.eq[e.k]}</span>`).join("")}</span>`;
 
+// Arena als schwebende Insel, eingefärbt in der Farbe der Arena
+function mixHex(a, b, t) {
+  const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), A = p(a), B = p(b);
+  return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
+}
+function arenaSVG(A) {
+  const c = A.bg, top = mixHex(c, "#ffffff", .45), mid = mixHex(c, "#ffffff", .2), dark = mixHex(c, "#000000", .35), id = "ar" + (++SVGID);
+  const star = (x, y, r) => `<path d="M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z" fill="#fff"/>`;
+  const tower = (x, flag) => `<g transform="translate(${x} 0)"><rect x="-17" y="104" width="34" height="34" rx="6" fill="${dark}" stroke="#0a1a44" stroke-width="3"/>
+    <path d="M-19 106 A19 19 0 0 1 19 106 Z" fill="#dfe8ff" stroke="#0a1a44" stroke-width="3"/><circle cx="0" cy="98" r="5" fill="${flag}" stroke="#0a1a44" stroke-width="2"/>
+    <line x1="0" y1="87" x2="0" y2="74" stroke="#0a1a44" stroke-width="3"/><path d="M0 74 L14 78 L0 83 Z" fill="${flag}" stroke="#0a1a44" stroke-width="2" stroke-linejoin="round"/></g>`;
+  return `<svg class="arena-svg" viewBox="0 0 300 250" role="img" aria-label="Arena ${A.i + 1}: ${A.n}">
+    <defs><linearGradient id="${id}t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${mid}"/></linearGradient>
+      <linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a6488"/><stop offset="1" stop-color="#262c4a"/></linearGradient></defs>
+    <ellipse cx="150" cy="236" rx="118" ry="11" fill="#000" opacity=".22"/>
+    ${star(36, 40, 7)}${star(266, 58, 9)}${star(250, 20, 5)}${star(56, 190, 5)}
+    <circle cx="58" cy="52" r="20" fill="#f4f1e6" stroke="#0a1a44" stroke-width="3"/><circle cx="52" cy="47" r="5" fill="#cfc9b4"/><circle cx="64" cy="58" r="4" fill="#cfc9b4"/>
+    <path d="M28 132 V160 Q28 214 82 220 H218 Q272 214 272 160 V132 Z" fill="url(#${id}r)" stroke="#0a1a44" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M60 190 l12 14 M120 206 l8 10 M200 200 l-10 12 M244 178 l-6 10" stroke="#1a1f38" stroke-width="3" stroke-linecap="round"/>
+    <rect x="22" y="70" width="256" height="112" rx="40" fill="url(#${id}t)" stroke="#0a1a44" stroke-width="4"/>
+    <rect x="54" y="86" width="192" height="78" rx="16" fill="${mixHex(c, "#ffffff", .62)}" stroke="#0a1a44" stroke-width="3"/>
+    <path d="M150 90 V160" stroke="${mid}" stroke-width="4" stroke-dasharray="7 6"/>
+    <circle cx="150" cy="125" r="13" fill="none" stroke="${mid}" stroke-width="3"/>
+    ${tower(82, "#5fe07a")}${tower(218, "#ff4f5e")}
+    <ellipse cx="40" cy="120" rx="9" ry="5" fill="${mid}" stroke="#0a1a44" stroke-width="2"/><ellipse cx="262" cy="150" rx="7" ry="4" fill="${mid}" stroke="#0a1a44" stroke-width="2"/>
+    <g transform="translate(232 62)"><path d="M-26 22 A26 26 0 0 1 26 22 Z" fill="#dfe8ff" stroke="#0a1a44" stroke-width="3"/><rect x="-8" y="8" width="16" height="14" rx="3" fill="${c}" stroke="#0a1a44" stroke-width="2"/>
+      <line x1="10" y1="-2" x2="18" y2="-18" stroke="#0a1a44" stroke-width="3"/><circle cx="18" cy="-20" r="4" fill="#ffcc2e" stroke="#0a1a44" stroke-width="2"/></g>
+    <g transform="translate(70 70)"><rect x="-14" y="-10" width="28" height="18" rx="4" fill="#c98a4a" stroke="#0a1a44" stroke-width="3"/><path d="M-14 -3 H14" stroke="#0a1a44" stroke-width="2"/></g>
+  </svg>`;
+}
 /* ---------- Spielen ---------- */
 // Kleine Karte für Deck-Ansichten: Symbol, Level und EP-Balken
 function deckChip(id) {
@@ -1601,52 +1755,40 @@ function deckChip(id) {
   return `<button class="dchip r-${d.r}" data-act="card" data-id="${id}"><span class="de">${f[1]}</span><span class="dn">${f[0]}</span>
     <span class="dl">Lv ${c.lv}</span>${bar(c.xp, cardNeed(c.lv))}</button>`;
 }
+// Runder Knopf am Rand des Startbildschirms
+const rbtn = (act, icon, label, opts = {}) => `<button class="rbtn ${opts.cls || ""}" ${act}><span class="rc">${icon}${opts.badge ? `<b class="nb">${opts.badge}</b>` : ""}</span><span class="rl">${label}</span></button>`;
 function screenHome() {
-  const t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
-  const A = arenaAt(arenaIdx(S.tr)), N = arenaAt(A.i + 1), into = S.tr - A.gate, nc = N.card && !S.cards[N.card.id] ? N.card : null;
-  const next = HERO_AB.find(a => a.lv > S.lv), nextT = TECH.find(x => x.lv > S.lv), nextMode = MODES.find(m => m.lv > S.lv);
-  const todos = [], nb = buyable().length;
-  if (nb) todos.push({ i:"★", b:`${S.sp} Sternenpunkte im Baum ausgeben`, s:`${nb} Upgrade${nb > 1 ? "s" : ""} kannst du dir gerade leisten.`, act:'data-act="tab" data-k="tree"' });
-  const rk = rankable();
-  if (!nb && rk.length) todos.push({ i:"⬆️", b:"Karten im Rang steigern", s:`${rk.length} Karte${rk.length > 1 ? "n können" : " kann"} mit Sternenpunkten aufsteigen.`, act:'data-act="tab" data-k="team"' });
-  const eu = eqUpgradable();
-  if (eu.length) todos.unshift({ i:eu[0].i, b:"Ausrüstung des Helden verbessern", s:`${eu.map(e => e.n).join(", ")} ${eu.length > 1 ? "können" : "kann"} eine Stufe höher`, act:'data-act="tab" data-k="hero"' });
-  const bc = boostCards();
-  if (bc.length) todos.unshift({ i:"✨", b:"Neue Level-Boosts wählen", s:`${bc.map(d => form(d.id)[1]).join(" ")} ${bc.length > 1 ? "haben" : "hat"} neue Boosts. Wählst du nichts, gilt die erste Möglichkeit.`, act:`data-act="card" data-id="${bc[0].id}"` });
-  const bench = owned().filter(c => !S.deck.includes(c.id));
-  if (bench.length && S.unseen) todos.push({ i:"🃏", b:"Neue Karte im Deck einsetzen", s:"Nur Karten im Deck sammeln EP.", act:'data-act="tab" data-k="team"' });
-  const modeCard = m => {
-    const lock = S.lv < m.lv, best = (S.best || {})[m.k];
-    return `<button class="mode ${lock ? "locked" : ""}" style="--mc:${m.c}" data-act="${lock ? "modeLocked" : "mode"}" data-k="${m.k}">
-      ${!lock && dailyFree(m.k) ? '<span class="daily">×2 heute</span>' : ""}
-      <span class="mi">${m.i}</span><span class="mn">${m.n}</span><span class="md">${m.d}</span>
-      <span class="mb">${lock ? `🔒 ab Level ${m.lv}` : best ? `Rekord: ${fmt(best)}` : "Noch nicht gespielt"}</span></button>`;
-  };
-  return `<button class="herocard" data-act="tab" data-k="hero" style="--hc:${t[2]}">
-      ${heroSVG(S.lv, S.eq, 80)}
-      <span class="hb"><span class="ht">${t[1]}</span><span class="hn">Mondkurier · Level ${S.lv}</span>
-        ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${fmt(S.xp)} / ${fmt(n)} EP · ${owned().length} von ${COMP.length} Karten</span>${eqDots()}</span>
-      <span class="chev">›</span></button>
-    <div class="nextfight" style="--zbg:${A.bgCss}">
-      <div class="nf-top"><div><div class="nf-kicker">🏆 Trophäenkampf${dailyFree("arena") ? '<span class="daily">×2 heute</span>' : ""}</div>
-        <div class="nf-title">Arena ${A.i + 1} · ${A.n}</div></div><span class="trbig">${fmt(S.tr)}</span></div>
-      <div>${bar(into, ARENA_STEP, "gold")}<div class="xptext" style="margin-top:4px">${into} / ${ARENA_STEP} Trophäen bis ${N.n}${nc ? ` · dort wartet <b style="color:var(--moon)">${nc.f[0][1]} ${nc.f[0][0]}</b>` : ""}</div></div>
-      <div class="deckrow">${S.deck.map(deckChip).join("")}</div>
-      <button class="btn big" data-act="fight">Kampf suchen</button>
-      <div class="nf-hint">Sieg <b>+${TROPHY}</b> 🏆, Niederlage <b>−${TROPHY}</b> 🏆.${A.i ? ` Unter ${fmt(A.gate)} Trophäen fällst du nicht mehr.` : ""} Jede Runde wählst du die Aktion des Helden und welche Karten ihre Sonderattacke einsetzen.</div>
+  const t = heroTitle(S.lv), A = arenaAt(arenaIdx(S.tr)), N = arenaAt(A.i + 1), into = S.tr - A.gate, nc = N.card && !S.cards[N.card.id] ? N.card : null;
+  const mini = MODES.slice(1).map(m => S.lv < m.lv
+    ? rbtn(`data-act="modeLocked" data-k="${m.k}"`, m.i, `ab Lv ${m.lv}`, { cls:"locked" })
+    : rbtn(`data-act="mode" data-k="${m.k}"`, m.i, dailyFree(m.k) ? "×2 heute" : m.n.split(" ").pop(), { cls:"blue" })).join("");
+  const nb = buyable().length, eu = eqUpgradable().length, bc = boostCards().length, rk = rankable().length;
+  const right = rbtn('data-act="tab" data-k="tree"', "🌳", "Baum", { badge:nb }) + rbtn('data-act="tab" data-k="hero"', "🛠️", "Ausrüstung", { badge:eu })
+    + rbtn('data-act="tab" data-k="team"', "✨", bc ? "Boosts" : "Rang", { badge:bc || rk, cls:"purple" });
+  const lead = form(S.deck[0])[1], dlv = Math.round(avgDeckLv());
+  return `<div class="home">
+    <div class="hrow">
+      <button class="pbanner" data-act="tab" data-k="hero" style="--hc:${t[2]}">
+        <span class="pport">${heroSVG(S.lv, S.eq, 48, false)}</span>
+        <span class="pinfo"><span class="pname">Mondkurier</span><span class="ptitle">${t[1]}</span></span>
+        <span class="ptr">🏆 ${fmt(S.tr)}</span></button>
+      <div class="sqbtns"><button class="sq" data-act="help" aria-label="Spielregeln">❓</button><button class="sq" data-act="saveCode" aria-label="Spielstand übertragen">💾</button></div>
     </div>
-    <div class="label">Minispiele</div>
-    <div class="modes">${MODES.slice(1).map(modeCard).join("")}</div>
-    <div class="label">Das kannst du jetzt tun</div>
-    <div class="todos">${todos.length ? todos.map(x => `<button class="todo hot" ${x.act}>
-        <span class="ti">${x.i}</span><span class="tt"><b>${x.b}</b><span>${x.s}</span></span><span class="chev">›</span></button>`).join("")
-      : `<div class="todo" style="cursor:default"><span class="ti">✓</span><span class="tt"><b>Alles erledigt</b><span>Kämpfe um Trophäen, um deine Karten zu leveln.</span></span></div>`}</div>
-    <div class="label">Nächste Belohnungen</div><div class="panel goal">
-      ${nc ? `<div><b>${fmt(N.gate)}</b> Trophäen: neue Karte <b>${nc.f[0][1]} ${nc.f[0][0]}</b> in ${N.n}</div>` : `<div><b>${fmt(N.gate)}</b> Trophäen: ${N.n} mit Münzen und Sternenpunkten</div>`}
-      ${nextMode ? `<div>Level <b>${nextMode.lv}</b>: neues Minispiel <b>${nextMode.i} ${nextMode.n}</b></div>` : ""}
-      ${nextT ? `<div>Level <b>${nextT.lv}</b>: neue Aktion des Helden <b>${nextT.i} ${nextT.n}</b></div>` : ""}
-      ${next ? `<div>Level <b>${next.lv}</b>: neue Fähigkeit des Helden <b>${next.n}</b></div>` : ""}
-      <div>Jedes Heldenlevel: <b>${ptsFor(S.lv + 1)} Sternenpunkte</b></div></div>`;
+    <div class="hstage">
+      <div class="hside">${mini}</div>
+      <button class="island" data-act="tab" data-k="arena">${arenaSVG(A)}
+        <span class="aname">Arena ${A.i + 1} · ${A.n}</span>
+        <span class="atrack"><span class="atr">🏆</span><span class="tpbar"><i style="width:${into / ARENA_STEP * 100}%"></i><span>${into} / ${ARENA_STEP}</span></span></span></button>
+      <div class="hside">${right}</div>
+    </div>
+    <button class="evbanner" data-act="tab" data-k="arena">
+      <span class="evb"><span class="evi">${nc ? nc.f[0][1] : "🎁"}</span><span class="evt"><small>${N.n} · noch ${ARENA_STEP - into} 🏆</small>${nc ? `Neue Karte: ${nc.f[0][0]}` : "Münzen und Sternenpunkte"}</span></span></button>
+    <div class="fightbar">
+      <button class="fb-side" data-act="tab" data-k="team" aria-label="Deck"><span class="fbcard">${lead}</span><b class="fblv">${dlv}</b>${bc ? `<b class="nb">${bc}</b>` : ""}</button>
+      <button class="fb-go" data-act="fight"><span>Kämpfen</span>${dailyFree("arena") ? "<small>👑 Tagesbonus ×2</small>" : `<small>Sieg +${TROPHY} 🏆</small>`}</button>
+      <button class="fb-side road" data-act="tab" data-k="arena" aria-label="Arenen"><span class="fbcard">🏆</span>${S.unseen ? '<b class="nb">!</b>' : ""}</button>
+    </div>
+  </div>`;
 }
 
 /* =========================================================

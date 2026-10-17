@@ -1,5 +1,5 @@
 // Offline-Speicher für Sternenkarten. Bei jeder Änderung am Spiel VERSION erhöhen.
-const VERSION = "sternenkarten-3";
+const VERSION = "sternenkarten-4";
 const SHELL = ["sternenkarten.html", "manifest.webmanifest", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", e => {
