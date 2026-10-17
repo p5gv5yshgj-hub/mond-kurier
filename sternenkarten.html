@@ -106,10 +106,6 @@ p { margin: 0; }
 .r-c { --rc: var(--r-c); } .r-r { --rc: var(--r-r); } .r-e { --rc: var(--r-e); } .r-l { --rc: var(--r-l); }
 .rar { color: var(--rc); font-weight: 700; }
 
-.chance { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 14px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.chance.easy { background: color-mix(in srgb, var(--good) 20%, transparent); color: var(--good); }
-.chance.even { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold); }
-.chance.hard { background: color-mix(in srgb, var(--hp) 20%, transparent); color: var(--hp); }
 
 /* ---------- Start ---------- */
 .herobar { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--deck); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
@@ -195,8 +191,6 @@ p { margin: 0; }
 .mode .mb { font-size: 12px; color: var(--moon); font-weight: 600; margin-top: auto; padding-top: 4px; }
 .mode .daily { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--good); color: var(--night); }
 .mode.locked { filter: grayscale(.8); opacity: .55; }
-.nextfight .daily { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--good); color: var(--night); margin-left: 6px; vertical-align: 2px; }
-.boost { font-size: 13px; color: var(--good); font-weight: 600; }
 /* Minispiele */
 .mg .b-top { align-items: center; }
 .mgscore { font-family: var(--f-display); font-weight: 700; font-size: 26px; color: var(--gold); font-variant-numeric: tabular-nums; }
@@ -242,29 +236,6 @@ p { margin: 0; }
 .ultbtn.ready { animation: charged .6s ease-in-out infinite; }
 
 /* ---------- Etappen ---------- */
-.zonetabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
-.zonetabs::-webkit-scrollbar { display: none; }
-.ztab { flex: none; background: var(--deck-2); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; text-align: left; color: var(--dim); }
-.ztab b { display: block; font-size: 14px; color: var(--moon); }
-.ztab span { font-size: 12px; }
-.ztab.on { background: var(--moon); border-color: var(--moon); }
-.ztab.on b, .ztab.on span { color: var(--night); }
-.ztab.lock { opacity: .45; }
-.zonehead { position: relative; border-radius: 16px; padding: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--deck); }
-.zonehead::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .6; }
-.zonehead > * { position: relative; }
-.zonehead h3 { font-size: 21px; }
-.zonehead p { color: var(--dim); font-size: 14px; margin-top: 4px; }
-.stages { display: flex; flex-direction: column; gap: 8px; }
-.stage { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--deck); border: 1px solid var(--line); border-radius: 14px; text-align: left; width: 100%; min-height: 64px; }
-.stage .sn { font-family: var(--f-display); font-weight: 700; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 16px; flex: none; background: var(--deck-2); }
-.stage.cleared .sn { background: color-mix(in srgb, var(--good) 25%, var(--deck-2)); color: var(--good); }
-.stage .sf { flex: 1; min-width: 0; font-size: 26px; letter-spacing: 3px; }
-.stage .sf small { display: block; font-size: 12px; letter-spacing: 0; color: var(--dim); font-family: var(--f-body); }
-.stage.boss { border-color: var(--r-l); }
-.stage.boss .sn { background: var(--r-l); color: var(--night); }
-.stage.locked { opacity: .4; }
-.stage.next { border: 2px solid var(--gold); }
 
 /* ---------- Team ---------- */
 .lineup { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
@@ -476,12 +447,93 @@ p { margin: 0; }
 @keyframes tin { from { transform: translateY(-20px); opacity: 0; } }
 @keyframes tout { to { transform: translateY(-20px); opacity: 0; } }
 
+/* ---------- Trophäen, Arenen, Deck ---------- */
+.trw::before { content: "🏆"; margin-right: 3px; }
+.trbig { font-family: var(--f-display); font-weight: 700; font-size: 24px; color: var(--gold); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.trbig::before { content: "🏆 "; font-size: 20px; }
+.nextfight .daily { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--good); color: var(--night); margin-left: 6px; vertical-align: 2px; }
+.deckrow { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+.dchip { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 6px 4px 7px; border-radius: 12px; border: 2px solid var(--rc); background: color-mix(in srgb, var(--night) 55%, transparent); color: var(--moon); }
+.dchip .de { font-size: 28px; line-height: 1.15; }
+.dchip .dn { font-size: 11px; font-weight: 700; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dchip .dl { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.dchip .bar, .slot .bar { width: 82%; height: 5px; margin-top: 2px; }
+.lineup.five .slot .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
+.slot.indeck { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 55%, transparent); }
+.flag.rk { background: var(--good); color: var(--night); }
+.swapgrid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+.msrow { display: flex; flex-wrap: wrap; gap: 4px; }
+.msrow span { font-size: 11.5px; padding: 3px 7px; border-radius: 7px; background: var(--deck); color: var(--dim); }
+.msrow span.on { color: var(--good); background: color-mix(in srgb, var(--good) 15%, var(--deck)); }
+.arenas { display: flex; flex-direction: column; gap: 8px; }
+.arow { position: relative; overflow: hidden; display: flex; gap: 12px; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--deck); }
+.arow::before { content: ""; position: absolute; inset: 0; background: var(--zbg); opacity: .35; pointer-events: none; }
+.arow > * { position: relative; }
+.arow.now { border: 2px solid var(--gold); }
+.arow.locked { opacity: .6; }
+.arow.done .arn b { color: var(--good); }
+.arn { width: 52px; flex: none; text-align: center; display: flex; flex-direction: column; }
+.arn b { font-family: var(--f-display); font-size: 24px; }
+.arn small { font-size: 11px; color: var(--dim); white-space: nowrap; }
+.ari { flex: 1; min-width: 0; }
+.art { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+.ars { font-size: 13px; color: var(--dim); }
+.arr { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.arc { font-size: 28px; line-height: 1; flex: none; }
+.arw { min-width: 0; }
+.arw b { display: block; font-size: 14px; }
+.arw small { display: block; font-size: 12px; color: var(--dim); }
+
+/* ---------- Kampf: Gegner, Planung ---------- */
+.foeside { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 6px; width: 100%; }
+.b-enemies .unit { width: auto; padding: 6px 3px; }
+.b-enemies .unit .ue { font-size: 34px; }
+.unit .ulv { font-size: 10px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.unit.foehero { border: 2px solid var(--hp); }
+.unit.foehero .hero-svg { margin: 0 auto; display: block; }
+.unit.foehero .uen { height: 5px; }
+.unit.mine { cursor: pointer; }
+.usp { font-size: 10px; font-weight: 700; line-height: 1.2; padding: 2px 3px; border-radius: 6px; background: var(--deck-2); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.usp:empty { display: none; }
+.unit.spready { border-color: var(--gold); }
+.unit.spready .usp { background: color-mix(in srgb, var(--gold) 25%, var(--deck-2)); color: var(--gold); }
+.unit.spsel { border: 2px solid var(--gold); background: color-mix(in srgb, var(--gold) 18%, var(--deck)); box-shadow: 0 0 12px color-mix(in srgb, var(--gold) 45%, transparent); }
+.unit.spsel .usp { background: var(--gold); color: var(--gold-ink); }
+.unit.spwait .usp { opacity: .7; }
+.unit.spfire { animation: pop .5s; }
+.tech.sel { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 24%, var(--deck)); }
+.tech.sel .tc { color: var(--gold); font-weight: 700; }
+.planrow { display: flex; align-items: center; gap: 10px; }
+.enbox { display: flex; flex-direction: column; gap: 3px; font-family: var(--f-display); font-weight: 700; font-size: 15px; color: var(--gold); white-space: nowrap; }
+.pips { display: inline-flex; gap: 2px; }
+.pips i { width: 7px; height: 11px; border-radius: 2px; background: var(--deck-2); }
+.pips i.on { background: var(--gold); }
+.pips i.use { background: color-mix(in srgb, var(--gold) 30%, var(--deck-2)); }
+.gostart { flex: 1; padding: 12px 10px; }
+.float.sp { color: var(--gold); font-size: 17px; }
+.float.foesp { color: var(--hp); font-size: 17px; }
+.ultname.foe { color: var(--hp); }
+
+/* ---------- Ergebnis ---------- */
+.trline { text-align: center; font-family: var(--f-display); font-weight: 700; font-size: 32px; line-height: 1.1; }
+.trline.plus { color: var(--gold); } .trline.minus { color: var(--hp); }
+.trline small { display: block; font-family: var(--f-body); font-size: 13px; color: var(--dim); font-weight: 600; }
+.xplist { display: flex; flex-direction: column; gap: 6px; }
+.xprow { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: var(--deck-2); border-left: 4px solid var(--rc); }
+.xprow.mvp { box-shadow: 0 0 0 1px var(--gold); }
+.xprow .xe { font-size: 30px; flex: none; }
+.xprow .xi { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.xprow .xn { font-size: 14px; font-weight: 700; }
+.xprow .xn .up { color: var(--good); }
+.xprow .xr { font-size: 12px; color: var(--dim); }
+.xprow .xv { font-family: var(--f-display); font-weight: 700; font-size: 17px; color: var(--xp); white-space: nowrap; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
 }
 @media (max-width: 360px) {
-  .b-enemies .unit { width: 88px; }
-  .nf-foes { font-size: 36px; }
+  .b-enemies .unit .ue { font-size: 28px; }
+  .unit .un { font-size: 9.5px; }
 }
 </style>
 </head>
@@ -503,16 +555,15 @@ p { margin: 0; }
 const G = 1.07;                 // Wachstum der Kampfwerte pro Level
 const MAX_LV = 999;             // praktisch endlos
 const MAX_ROUNDS = 30;
-const FORM_LV = [1, 25, 50];    // ab diesem Level entwickeln sich die Begleiter in die nächste Form
-const WAVE = [1, 1, 2, 2, 2, 3, 3, 3, 3];
-const recLv = s => Math.round(1 + (s - 1) * 1.2);       // empfohlenes Level je Etappe
-const isBoss = s => s % 10 === 0;
-const zoneOf = s => Math.floor((s - 1) / 10);
-const stageNo = s => (s - 1) % 10 + 1;
+const FORM_LV = [1, 10, 25];    // ab diesem Kartenlevel entwickeln sich die Karten in die nächste Form
+const TROPHY = 30, ARENA_STEP = 300, DECK_SIZE = 4;
+const EN_START = 4, EN_ROUND = 3, EN_MAX = 10;   // Sternenenergie für Sonderattacken
+const HP_MUL = 1.5;             // Leben im Kampf, damit Kämpfe mehrere Runden dauern
+const STORM = 8;                // ab dieser Runde zieht ein Sternensturm auf: jeder Treffer wird stärker, damit Kämpfe nicht ewig dauern
 const heroNeed = L => Math.round(12 * Math.pow(1.1, L - 1) * (3 + .35 * Math.min(L, 60) + .1 * Math.max(0, L - 60)));
+const cardNeed = L => Math.round(20 * Math.pow(1.1, L - 1) * (1 + .25 * Math.min(L, 60) + .08 * Math.max(0, L - 60)));
 const ptsFor = L => 3 + Math.floor(L / 15);   // Sternenpunkte beim Erreichen von Level L
-const BOSS_PTS = 5;
-const rankCost = r => 2 + Math.floor(r / 2);   // Sternenpunkte für den nächsten Rang eines Begleiters
+const rankCost = r => 2 + Math.floor(r / 2);   // Sternenpunkte für den nächsten Rang einer Karte
 const RANK_BONUS = .06;
 const pct = v => Math.round(v * 100) + " %";
 // Große Zahlen lesbar machen
@@ -577,23 +628,80 @@ const AB = {
   timebomb:  { n:"Zeitzünder",     v:[3,4,5.5],     d:v => `In Runde 4 explodiert die Ladung und trifft alle Gegner (${pct(v)} des Angriffs).` }
 };
 
-// Die 8 festen Begleiter: lv = ab welchem Heldenlevel sie dazukommen. Sie leveln automatisch mit dem Helden.
+// Die 16 Karten. ar = Arena, in der sie freigeschaltet wird (0 = von Anfang an dabei).
+// sp = Sonderattacke: e = Sternenenergie, cd = Abklingzeit in Runden, v = Grundwert, x = Zusatzeffekt ab Kartenlevel 15
 const COMP = [
-  { id:"kiesel", lv:1,  r:"c", m:1,    role:"tank",     ab:"taunt",     f:[["Kieselgolem","🪨"],["Felsgolem","🗿"],["Monolith","🏛️"]] },
-  { id:"funkel", lv:3,  r:"c", m:1,    role:"schuetze", ab:"crit",      f:[["Funkelkäfer","🐞"],["Leuchtkäfer","🪲"],["Sternkäfer","🌟"]] },
-  { id:"sani",   lv:6,  r:"c", m:1,    role:"heiler",   ab:"heal",      f:[["Sanibot","🤖"],["Medibot","🩺"],["Lebensbaum","🌳"]] },
-  { id:"blitz",  lv:10, r:"r", m:1.05, role:"magier",   ab:"aoe",       f:[["Funkenzauberer","🧙"],["Blitzmagier","⚡"],["Sturmrufer","🌩️"]] },
-  { id:"fleder", lv:15, r:"r", m:1.08, role:"krieger",  ab:"lifesteal", f:[["Mondfledermaus","🦇"],["Nachtjäger","🧛"],["Blutmond","🌑"]] },
-  { id:"banner", lv:20, r:"e", m:1.1,  role:"support",  ab:"aura",      f:[["Fahnenträger","🚩"],["Kommandant","🎖️"],["Sternenmarschall","⭐"]] },
-  { id:"ninja",  lv:26, r:"e", m:1.12, role:"schuetze", ab:"double",    f:[["Kurierninja","🥷"],["Schattenklinge","🗡️"],["Phantom","👤"]] },
-  { id:"drache", lv:32, r:"l", m:1.15, role:"magier",   ab:"dragon",    f:[["Sternendrache","🐲"],["Galaxiendrache","🐉"],["Urdrache","🌌"]] }
+  { id:"kiesel",  ar:0,  r:"c", m:1,    role:"tank",     ab:"taunt",     f:[["Kieselgolem","🪨"],["Felsgolem","🗿"],["Monolith","🏛️"]],
+    sp:{ n:"Felswall",        k:"shield", e:3, cd:3, v:.22, x:"heal" } },
+  { id:"funkel",  ar:0,  r:"c", m:1,    role:"schuetze", ab:"crit",      f:[["Funkelkäfer","🐞"],["Leuchtkäfer","🪲"],["Sternkäfer","🌟"]],
+    sp:{ n:"Leuchtpfeil",     k:"strike", e:2, cd:2, v:2.4, x:"stun" } },
+  { id:"sani",    ar:0,  r:"c", m:1,    role:"heiler",   ab:"heal",      f:[["Sanibot","🤖"],["Medibot","🩺"],["Lebensbaum","🌳"]],
+    sp:{ n:"Notfallpaket",    k:"heal",   e:3, cd:3, v:.2,  x:"shield" } },
+  { id:"krabbe",  ar:0,  r:"c", m:1,    role:"tank",     ab:"thorns",    f:[["Kraterkrabbe","🦀"],["Panzerkrebs","🦞"],["Muschelfestung","🐚"]],
+    sp:{ n:"Scherengriff",    k:"stun",   e:3, cd:3, v:1.5, x:"shred" } },
+  { id:"fuchs",   ar:1,  r:"c", m:1,    role:"krieger",  ab:"dodge",     f:[["Kometenfuchs","🦊"],["Sternenwolf","🐺"],["Polarlichtfuchs","🌠"]],
+    sp:{ n:"Wirbelbiss",      k:"multi",  e:3, cd:2, v:.9,  x:"burn" } },
+  { id:"blitz",   ar:2,  r:"r", m:1.05, role:"magier",   ab:"aoe",       f:[["Funkenzauberer","🧙"],["Blitzmagier","⚡"],["Sturmrufer","🌩️"]],
+    sp:{ n:"Gewitter",        k:"aoe",    e:4, cd:3, v:1.3, x:"stun" } },
+  { id:"pilz",    ar:3,  r:"r", m:1.05, role:"magier",   ab:"poison",    f:[["Sporenpilz","🍄"],["Giftmorchel","🦠"],["Myzelkönig","🌿"]],
+    sp:{ n:"Sporenwolke",     k:"burn",   e:3, cd:3, v:.7,  x:"shred" } },
+  { id:"fleder",  ar:4,  r:"r", m:1.08, role:"krieger",  ab:"lifesteal", f:[["Mondfledermaus","🦇"],["Nachtjäger","🧛"],["Blutmond","🌑"]],
+    sp:{ n:"Blutbiss",        k:"drain",  e:3, cd:2, v:2.2, x:"heal" } },
+  { id:"robo",    ar:5,  r:"r", m:1.08, role:"tank",     ab:"guard",     f:[["Wachdrohne","🛸"],["Schildwächter","🛡️"],["Bastion","🏰"]],
+    sp:{ n:"Schutzkuppel",    k:"shield", e:4, cd:3, v:.3,  x:"heal" } },
+  { id:"frost",   ar:6,  r:"e", m:1.1,  role:"magier",   ab:"stun",      f:[["Frostfee","🧚"],["Eiskönigin","❄️"],["Winterseele","🌨️"]],
+    sp:{ n:"Eissturm",        k:"aoe",    e:4, cd:3, v:1.1, x:"stun" } },
+  { id:"banner",  ar:7,  r:"e", m:1.1,  role:"support",  ab:"aura",      f:[["Fahnenträger","🚩"],["Kommandant","🎖️"],["Sternenmarschall","⭐"]],
+    sp:{ n:"Sturmangriff",    k:"rally",  e:4, cd:4, v:.3,  x:"shield" } },
+  { id:"eule",    ar:8,  r:"e", m:1.1,  role:"support",  ab:"mark",      f:[["Sterneneule","🦉"],["Sternwarte","🔭"],["Planetenhüter","🪐"]],
+    sp:{ n:"Sternendeutung",  k:"snipe",  e:3, cd:2, v:2.8, x:"shred" } },
+  { id:"ninja",   ar:9,  r:"e", m:1.12, role:"schuetze", ab:"double",    f:[["Kurierninja","🥷"],["Schattenklinge","🗡️"],["Phantom","👤"]],
+    sp:{ n:"Schattenwirbel",  k:"multi",  e:4, cd:2, v:1.2, x:"stun" } },
+  { id:"phoenix", ar:10, r:"l", m:1.14, role:"heiler",   ab:"revive",    f:[["Glutküken","🐤"],["Feuervogel","🦅"],["Phönix","🔥"]],
+    sp:{ n:"Flammenruf",      k:"revive", e:5, cd:4, v:.5,  x:"heal" } },
+  { id:"drache",  ar:11, r:"l", m:1.15, role:"magier",   ab:"dragon",    f:[["Sternendrache","🐲"],["Galaxiendrache","🐉"],["Urdrache","🌌"]],
+    sp:{ n:"Sternenfeuer",    k:"aoe",    e:5, cd:3, v:1.8, x:"burn" } },
+  { id:"titan",   ar:12, r:"l", m:1.16, role:"magier",   ab:"timebomb",  f:[["Leerenwesen","👾"],["Gravitar","🌀"],["Singularität","🕳️"]],
+    sp:{ n:"Ereignishorizont",k:"nuke",   e:6, cd:4, v:2.4, x:"stun" } }
 ];
 const RAR_N = { c:"Gewöhnlich", r:"Selten", e:"Episch", l:"Legendär" };
 const CC = Object.fromEntries(COMP.map(c => [c.id, c]));
 
+// Sonderattacken: was sie tun (v ist schon mit dem Kartenlevel verrechnet)
+const SPK = {
+  strike: v => `Trifft das Ziel mit ${pct(v)} Angriff.`,
+  aoe:    v => `Trifft alle Gegner mit ${pct(v)} Angriff.`,
+  nuke:   v => `Trifft alle Gegner mit ${pct(v)} Angriff und durchbricht ihre Schilde.`,
+  multi:  v => `Drei schnelle Treffer auf zufällige Gegner mit je ${pct(v)} Angriff.`,
+  snipe:  v => `Trifft den schwächsten Gegner mit ${pct(v)} Angriff, doppelt gegen fast Besiegte.`,
+  stun:   v => `Trifft das Ziel mit ${pct(v)} Angriff und friert es eine Runde ein.`,
+  drain:  v => `Trifft das Ziel mit ${pct(v)} Angriff und heilt sich um die Hälfte des Schadens.`,
+  burn:   v => `Setzt alle Gegner 3 Runden in Brand (${pct(v)} Angriff pro Runde).`,
+  heal:   v => `Heilt das ganze Team um ${pct(v)} seiner Leben.`,
+  shield: v => `Gibt dem ganzen Team einen Schild von ${pct(v)} seiner Leben.`,
+  rally:  v => `Das ganze Team macht 2 Runden lang ${pct(v)} mehr Schaden.`,
+  revive: v => `Holt eine gefallene Karte mit ${pct(v)} Leben zurück, sonst heilt sie das schwächste Teammitglied.`
+};
+const SPX = { stun:"friert zusätzlich ein Ziel ein", shred:"macht die Ziele 15 % verwundbarer", burn:"setzt die Ziele zusätzlich in Brand",
+  heal:"heilt zusätzlich das Team um 10 %", shield:"gibt zusätzlich dem Team einen Schild von 10 %" };
+// Was jedes Kartenlevel der Sonderattacke bringt: jedes Level +1 % Wirkung, dazu Meilensteine
+const SP_MS = [
+  { lv:5,  t:"+25 % Wirkung" },
+  { lv:10, t:"kostet 1 ⚡ weniger" },
+  { lv:15, t:"Zusatzeffekt" },
+  { lv:20, t:"1 Runde kürzere Abklingzeit" },
+  { lv:25, t:"+25 % Wirkung" },
+  { lv:35, t:"+20 % Wirkung" }, { lv:45, t:"+20 % Wirkung" }, { lv:60, t:"+20 % Wirkung" }, { lv:80, t:"+20 % Wirkung" }, { lv:100, t:"+20 % Wirkung" }
+];
+const spPow = L => (1 + .01 * Math.min(L - 1, 150)) * (L >= 5 ? 1.25 : 1) * (L >= 25 ? 1.25 : 1) * (1 + .2 * [35, 45, 60, 80, 100].filter(x => L >= x).length);
+const spCost = (id, L) => Math.max(1, CC[id].sp.e - (L >= 10 ? 1 : 0));
+const spCd = (id, L) => Math.max(1, CC[id].sp.cd - (L >= 20 ? 1 : 0));
+const spVal = (id, L) => CC[id].sp.v * spPow(L);
+const spDesc = (id, L) => SPK[CC[id].sp.k](spVal(id, L)) + (L >= 15 ? ` Außerdem ${SPX[CC[id].sp.x]}.` : "");
+
 // Fähigkeiten der Hauptkarte, kommen mit dem Level automatisch dazu
 const HERO_AB = [
-  { lv:1,  n:"Kurierschlag",      d:"Greift jede Runde einen Gegner an." },
+  { lv:1,  n:"Hauptattacke",      d:"Jede Runde wählst du eine Aktion. Die Hauptattacke trifft mit 120 % Angriff." },
   { lv:5,  k:"hShield", n:"Mondschild",       d:"Zu Kampfbeginn bekommt das ganze Team einen Schild." },
   { lv:10, k:"hRain",   n:"Schnellladung",    d:"Die Kurier-Energie lädt sich 50 % schneller auf." },
   { lv:15, k:"hRegen",  n:"Ausdauer",         d:"Der Held heilt sich jede Runde ein wenig." },
@@ -602,23 +710,24 @@ const HERO_AB = [
   { lv:30, k:"hAura",   n:"Vollmond",         d:"Das ganze Team macht 15 % mehr Schaden." },
   { lv:40, k:"hCrit",   n:"Kometenkern",      d:"Der Held trifft viel öfter kritisch, mit 2,5-fachem Schaden." },
   { lv:50, k:"hNova",   n:"Supernova",        d:"Jede 6. Runde ein gewaltiger Treffer gegen alle Gegner." },
-  { lv:70, k:"hUltUp",  n:"Sternenfeuer",     d:"Der Spezialangriff macht 50 % mehr Schaden." },
+  { lv:70, k:"hUltUp",  n:"Sternenfeuer",     d:"Die Ultimative macht 50 % mehr Schaden." },
   { lv:100, k:"hStart", n:"Vorgeladen",       d:"Der Held startet jeden Kampf mit halb voller Kurier-Energie." }
 ];
 const HERO_TITLES = [[1,"Kurierlehrling","var(--r-c)"],[10,"Mondkurier","var(--r-r)"],[20,"Sternenbote","var(--good)"],[30,"Kometenmeister","var(--r-e)"],[40,"Hüter der Umlaufbahn","var(--shield)"],[50,"Legende des Mondes","var(--r-l)"],[75,"Sternenkaiser","var(--gold)"],[100,"Wächter der Galaxis","var(--gold)"],[150,"Unendlicher Kurier","var(--gold)"]];
 const heroTitle = L => HERO_TITLES.filter(t => t[0] <= L).pop();
 const titleIdx = L => HERO_TITLES.filter(t => t[0] <= L).length - 1;
 
-// Heldentechniken: im Story-Kampf per Knopf, im Auto-Modus setzt der Held sie selbst ein
+// Aktionen des Helden: jede Runde wählst du genau eine. Fokus ist frei und gilt, bis du ein anderes Ziel antippst.
 const TECH = [
-  { k:"ult",   n:"Spezialangriff", i:"☄️", lv:1,  d:"Wenn die Kurier-Energie voll ist." },
-  { k:"focus", n:"Fokus",          i:"🎯", lv:3,  d:"Tippe einen Gegner an: Alle Begleiter greifen ihn an, und er nimmt 15 % mehr Schaden." },
-  { k:"wall",  n:"Schildwall",     i:"🛡️", lv:5,  cd:5, d:"Das ganze Team bekommt einen Schild von 25 % seiner Leben." },
-  { k:"heal",  n:"Heilwelle",      i:"💚", lv:8,  cd:6, d:"Heilt das ganze Team um 25 % seiner Leben." },
-  { k:"stop",  n:"Zeitstopp",      i:"⏳", lv:15, cd:8, d:"Alle Gegner setzen eine Runde aus. Bricht aufgeladene Großangriffe ab." }
+  { k:"atk",   n:"Hauptattacke",   i:"⚔️", lv:1,  d:"Trifft das Ziel mit 120 % Angriff und lädt die Kurier-Energie." },
+  { k:"ult",   n:"Ultimative",     i:"☄️", lv:1,  d:"Geht nur, wenn die Kurier-Energie voll ist." },
+  { k:"focus", n:"Fokus",          i:"🎯", lv:3,  d:"Tippe einen Gegner an: Dein Team greift ihn bevorzugt an, und er nimmt 15 % mehr Schaden." },
+  { k:"wall",  n:"Schildwall",     i:"🛡️", lv:5,  cd:4, d:"Das ganze Team bekommt einen Schild von 25 % seiner Leben." },
+  { k:"heal",  n:"Heilwelle",      i:"💚", lv:8,  cd:5, d:"Heilt das ganze Team um 25 % seiner Leben." },
+  { k:"stop",  n:"Zeitstopp",      i:"⏳", lv:15, cd:6, d:"Alle Gegner setzen einmal aus, auch ihre geplanten Sonderattacken." }
 ];
 const TK = Object.fromEntries(TECH.map(t => [t.k, t]));
-// Spezialangriff des Helden: wird durch Kurier-Energie ausgelöst
+// Ultimative des Helden: braucht volle Kurier-Energie
 const ULTS = [
   { lv:1,  n:"Mondsalve",      mult:2,   d:"Trifft alle Gegner mit 200 % Angriff." },
   { lv:20, n:"Kometenhagel",   mult:2.6, burn:.5, d:"Trifft alle Gegner mit 260 % Angriff und setzt sie 3 Runden in Brand." },
@@ -634,7 +743,7 @@ const EQUIP = [
     tiers:["Arbeitsanzug","Kraterpanzer","Sternenrüstung","Kometenharnisch","Nebelplatte","Mondkönigsrüstung"] },
   { k:"h", n:"Helm",       i:"⛑️", d:l => `Held trifft ${String(Math.min(30, +(l * .6).toFixed(1))).replace(".", ",")} % öfter kritisch`,
     tiers:["Glaskuppel","Visierhelm","Sternenhelm","Kometenhelm","Nebelkrone","Mondkrone"] },
-  { k:"c", n:"Energiekern",i:"🔋", d:l => `Spezialangriff macht ${l * 5} % mehr Schaden, Energie lädt ${l} % schneller`,
+  { k:"c", n:"Energiekern",i:"🔋", d:l => `Ultimative macht ${l * 5} % mehr Schaden, Energie lädt ${l} % schneller`,
     tiers:["Batterie","Mondkern","Sternenkern","Kometenkern","Nebelkern","Herz des Mondes"] }
 ];
 const eqTier = l => Math.min(5, Math.floor(l / 10));
@@ -648,7 +757,7 @@ const TIER_COL = ["#9aa3b8", "#4fb3ff", "#7bd88f", "#b77bff", "#ffb347", "#f2c14
    ========================================================= */
 const EFX = {
   atk:v => `Team macht ${pct(v)} mehr Schaden`, crit:v => `Team trifft ${pct(v)} öfter kritisch`, critDmg:v => `Kritische Treffer machen ${pct(v)} mehr Schaden`,
-  first:v => `${pct(v)} mehr Schaden in den ersten 2 Runden`, heroAtk:v => `Der Held macht ${pct(v)} mehr Schaden`, boss:v => `${pct(v)} mehr Schaden gegen Bosse`,
+  first:v => `${pct(v)} mehr Schaden in den ersten 2 Runden`, heroAtk:v => `Der Held macht ${pct(v)} mehr Schaden`, boss:v => `${pct(v)} mehr Schaden gegen den gegnerischen Helden`,
   exec:v => `${pct(v)} mehr Schaden gegen fast besiegte Gegner`, aoe:v => `Flächenangriffe machen ${pct(v)} mehr Schaden`, dot:v => `Gift und Brand machen ${pct(v)} mehr Schaden`,
   multi:v => `Jede Karte hat ${pct(v)} Chance auf einen Zusatzangriff`, pierce:v => `Treffer durchdringen ${pct(v)} von gegnerischen Schilden und Rüstung`,
   fall:() => `Der Held trifft jede 3. Runde alle Gegner`,
@@ -656,13 +765,13 @@ const EFX = {
   dodge:v => `Team weicht ${pct(v)} der Angriffe aus`, heroDr:v => `Der Held nimmt ${pct(v)} weniger Schaden`, dr:v => `Team nimmt ${pct(v)} weniger Schaden`,
   thorns:v => `Angreifer bekommen ${pct(v)} des Schadens zurück`, healUp:v => `Alle Heilungen sind ${pct(v)} stärker`, heroHp:v => `Der Held hat ${pct(v)} mehr Leben`,
   unb:() => `Der Held überlebt einmal pro Kampf einen tödlichen Treffer`, teamRevive:() => `Einmal pro Kampf steht das erste gefallene Teammitglied mit 40 % Leben wieder auf`,
-  cardHp:v => `Alle Begleiter haben ${pct(v)} mehr Leben`, cardAtk:v => `Alle Begleiter machen ${pct(v)} mehr Schaden`, abil:v => `Alle Fähigkeiten der Begleiter sind ${pct(v)} stärker`,
+  cardHp:v => `Alle Karten haben ${pct(v)} mehr Leben`, cardAtk:v => `Alle Karten machen ${pct(v)} mehr Schaden`, abil:v => `Fähigkeiten der Karten sind ${pct(v)} stärker, Sonderattacken ${pct(v / 2)}`,
   tank:v => `Tanks haben ${pct(v)} mehr Leben`, shooter:v => `Schützen machen ${pct(v)} mehr Schaden`, mage:v => `Magier machen ${pct(v)} mehr Schaden`,
   warrior:v => `Krieger haben ${pct(v)} mehr Leben und Schaden`, healer:v => `Heiler heilen ${pct(v)} mehr`, support:v => `Unterstützer haben ${pct(v)} mehr Leben und Schaden`,
-  cardXp:v => `Karten bekommen ${pct(v)} mehr EP`, mentor:v => `Karten auf der Bank lernen ${pct(v)} der Kampf-EP mit`, train:v => `Training kostet ${pct(v)} weniger`,
+  mentor:v => `Karten auf der Bank lernen ${pct(v)} der Kampf-EP mit`, train:v => `Training kostet ${pct(v)} weniger`,
   evo:v => `Entwickeln kostet ${pct(v)} weniger`, newLv:v => `Neue Karten starten ${v} Level höher`,
   xp:v => `Der Held bekommt ${pct(v)} mehr EP`, coins:v => `${pct(v)} mehr Münzen`, lossXp:v => `Niederlagen geben ${pct(v)} mehr EP`,
-  firstCo:v => `Neue Etappen geben ${pct(v)} mehr Münzen`, eqDisc:v => `Ausrüstung kostet ${pct(v)} weniger`, bossXp:v => `Bosse geben ${pct(v)} mehr EP`, ptsLv:v => `Alle 5 Level ${v} Sternenpunkt extra`
+  firstCo:v => `Neue Arenen geben ${pct(v)} mehr Münzen`, eqDisc:v => `Ausrüstung kostet ${pct(v)} weniger`, bossXp:v => `Karten bekommen ${pct(v)} mehr EP`, ptsLv:v => `Alle 5 Level ${v} Sternenpunkt extra`
 };
 // [Bahn 0=links 1=Mitte 2=rechts, Symbol, Name, Effekt, Wert]
 const TREE_DEF = [
@@ -670,13 +779,13 @@ const TREE_DEF = [
     [[1,"🗡️","Scharfe Klingen I","atk",.04]],
     [[0,"🎯","Präzision I","crit",.04],[1,"🧑‍🚀","Kurierzorn I","heroAtk",.08],[2,"⚡","Erstschlag I","first",.15]],
     [[1,"🗡️","Scharfe Klingen II","atk",.05]],
-    [[0,"💥","Wucht I","critDmg",.2],[1,"✌️","Doppelschlag I","multi",.05],[2,"👑","Bossjäger I","boss",.1]],
+    [[0,"💥","Wucht I","critDmg",.2],[1,"✌️","Doppelschlag I","multi",.05],[2,"👑","Heldenjäger I","boss",.1]],
     [[1,"🗡️","Scharfe Klingen III","atk",.06]],
     [[0,"🎯","Präzision II","crit",.05],[1,"🔩","Durchschlag I","pierce",.15],[2,"🪓","Gnadenstoß I","exec",.3]],
     [[1,"🧑‍🚀","Kurierzorn II","heroAtk",.12]],
     [[0,"💥","Wucht II","critDmg",.3],[1,"🌊","Flächenwucht I","aoe",.2],[2,"⚡","Erstschlag II","first",.25]],
     [[1,"🗡️","Scharfe Klingen IV","atk",.07]],
-    [[0,"🎯","Präzision III","crit",.06],[1,"✌️","Doppelschlag II","multi",.07],[2,"👑","Bossjäger II","boss",.15]],
+    [[0,"🎯","Präzision III","crit",.06],[1,"✌️","Doppelschlag II","multi",.07],[2,"👑","Heldenjäger II","boss",.15]],
     [[1,"☠️","Giftklingen","dot",.3]],
     [[0,"💥","Wucht III","critDmg",.4],[1,"🔩","Durchschlag II","pierce",.2],[2,"🪓","Gnadenstoß II","exec",.5]],
     [[1,"🗡️","Scharfe Klingen V","atk",.1]],
@@ -698,7 +807,7 @@ const TREE_DEF = [
     [[1,"🛡️","Panzerung V","hp",.1]],
     [[0,"🧱","Rüstung III","dr",.06],[1,"🗿","Unbeugsam","unb",1,1],[2,"❤️","Heldenherz II","heroHp",.2]]
   ]},
-  { k:"c", n:"Begleiter", c:"var(--t-c)", rows:[
+  { k:"c", n:"Karten", c:"var(--t-c)", rows:[
     [[1,"🃏","Kartenkraft I","cardAtk",.05]],
     [[0,"🪨","Felsenhaut I","tank",.1],[1,"🤝","Begleiterbund I","cardHp",.04],[2,"🏹","Zielwasser I","shooter",.1]],
     [[1,"🎴","Kartenhülle I","cardHp",.05]],
@@ -718,13 +827,13 @@ const TREE_DEF = [
     [[1,"📖","Schnelllerner I","xp",.08]],
     [[0,"🪙","Goldader I","coins",.1],[1,"📗","Schnellstart","xp",.06],[2,"🔁","Aus Fehlern lernen I","lossXp",.5]],
     [[1,"📖","Schnelllerner II","xp",.1]],
-    [[0,"🏷️","Schmiederabatt I","eqDisc",.1],[1,"👑","Bosswissen I","bossXp",.3],[2,"🚀","Pioniergeist I","firstCo",.5]],
+    [[0,"🏷️","Schmiederabatt I","eqDisc",.1],[1,"👑","Kartenwissen I","bossXp",.3],[2,"🏟️","Arenaruhm I","firstCo",.5]],
     [[1,"🪙","Goldader II","coins",.15]],
     [[0,"★","Sternenquelle I","ptsLv",1],[1,"📖","Schnelllerner III","xp",.12],[2,"🔁","Aus Fehlern lernen II","lossXp",.5]],
     [[1,"🪙","Goldregen","coins",.1]],
-    [[0,"🏷️","Schmiederabatt II","eqDisc",.15],[1,"🪙","Goldader III","coins",.2],[2,"👑","Bosswissen II","bossXp",.4]],
+    [[0,"🏷️","Schmiederabatt II","eqDisc",.15],[1,"🪙","Goldader III","coins",.2],[2,"👑","Kartenwissen II","bossXp",.4]],
     [[1,"📖","Schnelllerner IV","xp",.14]],
-    [[0,"★","Sternenquelle II","ptsLv",1],[1,"👑","Bosswissen III","bossXp",.3],[2,"🚀","Pioniergeist II","firstCo",.5]],
+    [[0,"★","Sternenquelle II","ptsLv",1],[1,"👑","Kartenwissen III","bossXp",.3],[2,"🏟️","Arenaruhm II","firstCo",.5]],
     [[1,"🪙","Goldader IV","coins",.25]],
     [[0,"🏷️","Schmiederabatt III","eqDisc",.2],[1,"📖","Schnelllerner V","xp",.16],[2,"✨","Sternenfunke","ptsLv",1]],
     [[1,"📖","Schnelllerner VI","xp",.15]],
@@ -757,77 +866,85 @@ const TREE = [], TN = {};
 })();
 const treeTotal = () => TREE.reduce((a, n) => a + (n.cost || 0), 0);
 
-/* ---------- Gegner ---------- */
-const ZONES = [
-  { n:"Mondkrater", sub:"Graue Staubebenen. Hier beginnt jede Kurierroute.", bg:"radial-gradient(120% 90% at 80% 0%, #5b6280, transparent 60%)",
-    en:[["Kraterkriecher","🦂","krieger"],["Staubgeist","👻","magier","poison",0],["Mondmilbe","🕷️","schuetze"],["Kraterkäfer","🪲","tank","taunt",0]],
-    boss:["Regolith-Golem","🗿","tank","thorns",0] },
-  { n:"Asteroidengürtel", sub:"Treibende Felsen, Piratennester und Funkstille.", bg:"radial-gradient(120% 90% at 80% 0%, #7a4e2c, transparent 60%)",
-    en:[["Felsdrohne","🤖","schuetze","crit",0],["Weltraumpirat","🏴‍☠️","krieger","lifesteal",0],["Meteorschnecke","🐌","tank","taunt",1],["Schrottmechaniker","🔧","heiler","heal",0]],
-    boss:["Kapitänin Nova","🦹","krieger","double",1] },
-  { n:"Orionnebel", sub:"Leuchtende Gaswolken, in denen etwas Hungriges treibt.", bg:"radial-gradient(120% 90% at 80% 0%, #6a2f7a, transparent 60%)",
-    en:[["Nebelqualle","🪼","magier","poison",1],["Sternenfresser","👾","krieger","rage",1],["Plasmawurm","🐛","schuetze","stun",0],["Nebelgeist","🌫️","heiler","heal",1]],
-    boss:["Nebelhexe Lyra","🧙‍♀️","magier","aoe",2] },
-  { n:"Kometenschweif", sub:"Eis, Geschwindigkeit und das Reich eines gefrorenen Königs.", bg:"radial-gradient(120% 90% at 80% 0%, #2d6a8a, transparent 60%)",
-    en:[["Eisgeist","🥶","magier","stun",1],["Kometenreiter","🏇","krieger","execute",1],["Frostkristall","💎","tank","thorns",1],["Schneefee","❄️","support","aura",1]],
-    boss:["Kometenkönig","🤴","tank","taunt",2] },
-  { n:"Schwarzes Loch", sub:"Die letzte Zustellung. Hinter dem Horizont kehrt nichts zurück.", bg:"radial-gradient(120% 90% at 80% 0%, #3a1030, transparent 60%)",
-    en:[["Leerenwandler","🌑","krieger","lifesteal",2],["Zeitverzerrer","⌛","support","shieldTeam",2],["Gravitonbestie","🐙","tank","taunt",2],["Schattenjäger","👤","schuetze","double",2]],
-    boss:["Ereignishorizont","🕳️","magier","dragon",2] }
+/* ---------- Arenen ---------- */
+// Alle 300 Trophäen eine neue Arena. Jede der ersten 12 schaltet eine neue Karte frei.
+const ARENAS = [
+  { n:"Mondkrater",        bg:"#5b6280", sub:"Graue Staubebenen. Hier tritt jeder Kurier zum ersten Mal an." },
+  { n:"Asteroidengürtel",  bg:"#7a4e2c", sub:"Treibende Felsen und schnelle Gegner." },
+  { n:"Orionnebel",        bg:"#6a2f7a", sub:"Leuchtende Gaswolken voller Blitze." },
+  { n:"Kometenschweif",    bg:"#2d6a8a", sub:"Eis, Staub und giftige Sporen." },
+  { n:"Saturnringe",       bg:"#8a6a2c", sub:"Kämpfe auf den Ringen des Riesen." },
+  { n:"Marsstation",       bg:"#8a3a2c", sub:"Die rote Festung der Schildbauer." },
+  { n:"Sonnenwind",        bg:"#9a7a1c", sub:"Glühende Stürme und Frost im Schatten." },
+  { n:"Andromeda",         bg:"#3a2c8a", sub:"Die Nachbargalaxie. Hier kämpfen ganze Armeen." },
+  { n:"Pulsarfeld",        bg:"#2c8a7a", sub:"Blinkende Sterne zeigen jede Schwäche." },
+  { n:"Sternenschmiede",   bg:"#8a2c5a", sub:"Wo Klingen aus Sternenstaub entstehen." },
+  { n:"Galaxienkern",      bg:"#5a2c8a", sub:"Das Herz der Milchstraße. Nur Legenden kommen hierher." },
+  { n:"Ereignishorizont",  bg:"#3a1030", sub:"Kurz vor dem Schwarzen Loch." },
+  { n:"Schwarzes Loch",    bg:"#1a0820", sub:"Die letzte Arena mit einer neuen Karte." }
 ];
+const LAST_CARD_AR = ARENAS.length - 1;
+const arenaIdx = tr => Math.floor(Math.max(0, tr) / ARENA_STEP);
+function arenaAt(i) {
+  const a = i < ARENAS.length ? ARENAS[i] : { ...ARENAS[(i - ARENAS.length) % 5 + 8], n:`Legendenliga ${roman(i - ARENAS.length + 1)}`, sub:"Jenseits aller Karten. Jede Liga bringt Münzen und Sternenpunkte." };
+  return { ...a, i, gate:i * ARENA_STEP, card:COMP.find(c => c.ar === i), bgCss:`radial-gradient(120% 90% at 80% 0%, ${a.bg}, transparent 60%)` };
+}
+const arenaReward = i => ({ co:Math.round(120 * Math.pow(1.25, i)), sp:3 + Math.floor(i / 2) });
+// Namen der Computer-Gegner
+const RIVALS = ["Kometenfuchs Kai", "Nova", "Astro-Lena", "Orbit-Max", "Sternenpirat Jo", "Luna", "Kapitän Krater", "Nebelkatze", "Pixelpilot", "Raketen-Rudi",
+  "Saturna", "Meteor-Mia", "Captain Quasar", "Zoe Zenit", "Polarlicht", "Asteroid-Ali", "Mira Milchstraße", "Funkel-Finn", "Pulsar-Paul", "Vega"];
 // Spielmodi: alle geben EP und Münzen. Das erste Spiel je Modus und Tag zählt doppelt.
 const MODES = [
-  { k:"story",  n:"Kurierroute",   i:"🗺️", lv:1,  c:"var(--gold)",   d:"Die Story: kämpfe dich durch Etappen und Zonen." },
+  { k:"arena",  n:"Trophäenkampf", i:"🏆", lv:1,  c:"var(--gold)",   d:"Kämpfe gegen andere Kuriere um Trophäen." },
   { k:"sprint", n:"Mondsprint",    i:"🏃", lv:1,  c:"var(--r-r)",    d:"Spring über Krater und Felsen und sammle Pakete.",
     rules:"Tippe auf das Spielfeld, um zu springen, und in der Luft nochmal für einen Doppelsprung. Sammle 📦 Pakete: Pakete am Stück erhöhen den Multiplikator, alle 10 am Stück gibt es +2 Sekunden. Weiche Felsen, Kratern und 🛸 Drohnen aus (die fliegen in Sprunghöhe). Extras: ⏱️ +3 Sekunden, 🛡️ Schild gegen einen Treffer, 🧲 Magnet zieht Pakete heran." },
-  { k:"memory", n:"Sternen-Memory",i:"🃏", lv:4,  c:"var(--r-e)",    d:"Finde alle Paare deiner Begleiter gegen die Zeit.",
+  { k:"memory", n:"Sternen-Memory",i:"🃏", lv:4,  c:"var(--r-e)",    d:"Finde alle Paare deiner Karten gegen die Zeit.",
     rules:"Decke zwei Karten auf. Gleiche Karten bleiben offen und geben +2 Sekunden, Paare am Stück bringen mehr Punkte. Ein Fehlgriff kostet 1 Sekunde. Ist das Brett leer, kommt ein größeres und du bekommst +15 Sekunden. Ab Brett 2: ⏱️ Zeitpaar (+8 Sekunden) und 👁️ Späherauge, das kurz alle Karten zeigt." },
   { k:"meteor", n:"Meteorabwehr",  i:"☄️", lv:8,  c:"var(--hp)",     d:"Tippe Meteore weg, bevor sie die Mondbasis treffen.",
     rules:"Tippe ☄️ Meteore an, jeder gibt +1 Sekunde. 🌟 Sterne geben 3 Punkte und +2 Sekunden. Große 🪨 Meteore brauchen 3 Treffer. Tippe keine 🛰️ Satelliten an! Extras: ❤️ Leben, 🧊 Zeitfrost, 💣 Bombe räumt alles ab, ⚡ doppelte Punkte. Es wird immer schneller, du hast 3 Leben." },
   { k:"boss",   n:"Bossjagd",      i:"👹", lv:12, c:"var(--r-l)",    d:"Tippe auf den Koloss, dein Team schlägt mit zu.",
-    rules:"Tippe auf den Koloss, jeder Tipp lädt die Kurier-Energie für den Spezialangriff. 🎯 Schwachstellen geben 8-fachen Schaden. Hebt der Boss seinen Schild, tippe 4-mal auf den 💎 Kristall, um ihn zu brechen. Jeder besiegte Koloss gibt +10 Sekunden, dann kommt ein stärkerer. Dein Team greift automatisch mit an." }
+    rules:"Tippe auf den Koloss, jeder Tipp lädt die Kurier-Energie für die Ultimative. 🎯 Schwachstellen geben 8-fachen Schaden. Hebt der Boss seinen Schild, tippe 4-mal auf den 💎 Kristall, um ihn zu brechen. Jeder besiegte Koloss gibt +10 Sekunden, dann kommt ein stärkerer. Dein Team greift automatisch mit an." }
 ];
 const MM = Object.fromEntries(MODES.map(m => [m.k, m]));
 const today = () => new Date().toDateString();
 const dailyFree = k => !(S.daily && S.daily.d === today() && S.daily.used[k]);
 function useDaily(k) { if (!S.daily || S.daily.d !== today()) S.daily = { d:today(), used:{} }; S.daily.used[k] = 1; }
-const boostFor = s => s === S.prog + 1 ? Math.min(.25, ((S.fails || {})[s] || 0) * .05) : 0;
-
-const DEEP = ["Tiefer Raum", "Sternenwüste", "Nebelabgrund", "Kometenfriedhof", "Leerenrand"];
-function zoneAt(z) {
-  if (z < ZONES.length) return ZONES[z];
-  const b = ZONES[z % 5];
-  return { ...b, n:`${DEEP[z % 5]} ${roman(Math.floor(z / 5))}`, sub:"Endlose Weiten jenseits des Schwarzen Lochs. Jede Zone ist stärker als die davor.", deep:true };
-}
-// Gegnerstärke je Etappe (per Simulation abgestimmt)
-const EK = [2.41,2.755,2.775,3.723,3.833,2.747,3.892,3.463,3.943,3.181,10.1,13.08,8.597,10.82,9.739,8.878,10.77,12.34,11.84,9.291,35.75,56.26,22.41,27.35,29.08,23.87,27.51,27.44,28.26,22.38,103.4,54.76,49.1,51.43,64.36,18.94,59.85,46.54,56.28,51.53,213.1,217.3,105,127.1,124.7,107.6,91.8,116.9,106.8,124.8,1014,3318,271.8,428.4,248,298.7,206.4,236.3,318.9,102.3,1074,814.2,527.4,506,551.2,271.7,430.8,410.9,370.2,305,3240,5000,611.8,738.5,708.6,595.8,532.4,378.9,524,512.5,2568,402.7,892.1,414.7,959.9,176.3,745.6,326,651.7,398.4,2003,1348,789.9,689.3,769.9,464.3,514.2,530.9,400.6,586.8];
-// Nach den abgestimmten Etappen wächst die Stärke im gleichen Tempo weiter wie in den letzten 10 Etappen
-function ek(s) {
-  const n = EK.length;
-  if (s <= n) return EK[s - 1];
-  let r = 1; for (let i = n - 10; i < n; i++) r *= EK[i] / EK[i - 10];
-  r = Math.min(1.15, Math.max(1.02, Math.pow(r, 1 / 10)));
-  const k = Math.ceil((s - n) / 10), base = EK[n - 10 + ((s - n - 1) % 10)];
-  return base * Math.pow(r, k);
-}
 
 /* =========================================================
    SPIELSTAND
    ========================================================= */
-const KEY = "sternenkarten-v4";
+const KEY = "sternenkarten-v5";
+const START_CARDS = COMP.filter(c => c.ar === 0).map(c => c.id);
 function defSave() {
-  return { v:4, lv:1, xp:0, sp:0, tree:{}, co:50, eq:{ w:0, a:0, h:0, c:0 }, rank:{}, prog:0, zone:0, auto:false, autoTech:false, stats:{ wins:0, losses:0 }, best:{}, fails:{}, daily:null, seen:false };
+  return { v:5, lv:1, xp:0, sp:0, tree:{}, co:50, eq:{ w:0, a:0, h:0, c:0 }, rank:{},
+    tr:0, trBest:0, arMax:0, mm:.85, cards:Object.fromEntries(START_CARDS.map(id => [id, { lv:1, xp:0 }])), deck:START_CARDS.slice(0, DECK_SIZE),
+    autoTech:false, stats:{ wins:0, losses:0, streak:0 }, best:{}, daily:null, seen:false };
+}
+// Spielstand ergänzen und aufräumen (auch für ältere oder übertragene Stände)
+function fixSave(o) {
+  const d = defSave(), S2 = { ...d, ...o, stats:{ ...d.stats, ...o.stats } };
+  S2.cards = o.cards || d.cards;
+  START_CARDS.forEach(id => { if (!S2.cards[id]) S2.cards[id] = { lv:1, xp:0 }; });
+  S2.deck = (o.deck || []).filter(id => S2.cards[id]).slice(0, DECK_SIZE);
+  Object.keys(S2.cards).forEach(id => { if (S2.deck.length < DECK_SIZE && !S2.deck.includes(id)) S2.deck.push(id); });
+  return S2;
+}
+// Vorversion 4 (Story-Modus): Held, Baum, Münzen und Ausrüstung bleiben. Bisherige Begleiter werden Karten mit dem alten Level.
+function fromV4(o) {
+  const n = defSave();
+  const old = { kiesel:1, funkel:3, sani:6, blitz:10, fleder:15, banner:20, ninja:26, drache:32 };
+  const cards = { ...n.cards };
+  Object.entries(old).forEach(([id, l]) => { if (o.lv >= l) cards[id] = { lv:Math.max(1, Math.round(o.lv * .8)), xp:0 }; });
+  const deck = Object.keys(cards).sort((x, y) => cards[y].lv - cards[x].lv).slice(0, DECK_SIZE);
+  return fixSave({ ...n, lv:o.lv, xp:o.xp, sp:o.sp || 0, tree:o.tree || {}, co:o.co || 0, eq:o.eq || n.eq, rank:o.rank || {}, cards, deck,
+    stats:{ wins:(o.stats || {}).wins || 0, losses:(o.stats || {}).losses || 0, streak:0 }, best:o.best || {}, seen:true, migrated:true });
 }
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const o = JSON.parse(raw); if (o && o.v === 4) { const d = defSave(); return { ...d, ...o, stats:{ ...d.stats, ...o.stats } }; } }
-    // Vorversion übernehmen: Level, Münzen, Baum, Ausrüstung und Fortschritt bleiben, die Karten werden zu festen Begleitern
-    const old = localStorage.getItem("sternenkarten-v3");
-    if (old) {
-      const o = JSON.parse(old), d = defSave();
-      if (o && o.v === 3) return { ...d, lv:o.lv, xp:o.xp, sp:o.sp || 0, tree:o.tree || {}, co:o.co || 0, eq:o.eq || d.eq, prog:o.prog || 0, stats:o.stats || d.stats, seen:true };
-    }
+    if (raw) { const o = JSON.parse(raw); if (o && o.v === 5) return fixSave(o); }
+    const v4 = localStorage.getItem("sternenkarten-v4");
+    if (v4) { const o = JSON.parse(v4); if (o && o.v === 4) return fromV4(o); }
   } catch (e) {}
   return defSave();
 }
@@ -837,8 +954,9 @@ const saveToCode = () => btoa(unescape(encodeURIComponent(JSON.stringify(S))));
 function codeToSave(code) {
   try {
     const o = JSON.parse(decodeURIComponent(escape(atob(code.replace(/\s+/g, "")))));
-    if (!o || o.v !== 4 || typeof o.lv !== "number") return null;
-    const d = defSave(); return { ...d, ...o, stats:{ ...d.stats, ...o.stats }, seen:true };
+    if (!o || typeof o.lv !== "number") return null;
+    if (o.v === 4) return fromV4(o);
+    return o.v === 5 ? { ...fixSave(o), seen:true } : null;
   } catch (e) { return null; }
 }
 let S = null;
@@ -864,7 +982,9 @@ function heroStats(st = S) {
     ultMul:(1 + eq.c * .05) * (heroHas("hUltUp", L) ? 1.5 : 1), startEn:heroHas("hStart", L) ? 50 : 0, charge:(heroHas("hRain", L) ? 1.5 : 1) * (1 + eq.c * .01) };
 }
 const formOf = L => L >= FORM_LV[2] ? 2 : L >= FORM_LV[1] ? 1 : 0;
-const unlocked = (st = S) => COMP.filter(c => c.lv <= st.lv);
+const owned = (st = S) => COMP.filter(c => st.cards[c.id]);
+const cardLv = (id, st = S) => st.cards[id] ? st.cards[id].lv : 1;
+const avgDeckLv = (st = S) => st.deck.reduce((a, id) => a + cardLv(id, st), 0) / Math.max(1, st.deck.length);
 function cardStats(id, L, T, rank) {
   const c = CC[id], R = ROLES[c.role], m = c.m * STAGE_MUL[formOf(L)] * Math.pow(G, L - 1) * (1 + (rank || 0) * RANK_BONUS);
   let hp = R.hp * m, atk = R.atk * m;
@@ -876,62 +996,73 @@ function cardStats(id, L, T, rank) {
   return { hp:Math.round(hp), atk:Math.round(atk), spd:R.spd };
 }
 const abVal = (k, stg, T) => { const v = AB[k].v[stg] * (1 + (T ? T.abil : 0)); return ["dodge","stun","double","crit","counter"].includes(k) ? Math.min(.75, v) : v; };
-const form = (id, L) => CC[id].f[formOf(L)];
+const form = (id, L = cardLv(id)) => CC[id].f[formOf(L)];
 const resetPrice = () => Math.round(200 * Math.pow(1.06, Math.min(S.lv, 120) - 1));
-const unitPower = u => Math.sqrt(u.max * u.atk) * (1 + (u.ab ? .15 : 0));
+const unitPower = u => Math.sqrt(u.max * u.atk) * (1 + (u.ab ? .15 : 0)) * (u.sp ? 1.15 : 1);
 
 /* =========================================================
-   KAMPF-ENGINE (wird vorab komplett berechnet, dann abgespielt)
+   KAMPF-ENGINE
+   Runde für Runde: zuerst planen beide Seiten (Held: eine Aktion, Karten: Sonderattacken gegen Sternenenergie),
+   dann handeln alle nach Tempo. Karten ohne Sonderattacke greifen normal an.
    ========================================================= */
 let UID = 1;
 function mkUnit(o) {
-  return Object.assign({ uid:UID++, shield:0, dots:[], stun:0, rage:0, shred:0, weaken:0, mark:0, cnt:0, alive:true, dr:0, dodge:0, crit:.05, critDmg:2, thorns:0, healMul:1, habs:[] }, o);
+  return Object.assign({ uid:UID++, shield:0, dots:[], stun:0, rage:0, shred:0, weaken:0, mark:0, cnt:0, alive:true, dr:0, dodge:0, crit:.05, critDmg:2, thorns:0, healMul:1, habs:[],
+    spCd:0, buff:0, buffR:0, st:{ dmg:0, sup:0, tank:0, sp:0, kills:0, alive:0 } }, o);
 }
-function buildTeam(st = S) {
-  const T = treeFx(st), h = heroStats(st), L = st.lv;
-  const P = [mkUnit({ side:"p", hero:true, n:"Mondkurier", e:"🧑‍🚀", hp:h.hp, max:h.hp, atk:h.atk, spd:h.spd, crit:h.crit, critDmg:h.critDmg,
+// Eine Seite bauen. who = { name, lv, eq, tree, cards:[{ id, lv, rank }] }
+function buildSide(side, who) {
+  const tree = who.tree || {}, T = treeFx({ tree }), L = who.lv, eq = who.eq || { w:0, a:0, h:0, c:0 }, h = heroStats({ lv:L, eq, tree });
+  const U = [mkUnit({ side, hero:true, n:who.name, e:"🧑‍🚀", hp:h.hp * HP_MUL, max:h.hp * HP_MUL, atk:h.atk, spd:h.spd, crit:h.crit, critDmg:h.critDmg,
     dodge:T.dodge, dr:Math.min(.75, T.dr + T.heroDr), thorns:T.thorns, habs:HERO_AB.filter(a => a.k && a.lv <= L).map(a => a.k),
-    en:h.startEn, charge:h.charge, ultMul:h.ultMul, ult:ultAt(L), lv:L, eqs:{ ...(st.eq || { w:0, a:0, h:0, c:0 }) } })];
-  unlocked(st).forEach(d => {
-    const id = d.id, s = cardStats(id, L, T, (st.rank || {})[id]), ab = { k:d.ab, v:abVal(d.ab, formOf(L), T) }, f = form(id, L);
-    const hp = Math.round(s.hp * (1 + T.hp));
-    P.push(mkUnit({ side:"p", cid:id, n:f[0], e:f[1], hp, max:hp, atk:s.atk, spd:s.spd, ab,
+    en:h.startEn, charge:h.charge, ultMul:h.ultMul, ult:ultAt(L), lv:L, eqs:{ ...eq } })];
+  who.cards.forEach(c => {
+    const id = c.id, d = CC[id], Lc = c.lv, s = cardStats(id, Lc, T, c.rank), ab = { k:d.ab, v:abVal(d.ab, formOf(Lc), T) }, f = d.f[formOf(Lc)];
+    const hp = Math.round(s.hp * (1 + T.hp) * HP_MUL);
+    U.push(mkUnit({ side, cid:id, lv:Lc, r:d.r, n:f[0], e:f[1], hp, max:hp, atk:s.atk, spd:s.spd, ab,
       crit:.05 + T.crit + (ab.k === "crit" ? ab.v : 0), critDmg:2 + T.critDmg,
       dodge:Math.min(.6, T.dodge + (ab.k === "dodge" ? ab.v : 0)), dr:Math.min(.75, T.dr + (ab.k === "taunt" ? ab.v : 0)),
-      thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0), healMul:1 + (ROLES[d.role].key === "healer" ? T.healer : 0) }));
+      thorns:T.thorns + (ab.k === "thorns" ? ab.v : 0), healMul:1 + (ROLES[d.role].key === "healer" ? T.healer : 0),
+      sp:{ n:d.sp.n, k:d.sp.k, x:Lc >= 15 ? d.sp.x : null, v:spVal(id, Lc) * (1 + T.abil * .5), cost:spCost(id, Lc), cd:spCd(id, Lc) } }));
   });
-  const aura = T.atk + (heroHas("hAura", L) ? .15 : 0) + P.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
-  P.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
-  return P;
+  const aura = T.atk + (heroHas("hAura", L) ? .15 : 0) + U.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
+  U.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
+  return U;
 }
-function waveIds(s) {
-  const Z = zoneAt(zoneOf(s)), st = stageNo(s);
-  if (st === 10) return [Z.en[0], Z.boss, Z.en[3]];
-  return Array.from({ length:WAVE[st - 1] }, (_, i) => Z.en[(st + i * 2) % 4]);
-}
-function makeWave(s) {
-  const Z = zoneAt(zoneOf(s)), E = recLv(s), m = Math.pow(G, E - 1) * ek(s);
-  const W = waveIds(s).map(d => {
-    const R = ROLES[d[2]], boss = d === Z.boss || d[0] === Z.boss[0], ab = d[3] ? { k:d[3], v:AB[d[3]].v[d[4]] } : null;
-    const hp = Math.round(R.hp * m * (boss ? 3.4 : 1)), atk = Math.round(R.atk * m * (boss ? 1.5 : 1));
-    return mkUnit({ side:"e", boss, n:d[0], e:d[1], hp, max:hp, atk, spd:R.spd, ab,
-      crit:.05 + (ab && ab.k === "crit" ? ab.v : 0), dodge:ab && ab.k === "dodge" ? ab.v : 0,
-      dr:ab && ab.k === "taunt" ? ab.v : 0, thorns:ab && ab.k === "thorns" ? ab.v : 0 });
-  });
-  W.forEach(u => { if (u.boss) u.tele = 2.2; });
-  if (!isBoss(s) && stageNo(s) >= 5 && W.length) {
-    const el = W[W.length - 1];
-    Object.assign(el, { elite:true, tele:1.6, n:"Elite-" + el.n, hp:Math.round(el.hp * 1.6), max:Math.round(el.max * 1.6), atk:Math.round(el.atk * 1.15) });
-  }
-  const aura = W.reduce((a, u) => a + (u.ab && u.ab.k === "aura" ? u.ab.v : 0), 0);
-  W.forEach(u => u.atk = Math.round(u.atk * (1 + aura)));
-  return W;
-}
-const sidePower = U => Math.round(U.reduce((a, u) => a + unitPower(u), 0));
+const playerWho = (st = S) => ({ name:"Mondkurier", lv:st.lv, eq:st.eq, tree:st.tree, cards:st.deck.map(id => ({ id, lv:cardLv(id, st), rank:(st.rank || {})[id] || 0 })) });
+const buildTeam = (st = S) => buildSide("p", playerWho(st));
+const sidePower = U => U.reduce((a, u) => a + unitPower(u), 0);
 
-// Kampf läuft Schritt für Schritt: nach jeder Aktion gibt der Generator die neuen Ereignisse heraus.
-// ctl.cmds nimmt Befehle des Spielers entgegen (Spezialangriff, Techniken, Fokus), ctl.ai lässt den Helden selbst entscheiden.
-function newCtl(ai) { return { cmds:[], ai, cd:{ wall:0, heal:0, stop:0 }, focus:null, hero:null }; }
+// Computer-Gegner: zufälliger Held mit 2 bis 4 Karten. Die Stärke richtet sich verdeckt nach dem eigenen Team (S.mm).
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function makeRival(st = S) {
+  const A = arenaIdx(st.tr), pool = COMP.filter(c => c.ar <= Math.min(LAST_CARD_AR, A + 1)).map(c => c.id);
+  const n = Math.min(pool.length, rnd([2, 3, 3, 4, 4, 4, 4])), dl = avgDeckLv(st);
+  const rk = st.deck.reduce((a, id) => a + ((st.rank || {})[id] || 0), 0) / st.deck.length;
+  const who = { name:rnd(RIVALS), lv:Math.max(1, st.lv + ri(-3, 3)), eq:Object.fromEntries(Object.entries(st.eq).map(([k, l]) => [k, Math.max(0, l + ri(-2, 2))])),
+    cards:shuffle(pool).slice(0, n).map(id => ({ id, lv:Math.max(1, Math.round(dl + ri(-3, 3))), rank:Math.max(0, Math.round(rk + ri(-1, 1))) })) };
+  const target = sidePower(buildTeam(st)) * st.mm * (.92 + Math.random() * .16), pow = () => sidePower(buildSide("e", who));
+  // Kampfwerte wachsen um 7 % je Level: die Kartenlevel so weit verschieben, bis die Stärke passt (der Held bleibt nah an deinem Level)
+  for (let k = 0; k < 5; k++) {
+    const d = Math.round(Math.log(target / pow()) / Math.log(G));
+    if (!d) break;
+    who.cards.forEach(c => c.lv = Math.max(1, c.lv + d));
+    if (k >= 2) who.lv = Math.max(1, Math.min(st.lv + 5, Math.max(st.lv - 5, who.lv + d)));
+  }
+  who.scale = Math.max(.4, target / pow());
+  return who;
+}
+function buildRival(who) {
+  const E = buildSide("e", who);
+  E.forEach(u => { u.hp = u.max = Math.round(u.max * who.scale); u.atk = Math.max(1, Math.round(u.atk * who.scale)); });
+  return E;
+}
+
+function newCtl(ai) {
+  const c = ai => ({ ai, plan:null, en:EN_START, cd:{ wall:0, heal:0, stop:0 }, focus:null });
+  return { p:c(ai), e:c(true) };
+}
 function simulate(P, E, T, ai = true) {
   const g = battle(P, E, T, newCtl(ai)), ev = []; let r;
   while (!(r = g.next()).done) ev.push(...r.value);
@@ -944,28 +1075,32 @@ function* battle(P, E, T, ctl) {
   const snap = u => ({ u:u.uid, hp:Math.max(0, Math.round(u.hp)), sh:Math.round(u.shield) });
   const over = () => !E.some(x => x.alive) || !P.some(x => x.alive);
   const isP = u => u.side === "p";
+  const dotMul = u => isP(u) ? 1 + T.dot : 1;
+  const heroOf = side => (side === "p" ? P : E).find(u => u.hero);
+  const byUid = Object.fromEntries(all.map(u => [u.uid, u]));
   let round = 0, teamRevUsed = false;
+  const storm = () => round > STORM ? 1 + .25 * (round - STORM) : 1;
 
-  const addShield = (u, v) => { u.shield += v; ev.push({ t:"sh", ...snap(u), v:Math.round(v) }); };
+  const addShield = (u, v, src) => { if (!u.alive) return; u.shield += v; if (src) src.st.sup += v * .5; ev.push({ t:"sh", ...snap(u), v:Math.round(v) }); };
   const heal = (u, v, src) => {
     if (!u.alive) return;
     if (src && isP(src)) v *= (1 + T.healUp) * (src.healMul || 1);
     const b = u.hp; u.hp = Math.min(u.max, u.hp + v); const g = Math.round(u.hp - b);
+    if (src) src.st.sup += g;
     if (g > 0) ev.push({ t:"heal", a:src && src.uid, ...snap(u), v:g });
   };
+  const stunIt = t => { if (t && t.alive) { t.stun = 1; ev.push({ t:"stun", u:t.uid }); } };
   function kill(u) {
     if (u.alive && u.hp > 0 && u.ab && u.ab.k === "laststand" && !u.lsUsed && u.hp < u.max * .3) { u.lsUsed = true; addShield(u, u.max * u.ab.v); ev.push({ t:"banner", msg:`${u.n}: Letztes Gefecht!` }); }
     if (u.hp > 0 || !u.alive) return;
-    if (u.hero && T.unb && !u.unbUsed) { u.unbUsed = true; u.hp = 1; u.shield += u.max * .3; ev.push({ t:"save", ...snap(u), msg:"Unbeugsam: Der Held hält durch!" }); return; }
-    if (u.hero && u.habs.includes("hRevive") && !u.revUsed) { u.revUsed = true; u.hp = u.max * .4; ev.push({ t:"revive", ...snap(u), msg:"Zweiter Atem: Der Held steht wieder auf!" }); return; }
+    if (u.hero && isP(u) && T.unb && !u.unbUsed) { u.unbUsed = true; u.hp = 1; u.shield += u.max * .3; ev.push({ t:"save", ...snap(u), msg:"Unbeugsam: Der Held hält durch!" }); return; }
+    if (u.hero && u.habs.includes("hRevive") && !u.revUsed) { u.revUsed = true; u.hp = u.max * .4; ev.push({ t:"revive", ...snap(u), msg:`Zweiter Atem: ${u.n} steht wieder auf!` }); return; }
     u.alive = false; u.hp = 0; u.dots = []; u.stun = 0; u.shield = 0;
+    if (u.last && u.last.side !== u.side) u.last.st.kills++;
     ev.push({ t:"die", u:u.uid });
-    if (u.ab && u.ab.k === "martyr") {
-      ev.push({ t:"banner", msg:`${u.n} explodiert!` });
-      foes(u).forEach(f => directDmg(u, f, u.atk * u.ab.v));
-    }
+    if (u.ab && u.ab.k === "martyr") { ev.push({ t:"banner", msg:`${u.n} explodiert!` }); foes(u).forEach(f => directDmg(u, f, u.atk * u.ab.v)); }
     const ph = mates(u).find(f => f.ab && f.ab.k === "revive" && !f.revGiven);
-    if (ph) { ph.revGiven = true; u.alive = true; u.hp = u.max * ph.ab.v; ev.push({ t:"revive", ...snap(u), msg:`${ph.n} holt ${u.n} zurück!` }); return; }
+    if (ph) { ph.revGiven = true; u.alive = true; u.hp = u.max * ph.ab.v; ph.st.sup += u.hp; ev.push({ t:"revive", ...snap(u), msg:`${ph.n} holt ${u.n} zurück!` }); return; }
     if (isP(u) && !u.hero && T.teamRevive && !teamRevUsed) { teamRevUsed = true; u.alive = true; u.hp = u.max * .4; ev.push({ t:"revive", ...snap(u), msg:`Rettungskapsel: ${u.n} ist zurück!` }); }
   }
   function applyDmg(t, d, a) {
@@ -973,12 +1108,13 @@ function* battle(P, E, T, ctl) {
     const g = mates(t).find(m => m !== t && m.ab && m.ab.k === "guard");
     if (g && a && a.side !== t.side) {
       const part = Math.round(d * g.ab.v); d -= part;
-      const ga = Math.min(g.shield, part); g.shield -= ga; g.hp -= part - ga;
+      const ga = Math.min(g.shield, part); g.shield -= ga; g.hp -= part - ga; g.st.tank += part; g.last = a;
       ev.push({ t:"hit", a:a.uid, ...snap(g), v:part, guard:true }); kill(g);
     }
     if (t.hero) gainEn(t, 8);
     const pierce = a && isP(a) ? T.pierce : 0;
     const abs = Math.min(t.shield, d * (1 - pierce)); t.shield -= abs; t.hp -= d - abs;
+    t.st.tank += d; if (a) { a.st.dmg += d; t.last = a; }
     return d;
   }
   function directDmg(src, t, d) {
@@ -992,33 +1128,33 @@ function* battle(P, E, T, ctl) {
     if (!t || !t.alive || !a.alive) return 0;
     if (Math.random() < t.dodge) { ev.push({ t:"miss", a:a.uid, u:t.uid, aoe }); return 0; }
     const k = a.ab && a.ab.k, v = a.ab && a.ab.v;
-    let d = a.atk * (1 + a.rage) * (1 - a.weaken) * mult * (.9 + Math.random() * .2);
+    let d = a.atk * (1 + a.rage) * (1 + a.buff) * (1 - a.weaken) * mult * storm() * (.9 + Math.random() * .2);
     if (isP(a)) {
       if (round <= 2) d *= 1 + T.first;
-      if (t.boss) d *= 1 + T.boss;
+      if (t.hero) d *= 1 + T.boss;
       if (t.hp / t.max < .35) d *= 1 + T.exec;
       if (aoe) d *= 1 + T.aoe;
     }
     if (k === "execute" && t.hp / t.max < .35) d *= 1 + v;
     if (k === "berserk") d *= 1 + v * (1 - a.hp / a.max);
     d *= 1 + t.mark;
-    if (isP(a) && t.uid === ctl.focus) d *= 1.15;
+    const fc = ctl[a.side].focus;
+    if (t.uid === fc) d *= 1.15;
     const crit = Math.random() < a.crit; if (crit) d *= a.critDmg;
     const dr = isP(a) ? t.dr * (1 - T.pierce) : t.dr;
     d *= (1 + t.shred) * (1 - dr);
     d = Math.max(1, Math.round(d));
     applyDmg(t, d, a);
     ev.push({ t:"hit", a:a.uid, ...snap(t), v:d, crit, aoe });
-    const dotMul = isP(a) ? 1 + T.dot : 1;
-    if (k === "poison") t.dots.push({ d:a.atk * v * dotMul, r:3 });
+    if (k === "poison") t.dots.push({ d:a.atk * v * dotMul(a), r:3, src:a });
     if (k === "shred") t.shred += v;
     if (k === "drain") t.weaken = Math.min(.5, t.weaken + v);
     if (k === "mark") t.mark = Math.max(t.mark, v);
-    if (k === "stun" && t.hp > 0 && Math.random() < v) { t.stun = 1; ev.push({ t:"stun", u:t.uid }); }
+    if (k === "stun" && t.hp > 0 && Math.random() < v) stunIt(t);
     if (k === "lifesteal") heal(a, d * v, a);
-    if (k === "chain" && !aoe) { const o = foes(a).filter(f => f !== t); if (o.length) { const c2 = rnd(o); directDmg(a, c2, d * v); } }
+    if (k === "chain" && !aoe) { const o = foes(a).filter(f => f !== t); if (o.length) directDmg(a, rnd(o), d * v); }
     if (t.thorns > 0 && a.alive) {
-      const r = Math.max(1, Math.round(d * t.thorns)); a.hp -= r; ev.push({ t:"hit", a:t.uid, ...snap(a), v:r, thorns:true }); kill(a);
+      const r = Math.max(1, Math.round(d * t.thorns)); a.hp -= r; t.st.dmg += r; a.last = t; ev.push({ t:"hit", a:t.uid, ...snap(a), v:r, thorns:true }); kill(a);
     }
     kill(t);
     if (!noCounter && !aoe && t.alive && t.ab && t.ab.k === "counter" && a.alive && Math.random() < t.ab.v) {
@@ -1028,7 +1164,8 @@ function* battle(P, E, T, ctl) {
   }
   function target(u) {
     const fs = foes(u); if (!fs.length) return null;
-    if (isP(u) && ctl.focus) { const f = fs.find(x => x.uid === ctl.focus); if (f) return f; }
+    const fc = ctl[u.side].focus;
+    if (fc) { const f = fs.find(x => x.uid === fc); if (f) return f; }
     if (u.ab && u.ab.k === "snipe") return fs.reduce((m, f) => f.hp < m.hp ? f : m);
     const tz = fs.filter(f => f.ab && f.ab.k === "taunt");
     if (tz.length && Math.random() < .75) return rnd(tz);
@@ -1038,124 +1175,167 @@ function* battle(P, E, T, ctl) {
   const aoeAll = (u, mult, name) => { ev.push({ t:"skill", a:u.uid, msg:name }); foes(u).forEach(f => hit(u, f, mult, true)); };
   const lowest = u => mates(u).reduce((m, f) => f.hp / f.max < m.hp / m.max ? f : m);
 
+  // Normaler Zug einer Karte: Grundangriff plus ihre feste Fähigkeit
   function act(u) {
     const k = u.ab && u.ab.k, v = u.ab && u.ab.v;
-    if (u.tele) {
-      if (u.charging) { u.charging = false; ev.push({ t:"skill", a:u.uid, msg:"Großangriff" }); ev.push({ t:"charge", u:u.uid, on:false }); foes(u).forEach(f => hit(u, f, u.tele, true)); return; }
-      if (round % 4 === 3) { u.charging = true; ev.push({ t:"warn", u:u.uid, msg:`⚠️ ${u.n} lädt einen Großangriff auf!` }); ev.push({ t:"charge", u:u.uid, on:true }); return; }
-    }
-    if (u.hero) {
-      gainEn(u, 25);
-      if (u.habs.includes("hNova") && round % 6 === 0) return aoeAll(u, 3, "Supernova");
-      if (T.fall && round % 3 === 0) return aoeAll(u, 1, "Sternenfall");
-      if (u.habs.includes("hStun") && round % 5 === 0) { ev.push({ t:"skill", a:u.uid, msg:"Gravitationswelle" }); foes(u).forEach(f => { f.stun = 1; ev.push({ t:"stun", u:f.uid }); }); }
-    }
     if (k === "timebomb" && round === 4) return aoeAll(u, v, AB.timebomb.n);
     if (k === "aoe" && round % 3 === 0) return aoeAll(u, v, AB.aoe.n);
-    if (k === "dragon" && round % 3 === 0) { aoeAll(u, v, AB.dragon.n); foes(u).forEach(f => f.dots.push({ d:u.atk * .4 * (isP(u) ? 1 + T.dot : 1), r:3 })); return; }
+    if (k === "dragon" && round % 3 === 0) { aoeAll(u, v, AB.dragon.n); foes(u).forEach(f => f.dots.push({ d:u.atk * .4 * dotMul(u), r:3, src:u })); return; }
     if (k === "divine") { ev.push({ t:"skill", a:u.uid, msg:AB.divine.n, quiet:1 }); mates(u).forEach(f => heal(f, u.atk * v, u)); return; }
     if (k === "heal") { const lo = lowest(u); if (lo.hp / lo.max < .75) { ev.push({ t:"skill", a:u.uid, msg:AB.heal.n, quiet:1 }); heal(lo, u.atk * v, u); return; } }
-    if (k === "barrier" && round % 2 === 0) { ev.push({ t:"skill", a:u.uid, msg:AB.barrier.n, quiet:1 }); addShield(lowest(u), u.atk * v); return; }
+    if (k === "barrier" && round % 2 === 0) { ev.push({ t:"skill", a:u.uid, msg:AB.barrier.n, quiet:1 }); addShield(lowest(u), u.atk * v, u); return; }
     let mult = 1 + (k === "snipe" ? v : 0);
     if (k === "charge") { u.cnt++; if (u.cnt % 3 === 0) { mult *= v; ev.push({ t:"skill", a:u.uid, msg:AB.charge.n, quiet:1 }); } }
     hit(u, target(u), mult);
     if (k === "rage") u.rage += v;
     if (k === "double" && u.alive && Math.random() < v) hit(u, target(u), 1);
-    if (isP(u) && !u.hero && T.multi && u.alive && Math.random() < T.multi) hit(u, target(u), 1);
+    if (isP(u) && T.multi && u.alive && Math.random() < T.multi) hit(u, target(u), 1);
   }
-
-  const hero = P.find(u => u.hero); ctl.hero = hero;
-  const has = k => hero && TK[k].lv <= hero.lv;
-  const ready = k => hero && hero.alive && has(k) && (k === "ult" ? hero.en >= 100 : !(ctl.cd[k] > 0));
-  function useTech(k) {
-    if (!ready(k)) return;
-    if (k === "ult") {
-      const U = hero.ult; hero.en = 0;
-      ev.push({ t:"ult", a:hero.uid, msg:U.n }); ev.push({ t:"en", u:hero.uid, v:0 });
-      foes(hero).forEach(f => hit(hero, f, U.mult * hero.ultMul, true));
-      if (U.burn) foes(hero).forEach(f => f.dots.push({ d:hero.atk * U.burn * (1 + T.dot), r:3 }));
-      if (U.heal) mates(hero).forEach(f => heal(f, f.max * U.heal, hero));
+  // Sonderattacke einer Karte (Energie wurde beim Planen bezahlt)
+  function special(u) {
+    const s = u.sp, v = s.v, tg = target(u), wide = ["aoe", "nuke", "burn", "multi"].includes(s.k);
+    u.spCd = s.cd; u.st.sp++;
+    ev.push({ t:"special", a:u.uid, msg:s.n, side:u.side });
+    switch (s.k) {
+      case "strike": hit(u, tg, v, false, true); break;
+      case "stun": hit(u, tg, v, false, true); stunIt(tg); break;
+      case "drain": heal(u, hit(u, tg, v, false, true) * .5, u); break;
+      case "snipe": { const fs = foes(u); if (fs.length) { const t = fs.reduce((m, f) => f.hp / f.max < m.hp / m.max ? f : m); hit(u, t, v * (t.hp / t.max < .35 ? 2 : 1), false, true); } break; }
+      case "multi": for (let i = 0; i < 3; i++) { const fs = foes(u); if (!fs.length) break; hit(u, rnd(fs), v, true); } break;
+      case "aoe": foes(u).forEach(f => hit(u, f, v, true)); break;
+      case "nuke": foes(u).forEach(f => { f.shield = 0; hit(u, f, v, true); }); break;
+      case "burn": foes(u).forEach(f => { f.dots.push({ d:u.atk * v * dotMul(u), r:3, src:u }); ev.push({ t:"tag", u:f.uid, txt:"🔥 Brand", cls:"dot" }); }); break;
+      case "heal": mates(u).forEach(f => heal(f, f.max * v, u)); break;
+      case "shield": mates(u).forEach(f => addShield(f, f.max * v, u)); break;
+      case "rally": mates(u).forEach(f => { f.buff = Math.max(f.buff, v); f.buffR = 2; ev.push({ t:"tag", u:f.uid, txt:`⚔️ +${pct(v)}`, cls:"heal" }); }); break;
+      case "revive": {
+        const dead = (isP(u) ? P : E).find(x => !x.alive && !x.hero);
+        if (dead) { dead.alive = true; dead.hp = dead.max * v; dead.dots = []; u.st.sup += dead.hp; ev.push({ t:"revive", ...snap(dead), msg:`${u.n} holt ${dead.n} zurück!` }); }
+        else { const lo = lowest(u); heal(lo, lo.max * v, u); }
+        break;
+      }
+    }
+    const live = foes(u), tgs = wide ? live : [tg].filter(x => x && x.alive);
+    if (s.x === "stun" && live.length) stunIt(tg && tg.alive ? tg : rnd(live));
+    if (s.x === "shred") tgs.forEach(f => { f.shred += .15; ev.push({ t:"tag", u:f.uid, txt:"verwundbar", cls:"info" }); });
+    if (s.x === "burn") tgs.forEach(f => f.dots.push({ d:u.atk * .4 * dotMul(u), r:3, src:u }));
+    if (s.x === "heal") mates(u).forEach(f => heal(f, f.max * .1, u));
+    if (s.x === "shield") mates(u).forEach(f => addShield(f, f.max * .1, u));
+  }
+  // Held: eine Aktion pro Runde
+  const techReady = (side, k) => { const h = heroOf(side); return !!h && h.alive && TK[k].lv <= h.lv && (k === "ult" ? h.en >= 100 : !(ctl[side].cd[k] > 0)); };
+  function heroAct(h) {
+    const c = ctl[h.side], k = (c.plan && c.plan.hero) || "atk";
+    if (k === "ult" && h.en >= 100) {
+      const U = h.ult; h.en = 0;
+      ev.push({ t:"ult", a:h.uid, msg:U.n, side:h.side }); ev.push({ t:"en", u:h.uid, v:0 });
+      foes(h).forEach(f => hit(h, f, U.mult * h.ultMul, true));
+      if (U.burn) foes(h).forEach(f => f.dots.push({ d:h.atk * U.burn * dotMul(h), r:3, src:h }));
+      if (U.heal) mates(h).forEach(f => heal(f, f.max * U.heal, h));
       return;
     }
-    ctl.cd[k] = TK[k].cd;
-    ev.push({ t:"tech", k, msg:TK[k].n });
-    if (k === "wall") mates(hero).forEach(f => addShield(f, f.max * .25));
-    if (k === "heal") mates(hero).forEach(f => heal(f, f.max * .25, hero));
-    if (k === "stop") foes(hero).forEach(f => { f.stun = 1; ev.push({ t:"stun", u:f.uid }); });
-  }
-  function think() {
-    if (!ctl.ai || !hero || !hero.alive) return;
-    const team = mates(hero), avg = team.reduce((a, u) => a + u.hp / u.max, 0) / team.length, low = team.some(u => u.hp / u.max < .35);
-    const charging = E.some(e => e.alive && e.charging);
-    if (ready("ult")) ctl.cmds.push("ult");
-    if (charging && ready("stop")) ctl.cmds.push("stop");
-    else if (charging && ready("wall")) ctl.cmds.push("wall");
-    if ((avg < .55 || low) && ready("heal")) ctl.cmds.push("heal");
-    else if (avg < .6 && ready("wall") && !charging) ctl.cmds.push("wall");
-    if (has("focus")) { const fs = foes(hero); if (fs.length && !fs.some(f => f.uid === ctl.focus)) ctl.focus = fs.reduce((m, f) => f.hp < m.hp ? f : m).uid; }
-  }
-  function commands() {
-    think();
-    while (ctl.cmds.length) {
-      const c = ctl.cmds.shift();
-      if (typeof c === "object" && c.k === "focus") { if (has("focus")) { ctl.focus = c.uid; ev.push({ t:"focus", u:c.uid }); } }
-      else useTech(c);
-      if (over()) return;
+    if (["wall", "heal", "stop"].includes(k) && techReady(h.side, k)) {
+      c.cd[k] = TK[k].cd + 1;
+      ev.push({ t:"tech", k, msg:TK[k].n, a:h.uid, side:h.side });
+      if (k === "wall") mates(h).forEach(f => addShield(f, f.max * .25, h));
+      if (k === "heal") mates(h).forEach(f => heal(f, f.max * .25, h));
+      if (k === "stop") foes(h).forEach(stunIt);
+      gainEn(h, 25);
+      return;
     }
+    gainEn(h, 25);
+    if (h.habs.includes("hNova") && round % 6 === 0) return aoeAll(h, 3, "Supernova");
+    if (isP(h) && T.fall && round % 3 === 0) return aoeAll(h, 1, "Sternenfall");
+    if (h.habs.includes("hStun") && round % 5 === 0) { ev.push({ t:"skill", a:h.uid, msg:"Gravitationswelle" }); foes(h).forEach(stunIt); }
+    hit(h, target(h), 1.2);
+  }
+  // Computer plant eine Runde (auch für den Spieler, wenn Auto an ist)
+  function aiPlan(side) {
+    const c = ctl[side], h = heroOf(side), team = (side === "p" ? P : E).filter(x => x.alive), fl = (side === "p" ? E : P).filter(x => x.alive);
+    const avg = team.reduce((a, u) => a + u.hp / u.max, 0) / team.length, low = team.some(u => u.hp / u.max < .35);
+    const dead = (side === "p" ? P : E).some(x => !x.alive && !x.hero);
+    const pl = { hero:"atk", sp:[] };
+    if (techReady(side, "ult")) pl.hero = "ult";
+    else if ((avg < .55 || low) && techReady(side, "heal")) pl.hero = "heal";
+    else if (avg < .65 && techReady(side, "wall")) pl.hero = "wall";
+    else if (techReady(side, "stop") && fl.filter(f => f.sp && f.spCd <= 0).length >= 2 && Math.random() < .5) pl.hero = "stop";
+    if (h && h.alive && h.lv >= TK.focus.lv && fl.length) c.focus = fl.reduce((m, f) => f.hp / f.max < m.hp / m.max ? f : m).uid;
+    let en = c.en;
+    team.filter(u => !u.hero && u.sp && u.spCd <= 0).map(u => {
+      const k = u.sp.k;
+      const w = k === "revive" ? (dead ? 3 : (1 - avg) * 3) : k === "heal" ? (1 - avg) * 4 : k === "shield" ? (1 - avg) * 3 + .4 : k === "rally" ? 1.2 : 1 + (["aoe", "nuke", "burn", "multi"].includes(k) ? fl.length * .3 : .4);
+      return { u, w:w + Math.random() * .5 };
+    }).sort((a, b) => b.w - a.w).forEach(x => { if (x.w > .7 && x.u.sp.cost <= en) { en -= x.u.sp.cost; pl.sp.push(x.u.uid); } });
+    return pl;
+  }
+  function applyPlan(side) {
+    const c = ctl[side], pl = c.plan || { hero:"atk", sp:[] }, ok = [];
+    if (pl.hero !== "atk" && !techReady(side, pl.hero)) pl.hero = "atk";
+    (pl.sp || []).forEach(uid => { const u = byUid[uid]; if (u && u.side === side && u.alive && u.sp && u.spCd <= 0 && u.sp.cost <= c.en && !ok.includes(uid)) { c.en -= u.sp.cost; ok.push(uid); } });
+    pl.sp = ok; c.plan = pl;
+    ev.push({ t:"energy", side, v:c.en });
   }
 
   // Kampfbeginn
   for (const u of all) {
     const k = u.ab && u.ab.k;
-    if (k === "shieldTeam") mates(u).forEach(f => addShield(f, f.max * u.ab.v));
-    if (k === "burn") foes(u).forEach(f => f.dots.push({ d:u.atk * u.ab.v * (isP(u) ? 1 + T.dot : 1), r:4 }));
-    if (u.hero && u.habs.includes("hShield")) P.forEach(f => addShield(f, u.max * .12));
+    if (k === "shieldTeam") mates(u).forEach(f => addShield(f, f.max * u.ab.v, u));
+    if (k === "burn") foes(u).forEach(f => f.dots.push({ d:u.atk * u.ab.v * dotMul(u), r:4, src:u }));
+    if (u.hero && u.habs.includes("hShield")) mates(u).forEach(f => addShield(f, u.max * .12));
   }
   if (T.shield) P.forEach(f => addShield(f, f.max * T.shield));
   yield flush();
 
   while (round < MAX_ROUNDS && !over()) {
     round++;
-    Object.keys(ctl.cd).forEach(k => ctl.cd[k] = Math.max(0, ctl.cd[k] - 1));
-    ev.push({ t:"round", n:round });
-    commands(); yield flush();
+    ["p", "e"].forEach(sd => { const c = ctl[sd]; if (round > 1) c.en = Math.min(EN_MAX, c.en + EN_ROUND); Object.keys(c.cd).forEach(k => c.cd[k] = Math.max(0, c.cd[k] - 1)); c.plan = null; });
+    all.forEach(u => { u.spCd = Math.max(0, u.spCd - 1); });
+    ev.push({ t:"round", n:round }); ev.push({ t:"energy", side:"p", v:ctl.p.en });
+    if (round === STORM + 1) ev.push({ t:"banner", msg:"🌠 Sternensturm! Ab jetzt wird jeder Treffer stärker." });
+    ctl.e.plan = aiPlan("e");
+    if (ctl.p.ai) ctl.p.plan = aiPlan("p");
+    else { ev.push({ t:"plan", n:round }); yield flush(); if (!ctl.p.plan && ctl.p.ai) ctl.p.plan = aiPlan("p"); }   // hier wartet das Spiel, bis der Spieler die Runde startet
+    applyPlan("p"); applyPlan("e");
+    yield flush();
     const order = all.filter(u => u.alive).sort((a, b) => b.spd - a.spd || Math.random() - .5);
     for (const u of order) {
-      commands();
       if (!u.alive || over()) { yield flush(); continue; }
-      if (u.stun > 0) {
-        u.stun--; ev.push({ t:"frozen", u:u.uid });
-        if (u.charging) { u.charging = false; ev.push({ t:"charge", u:u.uid, on:false }); ev.push({ t:"banner", msg:`${u.n}s Großangriff wurde abgebrochen!` }); }
-        yield flush(); continue;
-      }
+      if (u.stun > 0) { u.stun--; ev.push({ t:"frozen", u:u.uid }); yield flush(); continue; }
       ev.push({ t:"act", u:u.uid });
-      act(u);
+      if (u.hero) heroAct(u);
+      else if (ctl[u.side].plan.sp.includes(u.uid)) special(u);
+      else act(u);
       yield flush();
     }
     if (over()) break;
     for (const u of all) {
       if (!u.alive) continue;
       if (u.dots.length) {
-        const d = Math.max(1, Math.round(u.dots.reduce((a, x) => a + x.d, 0)));
-        u.hp -= d; u.dots.forEach(x => x.r--); u.dots = u.dots.filter(x => x.r > 0);
+        let d = 0;
+        u.dots.forEach(x => { const v = Math.max(1, Math.round(x.d)); d += v; if (x.src) x.src.st.dmg += v; x.r--; if (x.src) u.last = x.src; });
+        u.hp -= d; u.dots = u.dots.filter(x => x.r > 0);
         ev.push({ t:"dot", ...snap(u), v:d }); kill(u);
       }
       if (!u.alive) continue;
       if (u.hero && u.habs.includes("hRegen")) heal(u, u.max * .04);
       if (isP(u) && T.regen) heal(u, u.max * T.regen);
+      if (u.buffR > 0 && --u.buffR === 0) u.buff = 0;
+      u.st.alive++;
     }
     if (over()) break;
   }
   yield flush();
-  const win = !E.some(x => x.alive) && P.some(x => x.alive);
-  return { win, rounds:round, timeout:!over() };
+  // Nach 30 Runden gewinnt, wer anteilig mehr Leben übrig hat
+  const left = U => U.reduce((a, u) => a + Math.max(0, u.hp), 0) / U.reduce((a, u) => a + u.max, 0);
+  const timeout = !over(), win = timeout ? left(P) > left(E) : !E.some(x => x.alive);
+  return { win, rounds:round, timeout };
 }
 
 /* =========================================================
    FORTSCHRITT
    ========================================================= */
 function addHeroXP(n) {
-  const out = { lv:[], abs:[], comps:[], forms:[], pts:0 };
+  const out = { lv:[], abs:[], pts:0 };
   if (S.lv >= MAX_LV) return out;
   S.xp += n;
   while (S.lv < MAX_LV && S.xp >= heroNeed(S.lv)) {
@@ -1163,62 +1343,66 @@ function addHeroXP(n) {
     const p = ptsFor(S.lv) + (S.lv % 5 === 0 ? treeFx().ptsLv : 0);
     S.sp += p; out.pts += p;
     HERO_AB.filter(a => a.lv === S.lv).forEach(a => out.abs.push(a.n));
-    ULTS.filter(u => u.lv === S.lv && u.lv > 1).forEach(u => out.abs.push("Spezialangriff " + u.n));
-    COMP.filter(c => c.lv === S.lv).forEach(c => out.comps.push(c.id));
-    if (FORM_LV.includes(S.lv) && S.lv > 1) out.forms.push(S.lv);
+    TECH.filter(t => t.lv === S.lv && t.lv > 1).forEach(t => out.abs.push(`Technik ${t.i} ${t.n}`));
+    ULTS.filter(u => u.lv === S.lv && u.lv > 1).forEach(u => out.abs.push("Ultimative " + u.n));
   }
   if (S.lv >= MAX_LV) S.xp = 0;
   return out;
 }
-function teamBonus(k) {
-  const T = treeFx();
-  return unlocked().reduce((a, d) => a + (d.ab === k ? abVal(k, formOf(S.lv), T) : 0), 0);
+function addCardXP(id, n) {
+  const c = S.cards[id], out = { from:c.lv, up:0, forms:[], ms:[] };
+  c.xp += n;
+  while (c.lv < MAX_LV && c.xp >= cardNeed(c.lv)) {
+    c.xp -= cardNeed(c.lv); c.lv++; out.up++;
+    if (FORM_LV.includes(c.lv)) out.forms.push(c.lv);
+    SP_MS.filter(m => m.lv === c.lv).forEach(m => out.ms.push(m.lv === 15 ? `Zusatzeffekt: ${SPX[CC[id].sp.x]}` : m.t));
+  }
+  return out;
 }
-function grantRewards(win, s) {
-  const E = recLv(s), boss = isBoss(s), T = treeFx(), wis = teamBonus("wisdom"), luck = teamBonus("luck");
-  let base = 12 * Math.pow(1.1, E - 1) * (boss ? 3 * (1 + T.bossXp) : 1);
-  if (!win) base *= .3 * (1 + T.lossXp);
-  const daily = win && dailyFree("story");
-  if (daily) { base *= 2; useDaily("story"); }
-  S.fails = S.fails || {};
-  if (s === S.prog + 1) { if (win) delete S.fails[s]; else S.fails[s] = (S.fails[s] || 0) + 1; }
-  const hx = Math.round(base * (1 + T.xp + wis));
-  const first = win && s > S.prog;
-  const co = win ? Math.round(9 * Math.pow(1.09, E - 1) * (boss ? 3 : 1) * (first ? 2 * (1 + T.firstCo) : 1) * (daily ? 2 : 1) * (1 + T.coins + luck)) : 0;
+// Karten-EP nach Leistung: Schaden, Heilung und Schilde, eingesteckter Schaden, Überleben, Sonderattacken, erledigte Gegner
+const XP_PART = { dmg:"Schaden", sup:"Heilung/Schild", tank:"Eingesteckt", live:"Überlebt", sp:"Sonderattacken", kills:"Erledigt" };
+function cardXpSplit(units, rounds) {
+  const cs = units.filter(u => u.side === "p" && !u.hero), N = cs.length;
+  const sum = k => cs.reduce((a, u) => a + u.st[k], 0);
+  const share = (u, k) => { const t = sum(k); return t > 0 ? u.st[k] / t * N : 0; };
+  return cs.map(u => {
+    const parts = { dmg:.45 * share(u, "dmg"), sup:.25 * share(u, "sup"), tank:.15 * share(u, "tank"),
+      live:.2 * u.st.alive / Math.max(1, rounds), sp:Math.min(.5, .12 * u.st.sp), kills:.1 * u.st.kills };
+    return { id:u.cid, perf:.25 + Object.values(parts).reduce((a, b) => a + b, 0), parts };
+  });
+}
+const newCardLv = () => Math.max(1, Math.floor(avgDeckLv() * .75));
+function grantRewards(win, M) {
+  const T = treeFx(), rl = S.lv;
+  const daily = win && dailyFree("arena"); if (daily) useDaily("arena");
+  const before = S.tr, floor = S.arMax * ARENA_STEP;   // kein Abstieg unter die höchste erreichte Arena
+  S.tr = Math.max(floor, S.tr + (win ? TROPHY : -TROPHY)); S.trBest = Math.max(S.trBest || 0, S.tr);
+  // verdeckte Gegnerstärke: nach Siegen etwas stärker, nach Niederlagen deutlich schwächer (pendelt sich bei rund 70 % Siegen ein)
+  S.mm = Math.min(3, Math.max(.3, S.mm * (win ? 1.03 : .93)));
+  if (win) { S.stats.wins++; S.stats.streak = Math.max(0, S.stats.streak || 0) + 1; } else { S.stats.losses++; S.stats.streak = 0; }
+  let hb = 12 * Math.pow(1.1, rl - 1) * (win ? 1 : .35 * (1 + T.lossXp)) * (daily ? 2 : 1);
+  const hx = Math.round(hb * (1 + T.xp));
+  const co = win ? Math.round(9 * Math.pow(1.09, rl - 1) * (daily ? 2 : 1) * (1 + T.coins)) : 0;
   S.co += co;
-  let bossPts = 0;
-  if (win) { S.stats.wins++; if (first) { S.prog = s; if (boss) { bossPts = BOSS_PTS; S.sp += bossPts; } } } else S.stats.losses++;
-  const fromLv = S.lv;
+  // EP richten sich nach dem eigenen Kartenlevel. Karten weit unter dem Deckschnitt holen schneller auf,
+  // Karten weit darüber werden gebremst, damit nicht eine Karte allein davonzieht.
+  const dl = avgDeckLv(), mul = (win ? 1 : .4) * (daily ? 2 : 1) * (1 + T.bossXp);
+  const cards = cardXpSplit(M.units, M.rounds).map(x => {
+    const own = cardLv(x.id), cl = Math.max(own, Math.round(dl * .8)), damp = Math.pow(.8, Math.max(0, own - dl - 3) / 3);
+    const n = Math.max(1, Math.round(cardNeed(cl) * (.06 + .3 / cl) * mul * x.perf * damp));
+    return { ...x, n, ...addCardXP(x.id, n) };
+  });
+  const newAr = [];
+  while (arenaIdx(S.tr) > S.arMax) {
+    S.arMax++;
+    const A = arenaAt(S.arMax), rw = arenaReward(S.arMax);
+    let aco = Math.round(rw.co * (1 + T.firstCo)), card = null;
+    if (A.card && !S.cards[A.card.id]) { card = A.card.id; S.cards[card] = { lv:newCardLv(), xp:0 }; S.unseen = true; } else aco *= 2;
+    S.co += aco; S.sp += rw.sp; newAr.push({ i:S.arMax, co:aco, sp:rw.sp, card });
+  }
   const hero = addHeroXP(hx);
   save();
-  return { win, s, hx, co, first, hero, bossPts, fromLv, daily };
-}
-
-// Siegchance per Probekämpfen schätzen (zwischengespeichert, solange sich das Team nicht ändert)
-const oddsCache = {};
-function teamFor(s) {
-  const P = buildTeam(), b = boostFor(s);
-  if (b) P.forEach(u => { u.atk = Math.round(u.atk * (1 + b)); u.hp = u.max = Math.round(u.max * (1 + b)); });
-  return P;
-}
-function winChance(s) {
-  const key = [s, S.lv, Object.keys(S.tree).sort().join(""), JSON.stringify(S.rank), JSON.stringify(S.eq), boostFor(s)].join("|");
-  if (oddsCache[key] == null) {
-    let w = 0; const n = 30, T = treeFx();
-    for (let i = 0; i < n; i++) if (simulate(teamFor(s), makeWave(s), T).win) w++;
-    oddsCache[key] = w / n;
-  }
-  return oddsCache[key];
-}
-function chanceHTML(s) {
-  const c = winChance(s), p = Math.round(c * 100) + " %";
-  if (c >= .8) return `<span class="chance easy">${p} · Leicht</span>`;
-  if (c >= .4) return `<span class="chance even">${p} · Knapp</span>`;
-  return `<span class="chance hard">${p} · Zu schwer</span>`;
-}
-function farmStage() {
-  for (let s = S.prog; s >= 1; s--) if (winChance(s) >= .8) return s;
-  return S.prog >= 1 ? 1 : 0;
+  return { win, dTr:S.tr - before, hx, co, hero, cards, newAr, daily, timeout:M.timeout, rounds:M.rounds };
 }
 // Baum: Knoten ist kaufbar, wenn alle Vorgänger gekauft sind
 const nodeOwned = id => id === "root" || !!S.tree[id];
@@ -1241,20 +1425,20 @@ const stars = st => "★".repeat(st + 1) + "☆".repeat(2 - st);
 const ICONS = {
   hero: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M8.5 7.5h7"/><path d="M5 21c.8-4 3.6-6.5 7-6.5s6.2 2.5 7 6.5"/></svg>',
   home: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M10 8.2v7.6l6-3.8z" fill="currentColor"/></svg>',
-  map: '<svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
+  arena: '<svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v3M8 21h8M9 17h6v4H9z"/></svg>',
   team: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="11" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
   tree: '<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="13" r="2"/><circle cx="12" cy="13" r="2"/><circle cx="19" cy="13" r="2"/><circle cx="12" cy="21" r="1.5"/><path d="M12 6v5M11 5 6 11M13 5l5 6M12 15v4"/></svg>'
 };
-const rankable = () => unlocked().filter(d => S.sp >= rankCost(S.rank[d.id] || 0));
+const rankable = () => owned().filter(d => S.sp >= rankCost(S.rank[d.id] || 0));
 function renderTop() {
   const n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
   $("#top").innerHTML = `<div class="lvl-badge">Level ${S.lv}</div>
     <div class="xpwrap">${bar(mx ? 1 : S.xp, mx ? 1 : n)}
       <div class="xptext">${mx ? "Maximales Level erreicht" : `${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}`}</div></div>
-    <div class="wallet"><span class="sp" title="Sternenpunkte">${fmt(S.sp)}</span><span class="coin" title="Münzen">${fmt(S.co)}</span></div>`;
+    <div class="wallet"><span class="trw" title="Trophäen">${fmt(S.tr)}</span><span class="sp" title="Sternenpunkte">${fmt(S.sp)}</span><span class="coin" title="Münzen">${fmt(S.co)}</span></div>`;
 }
 function renderNav() {
-  const tabs = [["home","Spielen"],["hero","Held"],["map","Etappen"],["team","Begleiter"],["tree","Baum"]];
+  const tabs = [["home","Spielen"],["hero","Held"],["arena","Arenen"],["team","Karten"],["tree","Baum"]];
   const badge = { tree:buyable().length, team:buyable().length ? 0 : rankable().length, hero:eqUpgradable().length };
   $("#nav").innerHTML = tabs.map(([k, n]) =>
     `<button class="${UI.tab === k ? "on" : ""}" data-act="tab" data-k="${k}"><span class="badge">${ICONS[k]}${badge[k] ? `<b>${badge[k]}</b>` : ""}</span>${n}</button>`).join("");
@@ -1263,9 +1447,9 @@ function render() {
   renderTop(); renderNav();
   const m = $("#main");
   m.classList.toggle("fill", UI.tab === "tree");
-  m.innerHTML = ({ home:screenHome, hero:screenHero, map:screenMap, team:screenTeam, tree:screenTree })[UI.tab]();
+  m.innerHTML = ({ home:screenHome, hero:screenHero, arena:screenArena, team:screenTeam, tree:screenTree })[UI.tab]();
   if (UI.tab === "tree") afterTree();
-  if (UI.tab === "map") { const zt = $("#zoneTabs"), on = $("#zoneTabs .on"); if (zt && on) zt.scrollLeft = on.offsetLeft - zt.clientWidth / 2 + on.clientWidth / 2; }
+  if (UI.tab === "arena") { const on = $("#arenaNow"); if (on) m.scrollTop = Math.max(0, on.offsetTop - m.clientHeight / 2); }
 }
 
 /* ---------- Held zeichnen ---------- */
@@ -1314,7 +1498,7 @@ function screenHero() {
       ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="margin-top:4px">${mx ? "Maximales Level erreicht" : `${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}`}</div>
     </div>
     <div class="stats4"><div><b>${fmt(h.hp)}</b><span>Leben</span></div><div><b>${fmt(h.atk)}</b><span>Angriff</span></div>
-      <div><b>${Math.round(h.crit * 100)} %</b><span>Krit</span></div><div><b>${Math.round(U.mult * h.ultMul * 100)} %</b><span>Spezial</span></div></div>
+      <div><b>${Math.round(h.crit * 100)} %</b><span>Krit</span></div><div><b>${Math.round(U.mult * h.ultMul * 100)} %</b><span>Ultimative</span></div></div>
 
     <div class="label">Ausrüstung · mit Münzen verbessern, ohne Obergrenze</div>
     <div class="eqgrid">${EQUIP.map(e => { const l = S.eq[e.k], tc = TIER_COL[eqTier(l)], cap = false, cost = eqCost(l);
@@ -1322,9 +1506,13 @@ function screenHero() {
         <span class="ed">${l ? e.d(l) : "Noch keine Wirkung"}${eqTier(l) < 5 ? `. Neues Aussehen ab Stufe ${(eqTier(l) + 1) * 10}.` : "."}</span>
         <button class="btn sm ${cap ? "ghost" : ""}" data-act="eqUp" data-k="${e.k}" ${cap || S.co < cost ? "disabled" : ""}>${cap ? `Max. Heldenlevel ${S.lv}` : `Stufe ${l + 1} · <span class="coin">${fmt(cost)}</span>`}</button></div>`; }).join("")}</div>
 
-    <div class="label">Spezialangriff</div>
+    <div class="label">Ultimative</div>
     <div class="panel ultbox"><span class="uicon">☄️</span><div><b>${U.n}</b><p class="muted" style="font-size:14px">${U.d} Wird ausgelöst, sobald die Kurier-Energie voll ist. Sie lädt sich bei jeder Aktion und bei jedem Treffer auf.</p>
       ${nextU ? `<p style="font-size:13px;color:var(--gold);margin-top:4px">Ab Level ${nextU.lv}: ${nextU.n}</p>` : ""}</div></div>
+
+    <div class="label">Aktionen im Kampf · jede Runde eine</div>
+    <div class="ablist">${TECH.map(x => `<div class="abrow ${x.lv > S.lv ? "locked" : ""}"><span class="lvtag">${x.lv > S.lv ? "LV " + x.lv : x.i}</span>
+      <div><div class="an">${x.n}${x.cd ? ` · alle ${x.cd} Runden` : ""}</div><div class="ad">${x.d}</div></div></div>`).join("")}</div>
 
     <div class="label">Erscheinung · wächst mit dem Level</div>
     <div class="forms" style="--hc:${t[2]}">${HERO_TITLES.slice(0, 6).map((x, i) => `<div class="${i === ti ? "on" : i < ti ? "done" : ""}">${heroSVG(x[0], i <= ti ? S.eq : null, 44, false)}<span>Lv ${x[0]}</span></div>`).join("")}</div>
@@ -1334,24 +1522,32 @@ function screenHero() {
     <div class="ablist">${HERO_AB.map(a => `<div class="abrow ${a.lv > S.lv ? "locked" : ""}"><span class="lvtag">${a.lv > S.lv ? "LV " + a.lv : "✓ LV " + a.lv}</span>
       <div><div class="an">${a.n}</div><div class="ad">${a.d}</div></div></div>`).join("")}
       ${ULTS.slice(1).map(u => `<div class="abrow ${u.lv > S.lv ? "locked" : ""}"><span class="lvtag">${u.lv > S.lv ? "LV " + u.lv : "✓ LV " + u.lv}</span>
-      <div><div class="an">Spezialangriff: ${u.n}</div><div class="ad">${u.d}</div></div></div>`).join("")}</div>
-    <p class="muted" style="font-size:14px">Bisher: ${S.stats.wins} Siege, ${S.stats.losses} Niederlagen, ${S.prog} von 50 Etappen.</p>
+      <div><div class="an">Ultimative: ${u.n}</div><div class="ad">${u.d}</div></div></div>`).join("")}</div>
+    <p class="muted" style="font-size:14px">Bisher: ${S.stats.wins} Siege, ${S.stats.losses} Niederlagen · Rekord ${fmt(S.trBest || S.tr)} Trophäen.</p>
     <div style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" data-act="help">Spielregeln</button><button class="btn ghost" style="flex:1;color:var(--hp)" data-act="resetAsk">Neu starten</button></div>
     <div style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" data-act="installHelp">${IS_APP ? "✓ Läuft als App" : "Als App installieren"}</button><button class="btn ghost" style="flex:1" data-act="saveCode">Spielstand übertragen</button></div>`;
 }
 const eqDots = () => `<span class="eqdots">${EQUIP.map(e => `<span style="--tc:${TIER_COL[eqTier(S.eq[e.k])]}">${e.i} ${S.eq[e.k]}</span>`).join("")}</span>`;
 
 /* ---------- Spielen ---------- */
+// Kleine Karte für Deck-Ansichten: Symbol, Level und EP-Balken
+function deckChip(id) {
+  const d = CC[id], c = S.cards[id], f = form(id);
+  return `<button class="dchip r-${d.r}" data-act="card" data-id="${id}"><span class="de">${f[1]}</span><span class="dn">${f[0]}</span>
+    <span class="dl">Lv ${c.lv}</span>${bar(c.xp, cardNeed(c.lv))}</button>`;
+}
 function screenHome() {
-  const t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV, h = heroStats();
-  const s = S.prog + 1, Z = zoneAt(zoneOf(s)), c = winChance(s), fs = farmStage(), bst = boostFor(s);
-  const next = HERO_AB.find(a => a.lv > S.lv), nextCard = COMP.find(cc => cc.lv > S.lv), nextForm = FORM_LV.find(x => x > S.lv), nextMode = MODES.find(m => m.lv > S.lv);
+  const t = heroTitle(S.lv), n = heroNeed(S.lv), mx = S.lv >= MAX_LV;
+  const A = arenaAt(arenaIdx(S.tr)), N = arenaAt(A.i + 1), into = S.tr - A.gate, nc = N.card && !S.cards[N.card.id] ? N.card : null;
+  const next = HERO_AB.find(a => a.lv > S.lv), nextT = TECH.find(x => x.lv > S.lv), nextMode = MODES.find(m => m.lv > S.lv);
   const todos = [], nb = buyable().length;
   if (nb) todos.push({ i:"★", b:`${S.sp} Sternenpunkte im Baum ausgeben`, s:`${nb} Upgrade${nb > 1 ? "s" : ""} kannst du dir gerade leisten.`, act:'data-act="tab" data-k="tree"' });
   const rk = rankable();
-  if (!nb && rk.length) todos.push({ i:"⬆️", b:"Begleiter im Rang steigern", s:`${rk.length} Begleiter ${rk.length > 1 ? "können" : "kann"} mit Sternenpunkten aufsteigen.`, act:'data-act="tab" data-k="team"' });
+  if (!nb && rk.length) todos.push({ i:"⬆️", b:"Karten im Rang steigern", s:`${rk.length} Karte${rk.length > 1 ? "n können" : " kann"} mit Sternenpunkten aufsteigen.`, act:'data-act="tab" data-k="team"' });
   const eu = eqUpgradable();
   if (eu.length) todos.unshift({ i:eu[0].i, b:"Ausrüstung des Helden verbessern", s:`${eu.map(e => e.n).join(", ")} ${eu.length > 1 ? "können" : "kann"} eine Stufe höher`, act:'data-act="tab" data-k="hero"' });
+  const bench = owned().filter(c => !S.deck.includes(c.id));
+  if (bench.length && S.unseen) todos.push({ i:"🃏", b:"Neue Karte im Deck einsetzen", s:"Nur Karten im Deck sammeln EP.", act:'data-act="tab" data-k="team"' });
   const modeCard = m => {
     const lock = S.lv < m.lv, best = (S.best || {})[m.k];
     return `<button class="mode ${lock ? "locked" : ""}" style="--mc:${m.c}" data-act="${lock ? "modeLocked" : "mode"}" data-k="${m.k}">
@@ -1362,31 +1558,28 @@ function screenHome() {
   return `<button class="herocard" data-act="tab" data-k="hero" style="--hc:${t[2]}">
       ${heroSVG(S.lv, S.eq, 80)}
       <span class="hb"><span class="ht">${t[1]}</span><span class="hn">Mondkurier · Level ${S.lv}</span>
-        ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${fmt(S.xp)} / ${fmt(n)} EP · ${unlocked().length} von 8 Begleitern</span>${eqDots()}</span>
+        ${bar(mx ? 1 : S.xp, mx ? 1 : n)}<span class="xptext">${fmt(S.xp)} / ${fmt(n)} EP · ${owned().length} von ${COMP.length} Karten</span>${eqDots()}</span>
       <span class="chev">›</span></button>
-    <div class="screen-title"><h2>Was möchtest du spielen?</h2><p>Jeder Modus bringt EP und Münzen. Das erste Spiel je Modus am Tag zählt doppelt.</p></div>
-    <div class="nextfight" style="--zbg:${Z.bg}">
-      <div class="nf-top"><div><div class="nf-kicker">🗺️ Story · Kurierroute${dailyFree("story") ? '<span class="daily">×2 heute</span>' : ""}</div>
-        <div class="nf-title">${Z.n} · Etappe ${stageNo(s)}</div></div>${chanceHTML(s)}</div>
-      <div class="nf-foes">${waveIds(s).map(d => d[1]).join("")}</div>
-      ${bst ? `<div class="boost">Rückenwind: Dein Team ist hier ${Math.round(bst * 100)} % stärker.</div>` : ""}
-      <button class="btn big" data-act="fight" data-s="${s}">${isBoss(s) ? "Bosskampf starten" : "Kämpfen"}</button>
-      ${c < .4 && fs ? `<div class="nf-hint">Noch zu schwer? Hol dir EP in einem anderen Modus unten, oder wiederhole <b>Etappe ${stageNo(fs)}</b> von ${zoneAt(zoneOf(fs)).n}.</div>
-        <button class="btn ghost wide" data-act="fight" data-s="${fs}">Etappe ${stageNo(fs)} wiederholen · ${Math.round(winChance(fs) * 100)} %</button>` : ""}
-      <div style="display:flex;gap:8px;align-items:center"><button class="switchrow" data-act="auto" style="flex:1"><span><b>Automatisch wiederholen</b></span><span class="sw ${S.auto ? "on" : ""}"></span></button>
-        <button class="btn ghost sm" data-act="tab" data-k="map">Alle Etappen</button></div>
+    <div class="nextfight" style="--zbg:${A.bgCss}">
+      <div class="nf-top"><div><div class="nf-kicker">🏆 Trophäenkampf${dailyFree("arena") ? '<span class="daily">×2 heute</span>' : ""}</div>
+        <div class="nf-title">Arena ${A.i + 1} · ${A.n}</div></div><span class="trbig">${fmt(S.tr)}</span></div>
+      <div>${bar(into, ARENA_STEP, "gold")}<div class="xptext" style="margin-top:4px">${into} / ${ARENA_STEP} Trophäen bis ${N.n}${nc ? ` · dort wartet <b style="color:var(--moon)">${nc.f[0][1]} ${nc.f[0][0]}</b>` : ""}</div></div>
+      <div class="deckrow">${S.deck.map(deckChip).join("")}</div>
+      <button class="btn big" data-act="fight">Kampf suchen</button>
+      <div class="nf-hint">Sieg <b>+${TROPHY}</b> 🏆, Niederlage <b>−${TROPHY}</b> 🏆.${A.i ? ` Unter ${fmt(A.gate)} Trophäen fällst du nicht mehr.` : ""} Jede Runde wählst du die Aktion des Helden und welche Karten ihre Sonderattacke einsetzen.</div>
     </div>
+    <div class="label">Minispiele</div>
     <div class="modes">${MODES.slice(1).map(modeCard).join("")}</div>
     <div class="label">Das kannst du jetzt tun</div>
-    <div class="todos">${todos.length ? todos.map(x => `<button class="todo ${x.hot !== false ? "hot" : ""}" ${x.act}>
+    <div class="todos">${todos.length ? todos.map(x => `<button class="todo hot" ${x.act}>
         <span class="ti">${x.i}</span><span class="tt"><b>${x.b}</b><span>${x.s}</span></span><span class="chev">›</span></button>`).join("")
-      : `<div class="todo" style="cursor:default"><span class="ti">✓</span><span class="tt"><b>Alles erledigt</b><span>Spiel einen Modus, um EP für das nächste Level zu sammeln.</span></span></div>`}</div>
+      : `<div class="todo" style="cursor:default"><span class="ti">✓</span><span class="tt"><b>Alles erledigt</b><span>Kämpfe um Trophäen, um deine Karten zu leveln.</span></span></div>`}</div>
     <div class="label">Nächste Belohnungen</div><div class="panel goal">
-      ${nextMode ? `<div>Level <b>${nextMode.lv}</b>: neuer Spielmodus <b>${nextMode.i} ${nextMode.n}</b></div>` : ""}
-      ${nextCard ? `<div>Level <b>${nextCard.lv}</b>: neuer Begleiter <b>${nextCard.f[0][1]} ${nextCard.f[0][0]}</b></div>` : ""}
+      ${nc ? `<div><b>${fmt(N.gate)}</b> Trophäen: neue Karte <b>${nc.f[0][1]} ${nc.f[0][0]}</b> in ${N.n}</div>` : `<div><b>${fmt(N.gate)}</b> Trophäen: ${N.n} mit Münzen und Sternenpunkten</div>`}
+      ${nextMode ? `<div>Level <b>${nextMode.lv}</b>: neues Minispiel <b>${nextMode.i} ${nextMode.n}</b></div>` : ""}
+      ${nextT ? `<div>Level <b>${nextT.lv}</b>: neue Aktion des Helden <b>${nextT.i} ${nextT.n}</b></div>` : ""}
       ${next ? `<div>Level <b>${next.lv}</b>: neue Fähigkeit des Helden <b>${next.n}</b></div>` : ""}
-      ${nextForm ? `<div>Level <b>${nextForm}</b>: alle Begleiter entwickeln sich weiter</div>` : ""}
-      <div>Jedes Level: alle Begleiter werden stärker, dazu <b>${ptsFor(S.lv + 1)} Sternenpunkte</b></div></div>`;
+      <div>Jedes Heldenlevel: <b>${ptsFor(S.lv + 1)} Sternenpunkte</b></div></div>`;
 }
 
 /* =========================================================
@@ -1394,7 +1587,7 @@ function screenHome() {
    ========================================================= */
 let MG = null;
 function modeIntro(k) {
-  if (k === "story") { const s = S.prog + 1; startBattle(s); return; }
+  if (k === "arena") { startBattle(); return; }
   const m = MM[k];
   modal(`<div class="mhead" style="--rc:${m.c}"><span class="me" style="font-size:40px">${m.i}</span><div class="mt"><h2>${m.n}</h2><p>${dailyFree(k) ? "Heute noch doppelte EP" : "Belohnung wächst mit deinem Level"}</p></div></div>
     <div class="box"><div class="bt">So geht's</div><div class="bb">${m.rules}</div></div>
@@ -1442,8 +1635,8 @@ function finishMini(k, score, mult, lines) {
       <p>${lines}${rec ? " <b style='color:var(--gold)'>Neuer Rekord!</b>" : ""}${daily ? " Tagesbonus: doppelte EP!" : ""}</p></div>
     <div class="gains"><span class="x">+${fmt(hx)} EP</span><span class="coin">+${fmt(co)}</span></div>
     <div>${bar(S.xp, n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}</div></div>
-    ${hero.lv.length ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${hero.pts} Sternenpunkte · Held und alle Begleiter werden stärker</span>
-      ${hero.abs.map(a => `<span>Neu: ${a}</span>`).join("")}${hero.comps.map(id => `<span>Neuer Begleiter: ${CC[id].f[0][1]} ${CC[id].f[0][0]}</span>`).join("")}
+    ${hero.lv.length ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${hero.pts} Sternenpunkte · der Held wird stärker</span>
+      ${hero.abs.map(a => `<span>Neu: ${a}</span>`).join("")}
       ${MODES.filter(mm => hero.lv.includes(mm.lv)).map(mm => `<span>Neuer Spielmodus: ${mm.i} ${mm.n}</span>`).join("")}</div>` : ""}
     <div class="row"><button class="btn ghost" data-act="miniBack">Zur Auswahl</button><button class="btn" data-act="miniGo" data-k="${k}">Nochmal</button></div>`), 300);
 }
@@ -1546,7 +1739,7 @@ function startSprint() {
 /* ---------- Sternen-Memory ---------- */
 function startMemory() {
   const m = MM.memory; miniShell(m, '<div class="memgrid" id="memGrid"></div>');
-  const comp = COMP.map(c => c.f[formOf(Math.max(S.lv, 1))][1]), extra = ["🌙", "🪐", "🚀", "🌍", "👽", "☄️"];
+  const comp = COMP.map(c => form(c.id)[1]), extra = ["🌙", "🪐", "🚀", "🌍", "👽", "☄️"];
   const START = 45, st = { t:START, board:0, score:0, pairs:0, combo:0, moves:0, open:[], lock:false, deck:[], left:0 };
   MG = { k:"memory" };
   const grid = $("#memGrid");
@@ -1768,60 +1961,73 @@ function startBossHunt() {
 }
 const MINI = { sprint:startSprint, memory:startMemory, meteor:startMeteor, boss:startBossHunt };
 
-/* ---------- Etappen ---------- */
-function screenMap() {
-  const z = S.zone, Z = zoneAt(z), zOpen = i => i === 0 || S.prog >= i * 10, nz = Math.max(5, zoneOf(S.prog + 1) + 2);
-  const stages = Array.from({ length:10 }, (_, i) => z * 10 + i + 1);
-  return `<div class="screen-title"><h2>Etappen</h2><p>Die Prozentzahl ist deine Siegchance mit dem jetzigen Team. Erstmals besiegte Bosse geben ${BOSS_PTS} Sternenpunkte. Nach Zone 5 geht es endlos weiter.</p></div>
-    <div class="zonetabs" id="zoneTabs">${Array.from({ length:nz }, (_, i) => `<button class="ztab ${i === z ? "on" : ""} ${zOpen(i) ? "" : "lock"}" data-act="zone" data-z="${i}">
-      <b>${zOpen(i) ? "" : "🔒 "}Zone ${i + 1}</b><span>${zoneAt(i).n}</span></button>`).join("")}</div>
-    <div class="zonehead" style="--zbg:${Z.bg}"><h3>${Z.n}</h3><p>${Z.sub}</p></div>
-    <div class="stages">${stages.map(s => {
-      const open = s <= S.prog + 1, cleared = s <= S.prog, boss = isBoss(s);
-      return `<button class="stage ${boss ? "boss" : ""} ${cleared ? "cleared" : ""} ${open ? "" : "locked"} ${s === S.prog + 1 ? "next" : ""}" data-act="${open ? "fight" : "noop"}" data-s="${s}">
-        <span class="sn">${cleared ? "✓" : boss ? "👑" : stageNo(s)}</span>
-        <span class="sf">${waveIds(s).map(d => d[1]).join("")}<small>${boss ? "Boss · " : ""}Etappe ${stageNo(s)}${s === S.prog + 1 ? " · als Nächstes" : cleared ? " · geschafft" : ""}</small></span>
-        ${open ? chanceHTML(s) : `<span class="muted">🔒</span>`}</button>`;
-    }).join("")}</div>`;
+/* ---------- Arenen ---------- */
+function screenArena() {
+  const cur = arenaIdx(S.tr), last = Math.max(ARENAS.length + 1, cur + 3);
+  const rows = Array.from({ length:last }, (_, i) => arenaAt(i)).map(A => {
+    const done = A.i < cur, now = A.i === cur, c = A.card, rw = arenaReward(A.i);
+    const reward = c ? `<span class="arc r-${c.r}">${c.f[0][1]}</span><span class="arw"><b>${c.f[0][0]}</b><small>${RAR_N[c.r]}${A.i ? ` · +${fmt(rw.co)} Münzen, +${rw.sp} ★` : " · Startkarte"}</small></span>`
+      : `<span class="arc">🎁</span><span class="arw"><b>Münzen und Sternenpunkte</b><small>+${fmt(rw.co * 2)} Münzen, +${rw.sp} ★</small></span>`;
+    const extra = A.i === 0 ? COMP.filter(x => x.ar === 0).map(x => x.f[0][1]).join(" ") : "";
+    return `<div class="arow ${done ? "done" : ""} ${now ? "now" : ""} ${A.i > cur ? "locked" : ""}" ${now ? 'id="arenaNow"' : ""} style="--zbg:${A.bgCss}">
+      <div class="arn"><b>${A.i + 1}</b><small>${fmt(A.gate)} 🏆</small></div>
+      <div class="ari"><div class="art">${A.n}${now ? ' <span class="flag">Du bist hier</span>' : done ? " ✓" : ""}</div><div class="ars">${A.sub}</div>
+        <div class="arr">${A.i === 0 ? `<span class="arc">${extra}</span><span class="arw"><b>4 Startkarten</b><small>von Anfang an dabei</small></span>` : reward}</div></div></div>`;
+  }).join("");
+  const wins = S.stats.wins, all = wins + S.stats.losses;
+  return `<div class="screen-title"><h2>Arenen</h2><p>Alle ${ARENA_STEP} Trophäen steigst du in die nächste Arena auf und bekommst eine neue Karte. Ein Sieg bringt ${TROPHY} Trophäen, eine Niederlage kostet ${TROPHY}. Unter eine erreichte Arena fällst du nie zurück.</p></div>
+    <div class="stats4"><div><b>${fmt(S.tr)}</b><span>Trophäen</span></div><div><b>${fmt(S.trBest || S.tr)}</b><span>Rekord</span></div>
+      <div><b>${wins}</b><span>Siege</span></div><div><b>${all ? Math.round(wins / all * 100) : 0} %</b><span>Siegquote</span></div></div>
+    <div class="arenas">${rows}</div>`;
 }
 
-/* ---------- Begleiter ---------- */
+/* ---------- Karten ---------- */
 function screenTeam() {
-  const t = heroTitle(S.lv), T = treeFx(), all = unlocked().length === COMP.length;
+  const t = heroTitle(S.lv), T = treeFx(), own = owned();
   const tile = d => {
-    if (d.lv > S.lv) return `<div class="slot locked"><span class="se" style="filter:grayscale(1) brightness(.5)">${d.f[0][1]}</span><span class="sn">${d.f[0][0]}</span><span class="sl">ab Level ${d.lv}</span></div>`;
-    const r = S.rank[d.id] || 0, f = form(d.id, S.lv);
-    return `<button class="slot full r-${d.r}" data-act="card" data-id="${d.id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span>
-      <span class="sl">Lv ${S.lv}${r ? ` · Rang ${r}` : ""}</span>${S.sp >= rankCost(r) ? '<span class="flag">Rang +1</span>' : ""}</button>`;
+    if (!S.cards[d.id]) return `<button class="slot locked" data-act="card" data-id="${d.id}"><span class="se" style="filter:grayscale(1) brightness(.5)">${d.f[0][1]}</span><span class="sn">${d.f[0][0]}</span><span class="sl">Arena ${d.ar + 1}</span></button>`;
+    const c = S.cards[d.id], r = S.rank[d.id] || 0, f = form(d.id), inD = S.deck.includes(d.id);
+    return `<button class="slot full r-${d.r} ${inD ? "indeck" : ""}" data-act="card" data-id="${d.id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span>
+      <span class="sl">Lv ${c.lv}${r ? ` · Rang ${r}` : ""}</span>${bar(c.xp, cardNeed(c.lv))}${inD ? '<span class="flag">Deck</span>' : S.sp >= rankCost(r) ? '<span class="flag rk">Rang +1</span>' : ""}</button>`;
   };
-  return `<div class="screen-title"><h2>Begleiter</h2><p>${all ? "Dein Team ist komplett. Ab jetzt werden alle 8 Begleiter mit jedem Level stärker, und mit Sternenpunkten steigerst du ihren Rang ohne Obergrenze."
-      : `Der Held hat 8 feste Begleiter. Sie kommen mit dem Heldenlevel dazu und leveln automatisch mit. ${unlocked().length} von 8 sind schon dabei.`}</p></div>
-    <div class="lineup" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-      <button class="slot hero" data-act="tab" data-k="hero" style="--hc:${t[2]}">${heroSVG(S.lv, S.eq, 44, false)}<span class="sn">Mondkurier</span><span class="sl">Lv ${S.lv}</span><span class="flag">Held</span></button>
-      ${COMP.map(tile).join("")}</div>
-    <div class="label">Fähigkeiten</div>
-    <div class="clist">${COMP.map(d => { const on = d.lv <= S.lv, f = on ? form(d.id, S.lv) : d.f[0];
-      return `<button class="crow r-${d.r} ${on ? "" : "future"}" ${on ? `data-act="card" data-id="${d.id}"` : ""}><span class="ce">${f[1]}</span>
-        <span class="ci"><span class="cn">${f[0]}</span><span class="cm">${ROLES[d.role].n} · ${AB[d.ab].n}: ${AB[d.ab].d(abVal(d.ab, formOf(S.lv), T))}</span></span>
-        <span class="clv">${on ? `Rang ${S.rank[d.id] || 0}` : `ab Lv ${d.lv}`}</span></button>`; }).join("")}</div>`;
+  return `<div class="screen-title"><h2>Karten</h2><p>Du kämpfst mit dem Helden und ${DECK_SIZE} Karten. Nur Karten im Deck sammeln EP: wer viel Schaden macht, heilt, einsteckt, lange überlebt und Sonderattacken einsetzt, bekommt mehr. ${own.length} von ${COMP.length} Karten freigeschaltet.</p></div>
+    <div class="label">Dein Deck</div>
+    <div class="lineup five" style="grid-template-columns:repeat(5,minmax(0,1fr))">
+      <button class="slot hero" data-act="tab" data-k="hero" style="--hc:${t[2]}">${heroSVG(S.lv, S.eq, 40, false)}<span class="sn">Held</span><span class="sl">Lv ${S.lv}</span></button>
+      ${S.deck.map(id => { const d = CC[id], c = S.cards[id], f = form(id);
+        return `<button class="slot full r-${d.r}" data-act="card" data-id="${id}"><span class="se">${f[1]}</span><span class="sn">${f[0]}</span><span class="sl">Lv ${c.lv}</span>${bar(c.xp, cardNeed(c.lv))}</button>`; }).join("")}</div>
+    <div class="label">Alle Karten · antippen für Details und zum Tauschen</div>
+    <div class="lineup" style="grid-template-columns:repeat(4,minmax(0,1fr))">${COMP.map(tile).join("")}</div>`;
 }
 function cardModal(id) {
-  const T = treeFx(), d = CC[id], r = S.rank[id] || 0, f = form(id, S.lv), s = cardStats(id, S.lv, T, r), cost = rankCost(r);
-  const nf = FORM_LV.find(x => x > S.lv);
+  const T = treeFx(), d = CC[id], c = S.cards[id], L = c ? c.lv : 1, r = S.rank[id] || 0, f = form(id, L), s = cardStats(id, L, T, r), cost = rankCost(r);
+  const inD = S.deck.includes(id), nf = FORM_LV.find(x => x > L), A = arenaAt(d.ar);
+  const ms = SP_MS.slice(0, 5).map(m => `<span class="${L >= m.lv ? "on" : ""}">Lv ${m.lv}: ${m.lv === 15 ? SPX[d.sp.x] : m.t}</span>`).join("");
   modal(`<div class="mhead r-${d.r}"><span class="me">${f[1]}</span>
-      <div class="mt"><h2>${f[0]}</h2><p><span class="rar">${RAR_N[d.r]}</span> · ${ROLES[d.role].n} · Level ${S.lv} · Rang ${r}</p></div></div>
-    <div class="box"><div class="bt">Fähigkeit: ${AB[d.ab].n}</div><div class="bb">${AB[d.ab].d(abVal(d.ab, formOf(S.lv), T))}</div></div>
-    <div class="stats3"><div><b>${fmt(s.hp)}</b><span>Leben</span></div><div><b>${fmt(s.atk)}</b><span>Angriff</span></div><div><b>${stars(formOf(S.lv))}</b><span>Form</span></div></div>
-    <div class="box"><div class="bt">Level</div><div class="bb">Begleiter haben immer dasselbe Level wie der Held. Jeder Level-Aufstieg macht sie stärker, ohne dass du etwas tun musst.</div></div>
-    <div class="box"><div class="bt">Rang · ohne Obergrenze</div>
-      <div class="bb">Jeder Rang gibt <b>+${Math.round(RANK_BONUS * 100)} %</b> Leben und Angriff. Jetzt: +${Math.round(r * RANK_BONUS * 100)} %.</div>
-      <button class="btn green wide" data-act="rankUp" data-id="${id}" ${S.sp < cost ? "disabled" : ""}>Rang ${r + 1} · ${cost} ★</button>
-      ${S.sp < cost ? `<div class="bb" style="font-size:13px;color:var(--dim)">Dir fehlen ${cost - S.sp} Sternenpunkte.</div>` : ""}</div>
+      <div class="mt"><h2>${f[0]}</h2><p><span class="rar">${RAR_N[d.r]}</span> · ${ROLES[d.role].n}${c ? ` · Level ${L} · Rang ${r}` : ` · ab Arena ${d.ar + 1}`}</p></div></div>
+    ${c ? `<div>${bar(c.xp, cardNeed(L))}<div class="xptext" style="margin-top:4px">${fmt(c.xp)} / ${fmt(cardNeed(L))} EP bis Level ${L + 1}</div></div>` : `<div class="box"><div class="bt">Noch gesperrt</div><div class="bb">Erreiche ${fmt(A.gate)} Trophäen (Arena ${d.ar + 1}: ${A.n}), dann kommt die Karte zu dir.</div></div>`}
+    <div class="box spbox"><div class="bt">Sonderattacke: ${d.sp.n} · ${spCost(id, L)} ⚡ · alle ${spCd(id, L)} Runden</div><div class="bb">${spDesc(id, L)}</div>
+      <div class="msrow">${ms}</div><div class="bb" style="font-size:13px;color:var(--dim)">Jedes Kartenlevel macht die Sonderattacke 1 % stärker.</div></div>
+    <div class="box"><div class="bt">Fähigkeit: ${AB[d.ab].n}</div><div class="bb">${AB[d.ab].d(abVal(d.ab, formOf(L), T))}</div></div>
+    <div class="stats3"><div><b>${fmt(s.hp)}</b><span>Leben</span></div><div><b>${fmt(s.atk)}</b><span>Angriff</span></div><div><b>${stars(formOf(L))}</b><span>Form</span></div></div>
+    ${c ? `${inD ? `<div class="box"><div class="bt">Im Deck</div><div class="bb">Diese Karte kämpft mit und sammelt EP. Zum Tauschen tippe eine Karte außerhalb des Decks an.</div></div>`
+        : `<button class="btn wide" data-act="deckIn" data-id="${id}">Ins Deck nehmen</button>`}
+      <div class="box"><div class="bt">Rang · ohne Obergrenze</div>
+        <div class="bb">Jeder Rang gibt <b>+${Math.round(RANK_BONUS * 100)} %</b> Leben und Angriff. Jetzt: +${Math.round(r * RANK_BONUS * 100)} %.</div>
+        <button class="btn green wide" data-act="rankUp" data-id="${id}" ${S.sp < cost ? "disabled" : ""}>Rang ${r + 1} · ${cost} ★</button>
+        ${S.sp < cost ? `<div class="bb" style="font-size:13px;color:var(--dim)">Dir fehlen ${cost - S.sp} Sternenpunkte.</div>` : ""}</div>` : ""}
     <div class="box"><div class="bt">Entwicklung</div>
-      <div class="evorow r-${d.r}">${d.f.map((x, i) => `<div class="${i === formOf(S.lv) ? "on" : ""}"><div class="ee">${x[1]}</div><div class="en">${x[0]}</div><div class="el">ab Level ${FORM_LV[i]}</div></div>`).join("")}</div>
-      ${nf ? `<div class="bb" style="font-size:14px;color:var(--dim)">Auf Level ${nf} entwickelt sich ${f[0]} automatisch: ${AB[d.ab].d(abVal(d.ab, formOf(nf), T))}</div>` : ""}
+      <div class="evorow r-${d.r}">${d.f.map((x, i) => `<div class="${c && i === formOf(L) ? "on" : ""}"><div class="ee">${x[1]}</div><div class="en">${x[0]}</div><div class="el">ab Level ${FORM_LV[i]}</div></div>`).join("")}</div>
+      ${c && nf ? `<div class="bb" style="font-size:14px;color:var(--dim)">Auf Kartenlevel ${nf} entwickelt sich ${f[0]} weiter: ${AB[d.ab].d(abVal(d.ab, formOf(nf), T))}</div>` : ""}
     </div>
     <button class="btn ghost" data-act="close">Schließen</button>`);
+}
+function swapModal(id) {
+  const f = form(id);
+  modal(`<h2>${f[1]} ${f[0]} ins Deck</h2><p class="muted">Welche Karte soll dafür auf die Bank?</p>
+    <div class="swapgrid">${S.deck.map(o => { const g = form(o), d = CC[o];
+      return `<button class="slot full r-${d.r}" data-act="deckSwap" data-out="${o}" data-id="${id}"><span class="se">${g[1]}</span><span class="sn">${g[0]}</span><span class="sl">Lv ${cardLv(o)}</span></button>`; }).join("")}</div>
+    <button class="btn ghost" data-act="card" data-id="${id}">Abbrechen</button>`);
 }
 
 /* ---------- Baum ---------- */
@@ -1872,42 +2078,54 @@ function nodeModal(id) {
 function helpModal() {
   modal(`<h2>So spielst du</h2>
     <div class="steps">
-      <div><i>1</i><p>Spielen<span>Wähle unter „Spielen“ einen von 5 Modi: die Story mit automatischen Kämpfen oder eines der Minispiele. Alle geben EP.</span></p></div>
-      <div><i>2</i><p>Leveln<span>Jeder Kampf gibt EP. Jedes Level macht den Helden und alle Begleiter stärker. Bis Level 32 schließen sich 8 Begleiter an.</span></p></div>
-      <div><i>3</i><p>Upgrade-Baum<span>Jedes Level gibt Sternenpunkte. Damit kaufst du Upgrades im Baum, Schritt für Schritt nach unten.</span></p></div>
-      <div><i>4</i><p>Ausrüsten und aufsteigen<span>Mit Münzen verbesserst du die Ausrüstung des Helden, mit Sternenpunkten den Rang der Begleiter. Beides geht endlos weiter.</span></p></div>
+      <div><i>1</i><p>Trophäenkampf<span>Du trittst mit dem Helden und ${DECK_SIZE} Karten gegen andere Kuriere an. Sieg +${TROPHY} Trophäen, Niederlage −${TROPHY}.</span></p></div>
+      <div><i>2</i><p>Jede Runde planen<span>Wähle die Aktion des Helden (Hauptattacke, Ultimative, später Schildwall, Heilwelle, Zeitstopp) und tippe Karten an, die ihre Sonderattacke einsetzen sollen. Das kostet ⚡ Sternenenergie, die sich jede Runde auflädt.</span></p></div>
+      <div><i>3</i><p>Arenen und Karten<span>Alle ${ARENA_STEP} Trophäen kommst du in eine neue Arena und bekommst eine neue Karte, bis du alle ${COMP.length} hast.</span></p></div>
+      <div><i>4</i><p>Karten leveln<span>Jede Karte im Deck levelt einzeln. Wer viel Schaden macht, heilt, einsteckt, lange überlebt und Sonderattacken einsetzt, bekommt mehr EP. Jedes Level macht auch die Sonderattacke stärker.</span></p></div>
+      <div><i>5</i><p>Held, Baum und Rang<span>Der Held levelt mit jedem Kampf und gibt Sternenpunkte für den Baum und den Rang deiner Karten. Mit Münzen rüstest du ihn aus.</span></p></div>
     </div>
-    <p>Ist ein Kampf zu schwer, sammle erst EP in einer leichteren Etappe. Die Siegchance zeigt dir, wo du stehst.</p>
+    ${S.migrated ? `<p class="muted" style="font-size:14px">Neu: Die Story ist dem Trophäenmodus gewichen. Dein Held, der Baum, die Ausrüstung und deine bisherigen Begleiter sind geblieben.</p>` : ""}
     <button class="btn" data-act="close">Los geht's</button>`);
+  if (S.migrated) { delete S.migrated; save(); }
 }
 
 /* =========================================================
    KAMPF ABSPIELEN
    ========================================================= */
-function startBattle(s) {
+function startBattle() {
+  if (B) leaveBattle(true);
   UID = 1;
-  const P = teamFor(s), E = makeWave(s), units = P.concat(E).map(u => ({ ...u }));
-  const ctl = newCtl(S.auto || !!S.autoTech);
-  B = { s, ctl, gen:battle(P, E, treeFx(), ctl), q:[], res:null, units:Object.fromEntries(units.map(u => [u.uid, u])), timer:null, done:false, lv:P[0].lv };
-  const heroTile = u => `<div class="unit hero herobig" id="u${u.uid}"><span class="ust" id="st${u.uid}"></span>${heroSVG(u.lv, u.eqs, 58, false)}
-      <span class="hbx"><span class="un">Mondkurier · Lv ${u.lv}</span><span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${fmt(u.hp)}</span>
+  const rv = makeRival();
+  UID = 1;
+  const P = buildTeam(), E = buildRival(rv), all = P.concat(E), units = all.map(u => ({ ...u }));
+  const ctl = newCtl(!!S.autoTech);
+  B = { rv, ctl, P, gen:battle(P, E, treeFx(), ctl), q:[], res:null, units:Object.fromEntries(units.map(u => [u.uid, u])), live:Object.fromEntries(all.map(u => [u.uid, u])),
+    timer:null, done:false, lv:S.lv, plan:null, waiting:false };
+  const hpBar = u => `<span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${fmt(u.hp)}</span>`;
+  const myHero = u => `<div class="unit hero herobig" id="u${u.uid}"><span class="ust" id="st${u.uid}"></span>${heroSVG(u.lv, u.eqs, 54, false)}
+      <span class="hbx"><span class="un">Mondkurier · Lv ${u.lv}</span>${hpBar(u)}
       <span class="enlabel"><span>Kurier-Energie</span><span>${u.ult.n}</span></span><span class="uen" id="en${u.uid}"><i></i></span></span></div>`;
-  const tile = u => u.hero ? heroTile(u) : `<div class="unit ${u.boss ? "boss" : ""} ${u.elite ? "elite" : ""}" id="u${u.uid}" ${u.side === "e" ? `data-act="focus" data-u="${u.uid}"` : ""}>
-      <span class="ust" id="st${u.uid}"></span><span class="ue">${u.e}</span><span class="un">${u.n}</span>
-      <span class="uhp"><i style="width:100%"></i><span class="ush"></span></span><span class="uv" id="hv${u.uid}">${u.hp}</span></div>`;
+  const foeHero = u => `<div class="unit hero foehero" id="u${u.uid}" data-act="focus" data-u="${u.uid}"><span class="ust" id="st${u.uid}"></span>
+      ${heroSVG(u.lv, u.eqs, 36, false)}<span class="un">${u.n}</span><span class="ulv">Held · Lv ${u.lv}</span>${hpBar(u)}<span class="uen" id="en${u.uid}"><i></i></span></div>`;
+  const card = u => `<div class="unit r-${u.r} ${u.side === "p" ? "mine" : ""}" id="u${u.uid}" ${u.side === "e" ? `data-act="focus" data-u="${u.uid}"` : `data-act="spToggle" data-u="${u.uid}"`}>
+      <span class="ust" id="st${u.uid}"></span><span class="ue">${u.e}</span><span class="un">${u.n}</span><span class="ulv">Lv ${u.lv}</span>${hpBar(u)}
+      ${u.side === "p" ? `<span class="usp" id="sp${u.uid}"></span>` : ""}</div>`;
+  const A = arenaAt(arenaIdx(S.tr)), foes = units.filter(u => u.side === "e");
   const bt = $("#battle");
-  bt.style.setProperty("--zbg", zoneAt(zoneOf(s)).bg);
+  bt.style.setProperty("--zbg", A.bgCss);
   bt.innerHTML = `<div class="bwrap">
-    <div class="b-top"><div><div class="bz">${zoneAt(zoneOf(s)).n} · Etappe ${stageNo(s)}</div><div class="round" id="bRound">Kampf beginnt</div></div>
-      <button class="autobtn ${ctl.ai ? "on" : ""}" data-act="autoTech" ${S.auto ? "disabled" : ""}>Auto ${ctl.ai ? "an" : "aus"}</button></div>
-    <div class="b-enemies"><div class="sidelabel foe">Gegner</div><div class="side">${units.filter(u => u.side === "e").map(tile).join("")}</div></div>
-    <div class="b-log" id="bLog"><span>${ctl.ai ? "Der Held setzt seine Techniken selbst ein." : P[0].lv >= TK.focus.lv ? "Tippe einen Gegner für 🎯 Fokus. Unten sind deine Techniken." : "Ist die Energie voll, tippe auf ☄️ Spezialangriff."}</span></div>
-    <div class="b-team"><div class="sidelabel own">Dein Team</div>${tile(units.find(u => u.hero))}<div class="side">${units.filter(u => u.side === "p" && !u.hero).map(tile).join("")}</div>
-      <div class="techbar" id="techBar"></div></div>
+    <div class="b-top"><div><div class="bz">Arena ${A.i + 1} · ${A.n} · 🏆 ${fmt(S.tr)}</div><div class="round" id="bRound">Gegner gefunden</div></div>
+      <span style="display:flex;gap:6px"><button class="autobtn ${ctl.p.ai ? "on" : ""}" data-act="autoTech">Auto ${ctl.p.ai ? "an" : "aus"}</button><button class="autobtn" data-act="quitAsk" aria-label="Aufgeben">✕</button></span></div>
+    <div class="b-enemies"><div class="sidelabel foe">${rv.name} · ${foes.length - 1} Karte${foes.length === 2 ? "" : "n"}</div>
+      <div class="side foeside">${foes.map(u => u.hero ? foeHero(u) : card(u)).join("")}</div></div>
+    <div class="b-log" id="bLog"><span>${rv.name} fordert dich heraus!</span></div>
+    <div class="b-team"><div class="sidelabel own">Dein Team</div>${myHero(units.find(u => u.hero && u.side === "p"))}
+      <div class="side">${units.filter(u => u.side === "p" && !u.hero).map(card).join("")}</div>
+      <div id="planBar"></div></div>
     <div id="fx"></div></div>`;
   bt.hidden = false;
-  techBar();
-  B.timer = setTimeout(step, 600);
+  renderPlan();
+  B.timer = setTimeout(step, 700);
 }
 function setHP(uid, hp, sh) {
   const u = B.units[uid], el = $("#u" + uid); if (!el) return;
@@ -1943,38 +2161,42 @@ function beam(from, to) {
 }
 const say = html => { const l = $("#bLog"); if (l) l.innerHTML = `<span>${html}</span>`; };
 function flash(uid, cls) { const el = $("#u" + uid); if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
-// Ein Ereignis anzeigen; gibt die Wartezeit in ms zurück
-function applyEv(e, quiet) {
-  const U = B.units, nm = id => U[id] ? U[id].n : "";
+function bigName(text, foe) {
+  const bw = $(".bwrap"); bw.classList.remove("ultflash"); void bw.offsetWidth; bw.classList.add("ultflash");
+  const n = document.createElement("div"); n.className = "ultname" + (foe ? " foe" : ""); n.textContent = text; $("#fx").appendChild(n); setTimeout(() => n.remove(), 1100);
+}
+// Ein Ereignis anzeigen; gibt die Wartezeit in ms zurück (-1: auf den Spieler warten)
+function applyEv(e) {
+  const U = B.units, nm = id => U[id] ? U[id].n : "", foe = id => U[id] && U[id].side === "e";
+  const who = id => foe(id) ? `<span style="color:var(--hp)">${nm(id)}</span>` : `<b>${nm(id)}</b>`;
   switch (e.t) {
     case "round": $("#bRound").textContent = `Runde ${e.n}`; return 150;
-    case "warn": { const el = $("#u" + e.u); if (el) el.classList.add("charging"); if (!quiet) { say(`<b style="color:var(--hp)">${e.msg}</b>`); floatAt(e.u, "⚠️ lädt auf", "dmg"); } return 900; }
-    case "charge": { const el = $("#u" + e.u); if (el) el.classList.toggle("charging", e.on); return 0; }
-    case "tech": if (quiet) return 0; { const bw = $(".bwrap"); bw.classList.remove("techflash"); void bw.offsetWidth; bw.classList.add("techflash"); }
-      say(`<b>Mondkurier</b> setzt <b>${e.msg}</b> ein!`); return 650;
-    case "focus": say(`🎯 Fokus auf <b>${U[e.u] ? U[e.u].n : ""}</b>`); return 120;
+    case "plan": B.waiting = true; B.plan = { hero:B.lastHero && heroReady(B.lastHero) ? B.lastHero : "atk", sp:[] };
+      say(`Runde ${e.n}: Wähle die Aktion des Helden und tippe deine Karten für ihre Sonderattacke an.`); return -1;
+    case "energy": if (e.side === "p") renderPlan(); return 0;
+    case "tech": { const bw = $(".bwrap"); bw.classList.remove("techflash"); void bw.offsetWidth; bw.classList.add("techflash"); }
+      say(`${who(e.a)} setzt <b>${TK[e.k].i} ${e.msg}</b> ein!`); return 650;
     case "en": { const b = $("#en" + e.u); if (b) { b.querySelector("i").style.width = e.v + "%"; b.classList.toggle("full", e.v >= 100); } return 0; }
-    case "ult": if (quiet) return 0; {
-        const bw = $(".bwrap"); bw.classList.remove("ultflash"); void bw.offsetWidth; bw.classList.add("ultflash");
-        const nmEl = document.createElement("div"); nmEl.className = "ultname"; nmEl.textContent = e.msg + "!"; $("#fx").appendChild(nmEl); setTimeout(() => nmEl.remove(), 1100);
-        say(`<b>Mondkurier</b> entfesselt <b>${e.msg}</b>!`); return 900; }
-    case "act": if (!quiet) { document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act")); const el = $("#u" + e.u); if (el) el.classList.add("act"); } return 40;
-    case "hit": setHP(e.u, e.hp, e.sh); if (!quiet) {
-        if (!e.aoe && !e.thorns && !e.guard) beam(e.a, e.u);
-        floatAt(e.u, (e.crit ? "Krit! " : "") + fmt(e.v), e.crit ? "crit" : "dmg"); flash(e.u, "hurt"); burst(e.u, e.crit ? "crit" : "");
-        if (e.guard) say(`${nm(e.u)} fängt ${e.v} Schaden ab`);
-        else if (!e.aoe) say(e.thorns ? `${nm(e.u)} sticht sich an ${nm(e.a)}: ${e.v} Schaden` : `${nm(e.a)} trifft ${nm(e.u)}: <b>${fmt(e.v)}</b> Schaden${e.crit ? " (kritisch)" : ""}`); }
-      return e.aoe ? 110 : e.thorns || e.guard ? 150 : 340;
-    case "miss": if (!quiet) { floatAt(e.u, "ausgewichen", "miss"); if (!e.aoe) say(`${nm(e.u)} weicht ${nm(e.a)} aus`); } return e.aoe ? 110 : 260;
-    case "heal": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, "+" + e.v, "heal"); burst(e.u, "heal"); if (e.a && e.a !== e.u) say(`${nm(e.a)} heilt ${nm(e.u)} um ${e.v}`); } return 200;
-    case "sh": setHP(e.u, e.hp, e.sh); if (!quiet) floatAt(e.u, "Schild " + e.v, "sh"); return 110;
-    case "dot": setHP(e.u, e.hp, e.sh); if (!quiet) { floatAt(e.u, "Gift " + e.v, "dot"); say(`${nm(e.u)} leidet unter Gift oder Brand: ${e.v}`); } return 170;
-    case "stun": { const s = $("#st" + e.u); if (s) s.textContent = "❄"; if (!quiet) floatAt(e.u, "eingefroren", "info"); return 140; }
-    case "frozen": { const s = $("#st" + e.u); if (s) s.textContent = ""; if (!quiet) { floatAt(e.u, "setzt aus", "miss"); say(`${nm(e.u)} ist eingefroren und setzt aus`); } return 240; }
-    case "skill": if (quiet) return 0; say(`<b>${nm(e.a)}</b> setzt <b>${e.msg}</b> ein`); return e.quiet ? 160 : 650;
-    case "die": { const el = $("#u" + e.u); if (el) el.classList.add("dead"); const s = $("#st" + e.u); if (s) s.textContent = ""; setHP(e.u, 0, 0); if (!quiet) say(`${nm(e.u)} ist besiegt`); return 320; }
-    case "revive": case "save": { const el = $("#u" + e.u); if (el) { el.classList.remove("dead"); if (!quiet) flash(e.u, "revive"); } setHP(e.u, e.hp, e.sh); if (!quiet) say(`<b>${e.msg}</b>`); return 750; }
-    case "banner": if (!quiet) say(`<b>${e.msg}</b>`); return 600;
+    case "ult": bigName(e.msg + "!", e.side === "e"); say(`${who(e.a)} entfesselt die Ultimative <b>${e.msg}</b>!`); return 900;
+    case "special": flash(e.a, "spfire"); floatAt(e.a, e.msg, e.side === "e" ? "foesp" : "sp"); say(`${who(e.a)} setzt die Sonderattacke <b>${e.msg}</b> ein!`); return 700;
+    case "tag": floatAt(e.u, e.txt, e.cls); return 90;
+    case "act": { document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act")); const el = $("#u" + e.u); if (el) el.classList.add("act"); } return 40;
+    case "hit": setHP(e.u, e.hp, e.sh);
+      if (!e.aoe && !e.thorns && !e.guard) beam(e.a, e.u);
+      floatAt(e.u, (e.crit ? "Krit! " : "") + fmt(e.v), e.crit ? "crit" : "dmg"); flash(e.u, "hurt"); burst(e.u, e.crit ? "crit" : "");
+      if (e.guard) say(`${who(e.u)} fängt ${fmt(e.v)} Schaden ab`);
+      else if (!e.aoe) say(e.thorns ? `${who(e.a)}: Stacheln, ${fmt(e.v)} Schaden zurück` : `${who(e.a)} trifft ${who(e.u)}: <b>${fmt(e.v)}</b>${e.crit ? " (kritisch)" : ""}`);
+      return e.aoe ? 90 : e.thorns || e.guard ? 130 : 240;
+    case "miss": floatAt(e.u, "ausgewichen", "miss"); if (!e.aoe) say(`${who(e.u)} weicht ${who(e.a)} aus`); return e.aoe ? 90 : 200;
+    case "heal": setHP(e.u, e.hp, e.sh); floatAt(e.u, "+" + fmt(e.v), "heal"); burst(e.u, "heal"); return 120;
+    case "sh": setHP(e.u, e.hp, e.sh); floatAt(e.u, "Schild " + fmt(e.v), "sh"); return 80;
+    case "dot": setHP(e.u, e.hp, e.sh); floatAt(e.u, "🔥 " + fmt(e.v), "dot"); return 110;
+    case "stun": { const s = $("#st" + e.u); if (s) s.textContent = "❄"; floatAt(e.u, "eingefroren", "info"); return 140; }
+    case "frozen": { const s = $("#st" + e.u); if (s) s.textContent = ""; floatAt(e.u, "setzt aus", "miss"); say(`${who(e.u)} ist eingefroren und setzt aus`); return 240; }
+    case "skill": if (!e.quiet) say(`${who(e.a)} setzt <b>${e.msg}</b> ein`); return e.quiet ? 140 : 600;
+    case "die": { const el = $("#u" + e.u); if (el) el.classList.add("dead"); const s = $("#st" + e.u); if (s) s.textContent = ""; setHP(e.u, 0, 0); say(`${who(e.u)} ist besiegt`); return 320; }
+    case "revive": case "save": { const el = $("#u" + e.u); if (el) { el.classList.remove("dead"); flash(e.u, "revive"); } setHP(e.u, e.hp, e.sh); say(`<b>${e.msg}</b>`); return 750; }
+    case "banner": say(`<b>${e.msg}</b>`); return 600;
   }
   return 0;
 }
@@ -1984,65 +2206,85 @@ function step() {
     const r = B.gen.next();
     if (r.done) { B.res = r.value; return finishBattle(); }
     B.q = r.value;
-    if (!B.q.length) { techBar(); B.timer = setTimeout(step, 0); return; }
+    if (!B.q.length) { B.timer = setTimeout(step, 0); return; }
   }
-  const d = applyEv(B.q.shift(), false);
-  techBar();
+  const d = applyEv(B.q.shift());
+  renderPlan();
+  if (d < 0) return;   // Planungsphase: weiter geht es mit „Runde starten“
   B.timer = setTimeout(step, d);
 }
-// Leiste mit Heldentechniken im Kampf
-function techBar() {
-  const el = $("#techBar"); if (!el || !B) return;
-  const c = B.ctl, h = c.hero || Object.values(B.units).find(u => u.hero), lv = B.lv;
-  const btns = TECH.filter(t => t.k !== "focus" && t.lv <= lv).map(t => {
-    const isU = t.k === "ult", en = h ? Math.round(h.en) : 0, cd = c.cd[t.k] || 0;
-    const rdy = h && h.alive && !B.done && (isU ? en >= 100 : cd <= 0), queued = c.cmds.includes(t.k);
-    return `<button class="tech ${rdy ? "ready" : ""} ${isU ? "ultb" : ""}" data-act="tech" data-k="${t.k}" ${rdy && !queued ? "" : "disabled"}>
-      <span class="ti">${t.i}</span><span class="tn">${isU ? h.ult.n : t.n}</span><span class="tc">${queued ? "gleich …" : isU ? (en >= 100 ? "bereit!" : en + " %") : cd > 0 ? `noch ${cd} Rd.` : "bereit"}</span></button>`;
+// Planung des Spielers: Heldenaktion, Sonderattacken und Sternenenergie
+const myHero = () => Object.values(B.live).find(u => u.hero && u.side === "p");
+function heroReady(k) {
+  const h = myHero(), c = B.ctl.p;
+  if (!h || !h.alive || TK[k].lv > B.lv) return false;
+  return k === "atk" || (k === "ult" ? h.en >= 100 : !(c.cd[k] > 0));
+}
+const planCost = () => B.plan ? B.plan.sp.reduce((a, uid) => a + B.live[uid].sp.cost, 0) : 0;
+function renderPlan() {
+  const el = $("#planBar"); if (!el || !B) return;
+  const c = B.ctl.p, h = myHero(), w = B.waiting && !B.done, left = c.en - (w ? planCost() : 0);
+  const acts = TECH.filter(t => t.k !== "focus" && t.lv <= B.lv).map(t => {
+    const rdy = heroReady(t.k), sel = w && B.plan.hero === t.k, cd = c.cd[t.k] || 0;
+    const st = t.k === "atk" ? "immer" : t.k === "ult" ? (h && h.en >= 100 ? "bereit!" : `${Math.round(h ? h.en : 0)} %`) : cd > 0 ? `noch ${cd} Rd.` : "bereit";
+    return `<button class="tech ${rdy ? "ready" : ""} ${sel ? "sel" : ""} ${t.k === "ult" ? "ultb" : ""}" data-act="heroAct" data-k="${t.k}" ${w && rdy ? "" : "disabled"}>
+      <span class="ti">${t.i}</span><span class="tn">${t.k === "ult" && h ? h.ult.n : t.n}</span><span class="tc">${st}</span></button>`;
   }).join("");
-  if (el.dataset.html !== btns) { el.innerHTML = btns; el.dataset.html = btns; }
-  document.querySelectorAll(".b-enemies .unit").forEach(u => u.classList.toggle("focused", +u.id.slice(1) === c.focus));
+  const pips = Array.from({ length:EN_MAX }, (_, i) => `<i class="${i < left ? "on" : i < c.en ? "use" : ""}"></i>`).join("");
+  const html = `<div class="techbar">${acts}</div>
+    <div class="planrow"><div class="enbox"><span>⚡ ${left}/${EN_MAX}</span><span class="pips">${pips}</span></div>
+      <button class="btn gostart" data-act="roundGo" ${w ? "" : "disabled"}>${B.done ? "Kampf vorbei" : w ? "Runde starten ▶" : c.ai ? "Auto spielt …" : "Runde läuft …"}</button></div>`;
+  if (el.dataset.html !== html) { el.innerHTML = html; el.dataset.html = html; }
+  Object.values(B.live).filter(u => u.side === "p" && !u.hero).forEach(u => {
+    const tag = $("#sp" + u.uid), tile = $("#u" + u.uid); if (!tag || !tile) return;
+    const sel = w && B.plan.sp.includes(u.uid), ok = u.alive && u.spCd <= 0, afford = u.sp.cost <= left;
+    tag.textContent = !u.alive ? "" : sel ? `✓ ${u.sp.n}` : u.spCd > 0 ? `✦ noch ${u.spCd} Rd.` : `✦ ${u.sp.cost} ⚡`;
+    tile.classList.toggle("spsel", sel);
+    tile.classList.toggle("spready", w && ok && !sel && afford);
+    tile.classList.toggle("spwait", u.alive && (!ok || (w && !sel && !afford)));
+  });
+  document.querySelectorAll(".foeside .unit").forEach(u => u.classList.toggle("focused", +u.id.slice(1) === c.focus));
 }
 function finishBattle() {
   if (B.done) return;
-  B.done = true;
+  B.done = true; B.waiting = false;
   document.querySelectorAll(".unit.act").forEach(x => x.classList.remove("act"));
   say(B.res.win ? "<b>Sieg!</b>" : "<b>Niederlage</b>");
-  const R = grantRewards(B.res.win, B.s);
-  setTimeout(() => { if (B) showResult(R); }, 500);
+  renderPlan();
+  const R = grantRewards(B.res.win, { rival:B.rv, units:B.P, rounds:B.res.rounds, timeout:B.res.timeout });
+  setTimeout(() => { if (B) showResult(R); }, 700);
 }
 function showResult(R) {
-  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV, auto = S.auto && R.win && !R.hero.comps.length, lvUp = R.hero.lv.length;
-  const comps = unlocked().map(d => form(d.id, S.lv)[1]).join(" ");
-  const newComps = R.hero.comps.map(id => { const d = CC[id];
-    return `<div class="drop r-${d.r}"><div class="dm">Neuer Begleiter schließt sich an!</div><div class="de">${form(id, S.lv)[1]}</div><div class="dn">${form(id, S.lv)[0]}</div>
-      <div class="dm"><span class="rar">${RAR_N[d.r]}</span> · ${ROLES[d.role].n} · ${AB[d.ab].n} · ${unlocked().length} von 8 Begleitern${unlocked().length === 8 ? " · Team komplett!" : ""}</div></div>`; }).join("");
-  const nextOpen = R.win && R.s === S.prog;
-  const loseMsg = B.res.timeout ? "Nach 30 Runden ist die Zeit abgelaufen. Dein Team macht noch zu wenig Schaden." : "Dein Team ist gefallen.";
+  const n = heroNeed(S.lv), mx = S.lv >= MAX_LV, lvUp = R.hero.lv.length, A = arenaAt(arenaIdx(S.tr)), N = arenaAt(A.i + 1), into = S.tr - A.gate;
+  const top = Math.max(...R.cards.map(x => x.n));
+  const cardRows = R.cards.map(x => {
+    const d = CC[x.id], c = S.cards[x.id], f = form(x.id), best = Object.entries(x.parts).sort((a, b) => b[1] - a[1]).filter(p => p[1] > .05).slice(0, 2);
+    return `<div class="xprow r-${d.r} ${x.n === top ? "mvp" : ""}"><span class="xe">${f[1]}</span>
+      <span class="xi"><span class="xn">${f[0]} · Lv ${c.lv}${x.up ? ` <b class="up">+${x.up} Level!</b>` : ""}${x.n === top ? ' <span class="flag">Bester</span>' : ""}</span>
+        ${bar(c.xp, cardNeed(c.lv))}<span class="xr">${best.map(p => XP_PART[p[0]]).join(" · ") || "Dabei gewesen"}${x.forms.length ? " · hat sich weiterentwickelt!" : ""}${x.ms.length ? " · Sonderattacke: " + x.ms.join(", ") : ""}</span></span>
+      <span class="xv">+${fmt(x.n)}</span></div>`;
+  }).join("");
+  const arUp = R.newAr.map(a => { const AA = arenaAt(a.i), d = a.card && CC[a.card];
+    return `<div class="drop ${d ? "r-" + d.r : ""}" style="${d ? "" : "--rc:var(--gold)"}"><div class="dm">Aufgestiegen in Arena ${a.i + 1}!</div><div class="dn">${AA.n}</div>
+      ${d ? `<div class="de">${d.f[0][1]}</div><div class="dn">Neue Karte: ${d.f[0][0]}</div><div class="dm"><span class="rar">${RAR_N[d.r]}</span> · ${ROLES[d.role].n} · Sonderattacke ${d.sp.n} · Level ${S.cards[a.card].lv}</div>` : ""}
+      <div class="dm">+${fmt(a.co)} Münzen · +${a.sp} Sternenpunkte</div></div>`; }).join("");
+  const loseMsg = R.timeout ? "Nach 30 Runden hatte der Gegner mehr Leben übrig." : "Dein Team ist gefallen.";
   modal(`<div class="result-head ${R.win ? "win" : "lose"}"><h2>${R.win ? "Sieg!" : "Niederlage"}</h2>
-      <p>${R.win ? (R.first ? "Neue Etappe geschafft! Dafür gibt es extra Münzen." : `Gewonnen in ${B.res.rounds} ${B.res.rounds === 1 ? "Runde" : "Runden"}.`) : `${loseMsg} Du bekommst trotzdem ein paar EP, und beim nächsten Versuch hat dein Team ${Math.round(boostFor(R.s) * 100)} % Rückenwind.`}${R.daily ? " Tagesbonus: doppelte EP und Münzen!" : ""}</p></div>
-    <div class="gains"><span class="x">+${fmt(R.hx)} EP</span>${R.co ? `<span class="coin">+${fmt(R.co)}</span>` : ""}${R.bossPts ? `<span class="sp">+${R.bossPts}</span>` : ""}</div>
-    <div>${bar(mx ? 1 : S.xp, mx ? 1 : n)}<div class="xptext" style="text-align:center;margin-top:4px">Held Level ${S.lv} · ${mx ? "Maximum" : `${fmt(S.xp)} / ${fmt(n)} EP bis Level ${S.lv + 1}`}</div></div>
-    ${lvUp ? `<div class="lvup"><b>Level ${S.lv} erreicht!</b><span>+${R.hero.pts} Sternenpunkte · Held und alle Begleiter werden stärker</span>
-      <span style="font-size:22px;letter-spacing:4px;margin-top:6px">${comps}</span>
-      ${R.hero.abs.map(a => `<span>Neu: ${a}</span>`).join("")}${R.hero.forms.length ? "<span>Alle Begleiter haben sich weiterentwickelt!</span>" : ""}</div>` : ""}
-    ${newComps}
-    ${auto ? `<div class="autoline" id="autoLine">Nächster Kampf startet gleich …</div>` : ""}
-    ${lvUp && !auto ? `<button class="btn green wide" data-act="toTree">Sternenpunkte ausgeben</button>` : ""}
-    ${nextOpen && !auto ? `<button class="btn big" data-act="again" data-s="${R.s + 1}">Weiter zu ${stageNo(R.s + 1) === 1 ? zoneAt(zoneOf(R.s + 1)).n : "Etappe " + stageNo(R.s + 1)}</button>` : ""}
-    <div class="row">
-      <button class="btn ghost" data-act="leave">Zum Start</button>
-      <button class="btn ${nextOpen && !auto ? "ghost" : ""}" data-act="again" data-s="${R.s}">${auto ? "Sofort weiter" : R.win ? "Nochmal" : "Erneut versuchen"}</button>
-    </div>
-    ${auto ? `<button class="btn ghost sm" data-act="autoOff">Automatisch wiederholen stoppen</button>` : ""}`);
-  if (auto) B.autoT = setTimeout(() => { if (B && B.done && S.auto) { modal(""); startBattle(R.s); } }, 2200);
-  if (!R.win && S.auto) { S.auto = false; save(); }
+      <p>${R.win ? (R.timeout ? "Nach 30 Runden hattest du mehr Leben übrig." : `${B.rv.name} ist besiegt, nach ${R.rounds} ${R.rounds === 1 ? "Runde" : "Runden"}.`) : `${loseMsg} Deine Karten bekommen trotzdem EP.`}${R.daily ? " Tagesbonus: doppelte EP und Münzen!" : ""}</p></div>
+    <div class="trline ${R.dTr >= 0 ? "plus" : "minus"}">🏆 ${R.dTr > 0 ? "+" : R.dTr < 0 ? "−" : "±"}${Math.abs(R.dTr)}<small>${fmt(S.tr)} Trophäen${!R.win && R.dTr === 0 ? " · Arenaschutz" : ""}</small></div>
+    <div>${bar(into, ARENA_STEP, "gold")}<div class="xptext" style="text-align:center;margin-top:4px">Arena ${A.i + 1} · noch ${ARENA_STEP - into} bis ${N.n}</div></div>
+    ${arUp}
+    <div class="label" style="margin:0">Karten-EP nach Leistung</div><div class="xplist">${cardRows}</div>
+    <div class="gains"><span class="x">Held +${fmt(R.hx)} EP</span>${R.co ? `<span class="coin">+${fmt(R.co)}</span>` : ""}</div>
+    ${lvUp ? `<div class="lvup"><b>Held Level ${S.lv}!</b><span>+${R.hero.pts} Sternenpunkte</span>${R.hero.abs.map(a => `<span>Neu: ${a}</span>`).join("")}</div>` : ""}
+    ${lvUp ? `<button class="btn green wide" data-act="toTree">Sternenpunkte ausgeben</button>` : ""}
+    <div class="row"><button class="btn ghost" data-act="leave">Zum Start</button><button class="btn" data-act="fight">Nächster Kampf</button></div>`);
 }
-function leaveBattle() {
-  if (B) { clearTimeout(B.timer); clearTimeout(B.autoT); }
+function leaveBattle(keep) {
+  if (B) clearTimeout(B.timer);
   B = null; modal("");
   $("#battle").hidden = true; $("#battle").innerHTML = "";
-  render();
+  if (!keep) render();
 }
 
 /* =========================================================
@@ -2051,8 +2293,7 @@ function leaveBattle() {
 function act(el, ev) {
   const a = el.dataset.act, id = el.dataset.id;
   switch (a) {
-    case "tab": UI.tab = el.dataset.k; modal(""); render(); $("#main").scrollTop = 0; break;
-    case "heroInfo": UI.tab = "hero"; modal(""); render(); break;
+    case "tab": UI.tab = el.dataset.k; if (UI.tab === "team" && S.unseen) { S.unseen = false; save(); } modal(""); render(); $("#main").scrollTop = 0; break;
     case "eqUp": {
       const k = el.dataset.k, l = S.eq[k], cost = eqCost(l);
       if (S.co < cost) return;
@@ -2064,24 +2305,44 @@ function act(el, ev) {
     case "card": cardModal(id); break;
     case "rankUp": {
       const r = S.rank[id] || 0, cost = rankCost(r);
-      if (S.sp < cost) return;
+      if (S.sp < cost || !S.cards[id]) return;
       S.sp -= cost; S.rank[id] = r + 1; save(); render(); cardModal(id);
-      toast(`${form(id, S.lv)[0]} ist jetzt Rang ${r + 1}`); break;
+      toast(`${form(id)[0]} ist jetzt Rang ${r + 1}`); break;
+    }
+    case "deckIn": if (S.cards[id] && !S.deck.includes(id)) swapModal(id); break;
+    case "deckSwap": {
+      const out = el.dataset.out, i = S.deck.indexOf(out);
+      if (i < 0 || !S.cards[id] || S.deck.includes(id)) return;
+      S.deck[i] = id; save(); modal(""); render(); toast(`${form(id)[1]} ${form(id)[0]} ist jetzt im Deck`); break;
     }
     case "close": modal(""); break;
     case "closeBg": if (ev.target === el && !B && !MG && $("#battle").hidden) modal(""); break;
-    case "zone": { const z = +el.dataset.z; if (z > 0 && S.prog < z * 10) { toast(`Besiege zuerst den Boss von Zone ${z}.`); return; } S.zone = z; save(); render(); break; }
-    case "fight": startBattle(+el.dataset.s); break;
-    case "tech": if (B && !B.done && !B.ctl.cmds.includes(el.dataset.k)) { B.ctl.cmds.push(el.dataset.k); techBar(); } break;
+    case "fight": modal(""); startBattle(); break;
+    case "heroAct": if (B && B.waiting && heroReady(el.dataset.k)) { B.plan.hero = el.dataset.k; renderPlan(); } break;
+    case "spToggle": {
+      if (!B || !B.waiting) { if (B && !B.done) toast("Sonderattacken wählst du vor jeder Runde."); return; }
+      const uid = +el.dataset.u, u = B.live[uid], sp = B.plan.sp, i = sp.indexOf(uid);
+      if (!u || !u.alive) return;
+      if (i >= 0) sp.splice(i, 1);
+      else if (u.spCd > 0) { toast(`${u.n}: ${u.sp.n} ist in ${u.spCd} ${u.spCd === 1 ? "Runde" : "Runden"} wieder bereit.`); return; }
+      else if (u.sp.cost > B.ctl.p.en - planCost()) { toast(`Zu wenig Sternenenergie: ${u.sp.n} kostet ${u.sp.cost} ⚡.`); return; }
+      else sp.push(uid);
+      renderPlan(); break;
+    }
+    case "roundGo": if (B && B.waiting) { B.ctl.p.plan = B.plan; B.lastHero = B.plan.hero; B.waiting = false; renderPlan(); step(); } break;
     case "focus": {
       if (!B || B.done) return;
+      const u = B.live[+el.dataset.u];
       if (B.lv < TK.focus.lv) { toast(`🎯 Fokus lernt der Held auf Level ${TK.focus.lv}.`); return; }
-      B.ctl.cmds.push({ k:"focus", uid:+el.dataset.u }); B.ctl.focus = +el.dataset.u; techBar(); break;
+      if (!u || !u.alive) return;
+      B.ctl.p.focus = u.uid; say(`🎯 Fokus auf <b>${u.n}</b>`); renderPlan(); break;
     }
     case "autoTech": {
-      if (!B || S.auto) return;
-      S.autoTech = !S.autoTech; B.ctl.ai = S.autoTech; save();
-      el.classList.toggle("on", S.autoTech); el.textContent = `Auto ${S.autoTech ? "an" : "aus"}`; techBar(); break;
+      if (!B) return;
+      S.autoTech = !S.autoTech; B.ctl.p.ai = S.autoTech; save();
+      el.classList.toggle("on", S.autoTech); el.textContent = `Auto ${S.autoTech ? "an" : "aus"}`;
+      if (S.autoTech && B.waiting) { B.waiting = false; B.ctl.p.plan = null; step(); }
+      renderPlan(); break;
     }
     case "mode": modeIntro(el.dataset.k); break;
     case "modeLocked": toast(`${MM[el.dataset.k].n} wird auf Level ${MM[el.dataset.k].lv} freigeschaltet.`); break;
@@ -2089,11 +2350,10 @@ function act(el, ev) {
     case "miniQuit": modal(`<h2>Spiel beenden?</h2><p>Wenn du jetzt aufhörst, bekommst du für diese Runde nichts.</p>
       <div class="row"><button class="btn ghost" data-act="close">Weiterspielen</button><button class="btn danger" data-act="miniBack">Beenden</button></div>`); break;
     case "miniBack": UI.tab = "home"; closeMini(); break;
-    case "noop": toast("Schaffe zuerst die Etappe davor."); break;
-    case "auto": S.auto = !S.auto; save(); render(); break;
-    case "again": { const s = +el.dataset.s; if (B) clearTimeout(B.autoT); modal(""); S.zone = zoneOf(s); startBattle(s); break; }
-    case "autoOff": { S.auto = false; save(); if (B) clearTimeout(B.autoT); const l = $("#autoLine"); if (l) l.textContent = "Automatisch wiederholen ist aus."; el.hidden = true; break; }
     case "leave": UI.tab = "home"; leaveBattle(); break;
+    case "quitAsk": modal(`<h2>Kampf aufgeben?</h2><p>Aufgeben zählt als Niederlage und kostet ${TROPHY} Trophäen.</p>
+      <div class="row"><button class="btn ghost" data-act="close">Weiterkämpfen</button><button class="btn danger" data-act="quit">Aufgeben</button></div>`); break;
+    case "quit": if (B && !B.done) { clearTimeout(B.timer); B.res = { win:false, rounds:0, timeout:false }; modal(""); finishBattle(); } break;
     case "toTree": UI.tab = buyable().length || !rankable().length ? "tree" : "team"; UI.treeScroll = null; leaveBattle(); break;
     case "node": nodeModal(id); break;
     case "buyNode": {
